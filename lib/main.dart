@@ -2,12 +2,19 @@ import 'package:bio_watch/screens/mainpages/AccountPage.dart';
 import 'package:bio_watch/screens/mainpages/ActivityPage.dart';
 import 'package:bio_watch/screens/mainpages/EventPage.dart';
 import 'package:bio_watch/screens/mainpages/HomePage.dart';
+import 'package:bio_watch/screens/mainpages/LoginPage.dart';
+import 'package:bio_watch/screens/mainpages/SignInPage.dart';
 import 'package:bio_watch/screens/subpages/Scanner.dart';
+import 'package:bio_watch/shared/DataProvider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-void main() => runApp(MaterialApp(
-  theme: appTheme,
-  home: App()
+void main() => runApp(ChangeNotifierProvider(
+  create: (context) => DataProvider(),
+  child: MaterialApp(
+    theme: appTheme,
+    home: App()
+  ),
 ));
 
 class App extends StatefulWidget {
@@ -48,7 +55,6 @@ class _AppState extends State<App> {
         onTap: (value) => setState(() => _currentIndex = value),
         items: [
           BottomNavigationBarItem(
-            backgroundColor: theme.accentColor,
             label: 'Home',
             icon: Icon(Icons.home_rounded),
           ),
