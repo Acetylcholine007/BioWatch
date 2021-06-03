@@ -14,7 +14,8 @@ class AccountPage extends StatefulWidget {
 class _AccountPageState extends State<AccountPage> {
   @override
   Widget build(BuildContext context) {
-    User user = Provider.of<DataProvider>(context, listen: false).user;
+    int userId = Provider.of<DataProvider>(context, listen: false).user;
+    User user = Provider.of<DataProvider>(context, listen: false).users.where((user) => user.id == userId).toList()[0];
     final theme = Theme.of(context);
 
     return Container(

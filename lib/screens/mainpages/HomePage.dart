@@ -1,5 +1,7 @@
 import 'package:bio_watch/components/TileCard.dart';
 import 'package:bio_watch/models/Event.dart';
+import 'package:bio_watch/models/User.dart';
+import 'package:bio_watch/screens/subpages/EventDashboard.dart';
 import 'package:bio_watch/screens/subpages/EventViewer.dart';
 import 'package:bio_watch/shared/DataProvider.dart';
 import 'package:flutter/material.dart';
@@ -15,8 +17,10 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    List<int> eventIds = Provider.of<DataProvider>(context, listen: false).myEvents;
-    List<PeopleEvent> events = Provider.of<DataProvider>(context, listen: false).events.where((event) => eventIds.indexOf(event.id) != -1).toList();
+    int userId = Provider.of<DataProvider>(context, listen: false).user;
+    User user = Provider.of<DataProvider>(context, listen: false).users.where((user) => user.id == userId).toList()[0];
+    List<int> eventIds = user.myEvents;
+    List<PeopleEvent> events = Provider.of<DataProvider>(context, listen: true).events.where((event) => eventIds.indexOf(event.id) != -1).toList();
 
     return Container(
       child: Padding(
@@ -25,7 +29,13 @@ class _HomePageState extends State<HomePage> {
           itemCount: events.length,
           itemBuilder: (BuildContext context, int index){
             return GestureDetector(
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => EventViewer(event: events[index], callback: null))),
+              onTap: () {
+                if(user.accountType == 'USER') {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => EventViewer(event: events[index], user: user)));
+                } else if (user.accountType == 'HOST') {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => EventDashboard(event: events[index])));
+                }
+              },
               child: TileCard(
                 eventName: events[index].eventName,
                 hostName: events[index].hostName,
