@@ -19,9 +19,8 @@ class _EventPageState extends State<EventPage> {
 
   @override
   Widget build(BuildContext context) {
+    User user = Provider.of<DataProvider>(context, listen: false).user;
     List<PeopleEvent> events = Provider.of<DataProvider>(context, listen: false).events;
-    int userId = Provider.of<DataProvider>(context, listen: false).user;
-    User user = Provider.of<DataProvider>(context, listen: false).users.where((user) => user.id == userId).toList()[0];
 
     if(queryName != '') {
       events = events.where((event) => event.eventName.contains(new RegExp(queryName, caseSensitive: false))).toList();

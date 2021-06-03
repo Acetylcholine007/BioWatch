@@ -17,8 +17,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    int userId = Provider.of<DataProvider>(context, listen: false).user;
-    User user = Provider.of<DataProvider>(context, listen: false).users.where((user) => user.id == userId).toList()[0];
+    User user = Provider.of<DataProvider>(context, listen: false).user;
     List<int> eventIds = user.myEvents;
     List<PeopleEvent> events = Provider.of<DataProvider>(context, listen: true).events.where((event) => eventIds.indexOf(event.id) != -1).toList();
 

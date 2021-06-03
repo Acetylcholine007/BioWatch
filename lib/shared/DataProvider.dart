@@ -4,13 +4,14 @@ import 'package:bio_watch/models/User.dart';
 import 'package:flutter/foundation.dart';
 
 class DataProvider extends ChangeNotifier {
-  int _user;
+  int _userId;
+  User _user;
   List<User> _users;
   List<PeopleEvent> _events;
   List<Activity> _activities;
 
   DataProvider() {
-    _user = 1;
+    _userId = -1;
     _users = [
       User(
         id: 1,
@@ -67,9 +68,12 @@ class DataProvider extends ChangeNotifier {
       Activity(heading: 'Activity Type', body: 'Lorem ipsum', date: 'March 3, 2021 4:45 pm'),
       Activity(heading: 'Activity Type', body: 'Lorem ipsum', date: 'March 3, 2021 4:30 pm')
     ];
+    _user = _userId == -1 ? null : _users.where((user) => user.id == _userId).toList()[0];
   }
 
-  int get user => _user;
+  int get userId => _userId;
+
+  User get user => _user;
 
   List<User> get users => _users;
 
@@ -86,6 +90,30 @@ class DataProvider extends ChangeNotifier {
   void removeInterested(int eventId, int userId) {
     _users.where((user) => user.id == userId).toList()[0].myEvents.remove(eventId);
     _events.where((event) => event.id == eventId).toList()[0].interested.remove(userId);
+    notifyListeners();
+  }
+
+  bool login(String email, String password) {
+    print(email + password);
+    List<User> match = _users.where((user) => user.email == email && user.password == password).toList();
+    if(match.length == 1) {
+      _userId = match[0].id;
+      _user = match[0];
+      notifyListeners();
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  void logout() {
+    _user = null;
+    _userId = -1;
+    notifyListeners();
+  }
+
+  void signIn(User user) {
+    _users.add(user);
     notifyListeners();
   }
 }

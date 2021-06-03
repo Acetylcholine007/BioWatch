@@ -14,8 +14,8 @@ class AccountPage extends StatefulWidget {
 class _AccountPageState extends State<AccountPage> {
   @override
   Widget build(BuildContext context) {
-    int userId = Provider.of<DataProvider>(context, listen: false).user;
-    User user = Provider.of<DataProvider>(context, listen: false).users.where((user) => user.id == userId).toList()[0];
+    Function logout = Provider.of<DataProvider>(context, listen: true).logout;
+    User user = Provider.of<DataProvider>(context, listen: false).user;
     final theme = Theme.of(context);
 
     return Container(
@@ -79,7 +79,7 @@ class _AccountPageState extends State<AccountPage> {
                   Expanded(
                     child: ElevatedButton(
                       child: Text('LOG OUT'),
-                      onPressed: () {},
+                      onPressed: () => logout(),
                       style: ElevatedButton.styleFrom(primary: theme.accentColor),
                     ),
                   )
