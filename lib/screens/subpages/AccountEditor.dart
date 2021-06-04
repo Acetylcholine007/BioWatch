@@ -1,6 +1,8 @@
 import 'package:bio_watch/models/User.dart';
+import 'package:bio_watch/shared/DataProvider.dart';
 import 'package:bio_watch/shared/decorations.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class AccountEditor extends StatefulWidget {
   final User user;
@@ -8,7 +10,7 @@ class AccountEditor extends StatefulWidget {
   AccountEditor({this.user});
 
   @override
-  _AccountEditorState createState() => _AccountEditorState(user);
+  _AccountEditorState createState() => _AccountEditorState(user.copy());
 }
 
 class _AccountEditorState extends State<AccountEditor> {
@@ -19,6 +21,7 @@ class _AccountEditorState extends State<AccountEditor> {
 
   @override
   Widget build(BuildContext context) {
+    Function editAccount = Provider.of<DataProvider>(context, listen: true).editAccount;
     final theme = Theme.of(context);
 
     return GestureDetector(
@@ -112,7 +115,10 @@ class _AccountEditorState extends State<AccountEditor> {
                   flex: 2,
                   child: ElevatedButton(
                     child: Text('SAVE CHANGES'),
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () {
+                      editAccount(user.contact, user.password);
+                      Navigator.of(context).pop();
+                    },
                     style: ElevatedButton.styleFrom(primary: theme.accentColor),
                   ),
                 )

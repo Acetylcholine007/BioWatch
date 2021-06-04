@@ -1,3 +1,4 @@
+import 'package:bio_watch/components/NoActivity.dart';
 import 'package:bio_watch/models/Activity.dart';
 import 'package:bio_watch/screens/subpages/ActivityViewer.dart';
 import 'package:bio_watch/shared/DataProvider.dart';
@@ -14,10 +15,10 @@ class ActivityPage extends StatefulWidget {
 class _ActivityPageState extends State<ActivityPage> {
   @override
   Widget build(BuildContext context) {
-    List<Activity> activities = Provider.of<DataProvider>(context, listen: false).activities;
+    List<Activity> activities = Provider.of<DataProvider>(context, listen: false).user.activities;
     
     return Container(
-      child: ListView.builder(
+      child: activities.length != 0 ? ListView.builder(
         itemCount: activities.length,
         itemBuilder: (BuildContext context, int index){
           return GestureDetector(
@@ -31,7 +32,7 @@ class _ActivityPageState extends State<ActivityPage> {
             ),
           );
         }
-      )
+      ) : NoActivity()
     );
   }
 }

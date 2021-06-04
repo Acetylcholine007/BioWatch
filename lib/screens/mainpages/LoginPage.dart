@@ -90,7 +90,8 @@ class _LoginPageState extends State<LoginPage> {
                       address: '',
                       contact: '',
                       birthday: '',
-                      myEvents: []
+                      myEvents: [],
+                      activities: []
                     )))),
                     style: ElevatedButton.styleFrom(primary: theme.accentColor),
                   )

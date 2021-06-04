@@ -1,3 +1,5 @@
+import 'package:bio_watch/components/NoEvent.dart';
+import 'package:bio_watch/components/NoInterest.dart';
 import 'package:bio_watch/components/TileCard.dart';
 import 'package:bio_watch/models/Event.dart';
 import 'package:bio_watch/models/User.dart';
@@ -24,9 +26,9 @@ class _HomePageState extends State<HomePage> {
     return Container(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: ListView.builder(
+        child: events.length != 0 ? ListView.builder(
           itemCount: events.length,
-          itemBuilder: (BuildContext context, int index){
+          itemBuilder: (BuildContext context, int index) {
             return GestureDetector(
               onTap: () {
                 if(user.accountType == 'USER') {
@@ -43,7 +45,7 @@ class _HomePageState extends State<HomePage> {
               ),
             );
           }
-        ),
+        ) : user.accountType == 'USER' ? NoInterest() : NoEvent(),
       )
     );
   }

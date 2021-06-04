@@ -24,7 +24,7 @@ class _EventDashboardState extends State<EventDashboard> {
           appBar: AppBar(
             title: Text('Event Dashboard'),
             actions: [
-              IconButton(icon: Icon(Icons.edit_rounded), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => EventEditor(event: widget.event)))),
+              IconButton(icon: Icon(Icons.edit_rounded), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => EventEditor(event: widget.event, isNew: false)))),
               IconButton(icon: Icon(Icons.import_export_rounded), onPressed: () {}),
               IconButton(icon: Icon(Icons.qr_code_rounded), onPressed: () {}),
             ],

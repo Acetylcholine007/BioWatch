@@ -8,7 +8,6 @@ class DataProvider extends ChangeNotifier {
   User _user;
   List<User> _users;
   List<PeopleEvent> _events;
-  List<Activity> _activities;
 
   DataProvider() {
     _userId = -1;
@@ -22,7 +21,12 @@ class DataProvider extends ChangeNotifier {
         address: 'Malolos, Bulacan',
         contact: '09652854493',
         birthday: 'Jan 1, 2000',
-        myEvents: [1, 2]
+        myEvents: [1, 2],
+        activities: [
+          Activity(heading: 'Activity Type', body: 'Lorem ipsum', date: 'March 3, 2021 5:00 pm'),
+          Activity(heading: 'Activity Type', body: 'Lorem ipsum', date: 'March 3, 2021 4:45 pm'),
+          Activity(heading: 'Activity Type', body: 'Lorem ipsum', date: 'March 3, 2021 4:30 pm')
+        ]
       ),
       User(
         id: 2,
@@ -33,7 +37,11 @@ class DataProvider extends ChangeNotifier {
         address: 'Malolos, Bulacan',
         contact: '09652854493',
         birthday: 'Jan 1, 2000',
-        myEvents: [3]
+        myEvents: [3],
+          activities: [
+            Activity(heading: 'Activity Type', body: 'Lorem ipsum', date: 'March 3, 2021 5:00 pm'),
+            Activity(heading: 'Activity Type', body: 'Lorem ipsum', date: 'March 3, 2021 4:45 pm')
+          ]
       ),
       User(
         id: 3,
@@ -44,7 +52,10 @@ class DataProvider extends ChangeNotifier {
         address: 'Malolos, Bulacan',
         contact: '09652854493',
         birthday: 'Jan 1, 2000',
-        myEvents: [2, 3]
+        myEvents: [2, 3],
+          activities: [
+            Activity(heading: 'Activity Type', body: 'Lorem ipsum', date: 'March 3, 2021 4:30 pm')
+          ]
       ),
       User(
         id: 4,
@@ -55,18 +66,16 @@ class DataProvider extends ChangeNotifier {
         address: 'Malolos, Bulacan',
         contact: '09652854493',
         birthday: 'Jan 1, 2000',
-        myEvents: [1]
+        myEvents: [1],
+          activities: [
+            Activity(heading: 'Activity Type', body: 'Lorem ipsum', date: 'March 3, 2021 5:00 pm')
+          ]
       )
     ];
     _events = [
       PeopleEvent(id: 1, eventName: 'Event Name', hostName: 'Host Name', description: 'Lorem ipsum dolor sit amet', bannerUri: 'assets/events/img1.jpg', address: '305 Malolos, Bulacan', interested: [1, 2], participants: [1]),
       PeopleEvent(id: 2, eventName: 'Event Name', hostName: 'Host Name', description: 'Lorem ipsum dolor sit amet', bannerUri: 'assets/events/img2.jpg', address: '305 Malolos, Bulacan', interested: [1, 2 , 3], participants: [1, 2]),
       PeopleEvent(id: 3, eventName: 'Event Name', hostName: 'Host Name', description: 'Lorem ipsum dolor sit amet', bannerUri: 'assets/events/img3.jpg', address: '305 Malolos, Bulacan', interested: [3], participants: [])
-    ];
-    _activities = [
-      Activity(heading: 'Activity Type', body: 'Lorem ipsum', date: 'March 3, 2021 5:00 pm'),
-      Activity(heading: 'Activity Type', body: 'Lorem ipsum', date: 'March 3, 2021 4:45 pm'),
-      Activity(heading: 'Activity Type', body: 'Lorem ipsum', date: 'March 3, 2021 4:30 pm')
     ];
     _user = _userId == -1 ? null : _users.where((user) => user.id == _userId).toList()[0];
   }
@@ -79,8 +88,6 @@ class DataProvider extends ChangeNotifier {
 
   List<PeopleEvent> get events => _events;
 
-  List<Activity> get activities => _activities;
-
   void addInterested(int eventId, int userId) {
     _users.where((user) => user.id == userId).toList()[0].myEvents.add(eventId);
     _events.where((event) => event.id == eventId).toList()[0].interested.add(userId);
@@ -90,6 +97,18 @@ class DataProvider extends ChangeNotifier {
   void removeInterested(int eventId, int userId) {
     _users.where((user) => user.id == userId).toList()[0].myEvents.remove(eventId);
     _events.where((event) => event.id == eventId).toList()[0].interested.remove(userId);
+    notifyListeners();
+  }
+
+  void addEvent(PeopleEvent event) {
+    _events.add(event);
+    _user.myEvents.add(event.id);
+    notifyListeners();
+  }
+
+  void editEvent(PeopleEvent newEvent) {
+    PeopleEvent event = _events.where((event) => event.id == newEvent.id).toList()[0];
+    event = newEvent;
     notifyListeners();
   }
 
@@ -104,6 +123,12 @@ class DataProvider extends ChangeNotifier {
     } else {
       return false;
     }
+  }
+
+  void editAccount(String contact, String password) {
+    _user.contact = contact;
+    _user.password = password;
+    notifyListeners();
   }
 
   void logout() {

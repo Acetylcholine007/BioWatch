@@ -1,3 +1,5 @@
+import 'package:bio_watch/components/NoInterested.dart';
+import 'package:bio_watch/components/NoParticipant.dart';
 import 'package:bio_watch/models/User.dart';
 import 'package:bio_watch/screens/subpages/UserViewer.dart';
 import 'package:bio_watch/shared/DataProvider.dart';
@@ -7,8 +9,9 @@ import 'package:provider/provider.dart';
 
 class UserList extends StatefulWidget {
   final List<int> userIds;
+  final String type;
 
-  UserList({this.userIds});
+  UserList({this.userIds, this.type});
 
   @override
   _UserListState createState() => _UserListState();
@@ -39,7 +42,7 @@ class _UserListState extends State<UserList> {
             flex: 11,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: ListView.builder(
+              child: users.length != 0 ? ListView.builder(
                 itemCount: users.length,
                 itemBuilder: (BuildContext context, int index){
                   return GestureDetector(
@@ -51,7 +54,7 @@ class _UserListState extends State<UserList> {
                     )
                   );
                 }
-              ),
+              ) : widget.type == ' INTERESTED' ? NoInterested() : NoParticipant(),
             ),
           ),
         ],

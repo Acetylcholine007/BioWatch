@@ -1,11 +1,13 @@
 import 'package:bio_watch/models/Event.dart';
+import 'package:bio_watch/shared/DataProvider.dart';
 import 'package:bio_watch/shared/decorations.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class EventEditor extends StatefulWidget {
   final PeopleEvent event;
-
-  EventEditor({this.event});
+  final bool isNew;
+  EventEditor({this.event, this.isNew});
 
   @override
   _EventEditorState createState() => _EventEditorState(event);
@@ -18,13 +20,23 @@ class _EventEditorState extends State<EventEditor> {
 
   @override
   Widget build(BuildContext context) {
+    Function addEvent = Provider.of<DataProvider>(context, listen: true).addEvent;
+    Function editEvent = Provider.of<DataProvider>(context, listen: true).editEvent;
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
       child: Scaffold(
         appBar: AppBar(
           title: Text('Event Editor'),
           actions: [
-            IconButton(icon: Icon(Icons.save_rounded), onPressed: () {}),
+            IconButton(icon: Icon(Icons.save_rounded), onPressed: () {
+              if(widget.isNew) {
+                addEvent(event);
+              } else {
+                editEvent(event);
+              }
+              Navigator.of(context).pop();
+            }),
           ],
         ),
         body: Container(

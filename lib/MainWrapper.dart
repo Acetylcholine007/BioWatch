@@ -1,7 +1,9 @@
+import 'package:bio_watch/models/Event.dart';
 import 'package:bio_watch/screens/mainpages/AccountPage.dart';
 import 'package:bio_watch/screens/mainpages/ActivityPage.dart';
 import 'package:bio_watch/screens/mainpages/EventPage.dart';
 import 'package:bio_watch/screens/mainpages/HomePage.dart';
+import 'package:bio_watch/screens/subpages/EventEditor.dart';
 import 'package:bio_watch/screens/subpages/Scanner.dart';
 import 'package:flutter/material.dart';
 import 'models/User.dart';
@@ -35,7 +37,17 @@ class _MainWrapperState extends State<MainWrapper> {
       child: Scaffold(
         appBar: AppBar(
           title: Text('Bio Watch'),
-          actions: user.accountType == 'HOST' ? null : [
+          actions: user.accountType == 'HOST' ? [
+            IconButton(icon: Icon(Icons.add), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => EventEditor(event: PeopleEvent(
+              eventName: '',
+              hostName: user.fullName,
+              address: '',
+              time: '',
+              date: '',
+              description: '',
+              bannerUri: 'assets/events/img1.jpg'
+            ), isNew: true))))
+          ] : [
             IconButton(icon: Icon(Icons.qr_code_scanner_rounded), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => Scanner())))
           ],
         ),

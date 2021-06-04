@@ -14,7 +14,7 @@ class AccountPage extends StatefulWidget {
 class _AccountPageState extends State<AccountPage> {
   @override
   Widget build(BuildContext context) {
-    Function logout = Provider.of<DataProvider>(context, listen: true).logout;
+    Function logout = Provider.of<DataProvider>(context, listen: false).logout;
     User user = Provider.of<DataProvider>(context, listen: false).user;
     final theme = Theme.of(context);
 
