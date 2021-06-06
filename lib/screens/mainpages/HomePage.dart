@@ -20,7 +20,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     User user = Provider.of<DataProvider>(context, listen: false).user;
-    List<int> eventIds = user.myEvents;
+    List<String> eventIds = user.myEvents;
     List<PeopleEvent> events = Provider.of<DataProvider>(context, listen: true).events.where((event) => eventIds.indexOf(event.id) != -1).toList();
 
     return Container(

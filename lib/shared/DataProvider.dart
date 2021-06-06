@@ -4,16 +4,16 @@ import 'package:bio_watch/models/User.dart';
 import 'package:flutter/foundation.dart';
 
 class DataProvider extends ChangeNotifier {
-  int _userId;
+  String _userId;
   User _user;
   List<User> _users;
   List<PeopleEvent> _events;
 
   DataProvider() {
-    _userId = -1;
+    _userId = '4';
     _users = [
       User(
-        id: 1,
+        id: '1',
         fullName: 'Juan Dela Cruz',
         password: '1234',
         email: 'juandelacruz@gmail.com',
@@ -21,7 +21,7 @@ class DataProvider extends ChangeNotifier {
         address: 'Malolos, Bulacan',
         contact: '09652854493',
         birthday: 'Jan 1, 2000',
-        myEvents: [1, 2],
+        myEvents: ['1', '2'],
         activities: [
           Activity(heading: 'Activity Type', body: 'Lorem ipsum', date: 'March 3, 2021 5:00 pm'),
           Activity(heading: 'Activity Type', body: 'Lorem ipsum', date: 'March 3, 2021 4:45 pm'),
@@ -29,7 +29,7 @@ class DataProvider extends ChangeNotifier {
         ]
       ),
       User(
-        id: 2,
+        id: '2',
         fullName: 'John Doe',
         password: '1234',
         email: 'johndoe@gmail.com',
@@ -37,14 +37,14 @@ class DataProvider extends ChangeNotifier {
         address: 'Malolos, Bulacan',
         contact: '09652854493',
         birthday: 'Jan 1, 2000',
-        myEvents: [3],
+        myEvents: ['3'],
           activities: [
             Activity(heading: 'Activity Type', body: 'Lorem ipsum', date: 'March 3, 2021 5:00 pm'),
             Activity(heading: 'Activity Type', body: 'Lorem ipsum', date: 'March 3, 2021 4:45 pm')
           ]
       ),
       User(
-        id: 3,
+        id: '3',
         fullName: 'Franklin CLinton',
         password: '1234',
         email: 'franklin@gmail.com',
@@ -52,13 +52,13 @@ class DataProvider extends ChangeNotifier {
         address: 'Malolos, Bulacan',
         contact: '09652854493',
         birthday: 'Jan 1, 2000',
-        myEvents: [2, 3],
+        myEvents: ['2', '3'],
           activities: [
             Activity(heading: 'Activity Type', body: 'Lorem ipsum', date: 'March 3, 2021 4:30 pm')
           ]
       ),
       User(
-        id: 4,
+        id: '4',
         fullName: 'Trevor Phillips',
         password: '1234',
         email: 'trevor@gmail.com',
@@ -66,21 +66,21 @@ class DataProvider extends ChangeNotifier {
         address: 'Malolos, Bulacan',
         contact: '09652854493',
         birthday: 'Jan 1, 2000',
-        myEvents: [1],
+        myEvents: ['1'],
           activities: [
             Activity(heading: 'Activity Type', body: 'Lorem ipsum', date: 'March 3, 2021 5:00 pm')
           ]
       )
     ];
     _events = [
-      PeopleEvent(id: 1, eventName: 'Event Name', hostName: 'Host Name', description: 'Lorem ipsum dolor sit amet', bannerUri: 'assets/events/img1.jpg', address: '305 Malolos, Bulacan', interested: [1, 2], participants: [1]),
-      PeopleEvent(id: 2, eventName: 'Event Name', hostName: 'Host Name', description: 'Lorem ipsum dolor sit amet', bannerUri: 'assets/events/img2.jpg', address: '305 Malolos, Bulacan', interested: [1, 2 , 3], participants: [1, 2]),
-      PeopleEvent(id: 3, eventName: 'Event Name', hostName: 'Host Name', description: 'Lorem ipsum dolor sit amet', bannerUri: 'assets/events/img3.jpg', address: '305 Malolos, Bulacan', interested: [3], participants: [])
+      PeopleEvent(id: '1', eventName: 'Event Name', hostName: 'Host Name', description: 'Lorem ipsum dolor sit amet', bannerUri: 'assets/events/img1.jpg', address: '305 Malolos, Bulacan', interested: ['1', '2'], participants: []),
+      PeopleEvent(id: '2', eventName: 'Event Name', hostName: 'Host Name', description: 'Lorem ipsum dolor sit amet', bannerUri: 'assets/events/img2.jpg', address: '305 Malolos, Bulacan', interested: ['1', '2' , '3'], participants: ['1', '2']),
+      PeopleEvent(id: '3', eventName: 'Event Name', hostName: 'Host Name', description: 'Lorem ipsum dolor sit amet', bannerUri: 'assets/events/img3.jpg', address: '305 Malolos, Bulacan', interested: ['3'], participants: [])
     ];
-    _user = _userId == -1 ? null : _users.where((user) => user.id == _userId).toList()[0];
+    _user = _userId == '-1' ? null : _users.where((user) => user.id == _userId).toList()[0];
   }
 
-  int get userId => _userId;
+  String get userId => _userId;
 
   User get user => _user;
 
@@ -88,13 +88,13 @@ class DataProvider extends ChangeNotifier {
 
   List<PeopleEvent> get events => _events;
 
-  void addInterested(int eventId, int userId) {
+  void addInterested(String eventId, String userId) {
     _users.where((user) => user.id == userId).toList()[0].myEvents.add(eventId);
     _events.where((event) => event.id == eventId).toList()[0].interested.add(userId);
     notifyListeners();
   }
 
-  void removeInterested(int eventId, int userId) {
+  void removeInterested(String eventId, String userId) {
     _users.where((user) => user.id == userId).toList()[0].myEvents.remove(eventId);
     _events.where((event) => event.id == eventId).toList()[0].interested.remove(userId);
     notifyListeners();
@@ -133,12 +133,17 @@ class DataProvider extends ChangeNotifier {
 
   void logout() {
     _user = null;
-    _userId = -1;
+    _userId = '-1';
     notifyListeners();
   }
 
   void signIn(User user) {
     _users.add(user);
     notifyListeners();
+  }
+
+  void joinEvent(String eventId, String userId) {
+    PeopleEvent event = _events.where((event) => event.id == eventId).toList()[0];
+    event.participants.add(userId);
   }
 }

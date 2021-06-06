@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class UserList extends StatefulWidget {
-  final List<int> userIds;
+  final List<String> userIds;
   final String type;
 
   UserList({this.userIds, this.type});

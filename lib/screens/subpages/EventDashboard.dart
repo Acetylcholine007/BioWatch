@@ -1,3 +1,4 @@
+import 'package:bio_watch/components/QRDisplay.dart';
 import 'package:bio_watch/models/Event.dart';
 import 'package:bio_watch/screens/subpages/EventEditor.dart';
 import 'package:bio_watch/screens/subpages/UserList.dart';
@@ -26,7 +27,7 @@ class _EventDashboardState extends State<EventDashboard> {
             actions: [
               IconButton(icon: Icon(Icons.edit_rounded), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => EventEditor(event: widget.event, isNew: false)))),
               IconButton(icon: Icon(Icons.import_export_rounded), onPressed: () {}),
-              IconButton(icon: Icon(Icons.qr_code_rounded), onPressed: () {}),
+              IconButton(icon: Icon(Icons.qr_code_rounded), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => QRDisplay(eventId: widget.event.id)))),
             ],
             bottom: TabBar(
               tabs: [

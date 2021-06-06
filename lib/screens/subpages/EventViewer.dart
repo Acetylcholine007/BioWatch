@@ -18,7 +18,7 @@ class _EventViewerState extends State<EventViewer> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    List<int> eventIds = widget.user.myEvents;
+    List<String> eventIds = widget.user.myEvents;
     Function addInterested = Provider.of<DataProvider>(context, listen: true).addInterested;
     Function removeInterested = Provider.of<DataProvider>(context, listen: true).removeInterested;
 

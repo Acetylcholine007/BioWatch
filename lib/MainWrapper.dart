@@ -1,3 +1,4 @@
+import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:bio_watch/models/Event.dart';
 import 'package:bio_watch/screens/mainpages/AccountPage.dart';
 import 'package:bio_watch/screens/mainpages/ActivityPage.dart';
@@ -5,7 +6,9 @@ import 'package:bio_watch/screens/mainpages/EventPage.dart';
 import 'package:bio_watch/screens/mainpages/HomePage.dart';
 import 'package:bio_watch/screens/subpages/EventEditor.dart';
 import 'package:bio_watch/screens/subpages/Scanner.dart';
+import 'package:bio_watch/shared/DataProvider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'models/User.dart';
 
 class MainWrapper extends StatefulWidget {
@@ -23,8 +26,20 @@ class _MainWrapperState extends State<MainWrapper> {
 
   _MainWrapperState(this.user);
 
+  Future<String> scanCode() async {
+    var result = await BarcodeScanner.scan();
+
+    print(result.type); // The result type (barcode, cancelled, failed)
+    print(result.rawContent); // The barcode content
+    print(result.format); // The barcode format (as enum)
+    print(result.formatNote); // If a unknown format was scanned this field contains a note
+    return result.rawContent;
+  }
+
   @override
   Widget build(BuildContext context) {
+    Function joinEvent = Provider.of<DataProvider>(context, listen: false).joinEvent;
+    String userId = Provider.of<DataProvider>(context, listen: false).userId;
     final theme = Theme.of(context);
     final pages = [
       HomePage(),
@@ -32,6 +47,7 @@ class _MainWrapperState extends State<MainWrapper> {
       EventPage(),
       AccountPage()
     ];
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
       child: Scaffold(
@@ -42,13 +58,16 @@ class _MainWrapperState extends State<MainWrapper> {
               eventName: '',
               hostName: user.fullName,
               address: '',
-              time: '',
-              date: '',
+              time: TimeOfDay.now().format(context).split(' ')[0],
+              date: DateTime.now().toString(),
               description: '',
               bannerUri: 'assets/events/img1.jpg'
             ), isNew: true))))
           ] : [
-            IconButton(icon: Icon(Icons.qr_code_scanner_rounded), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => Scanner())))
+            IconButton(icon: Icon(Icons.qr_code_scanner_rounded), onPressed: () async {
+              String eventId = await scanCode();
+              joinEvent(eventId, userId);
+            })
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(

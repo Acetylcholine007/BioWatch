@@ -1,5 +1,5 @@
 class PeopleEvent {
-  int id;
+  String id;
   String eventName;
   String hostName;
   String address;
@@ -8,8 +8,8 @@ class PeopleEvent {
   String bannerUri;
   List<String> photoUri;
   List<String> permitUri;
-  List<int> interested;
-  List<int> participants;
+  List<String> interested;
+  List<String> participants;
   String description;
 
   PeopleEvent({

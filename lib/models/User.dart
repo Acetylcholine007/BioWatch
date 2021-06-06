@@ -1,7 +1,7 @@
 import 'Activity.dart';
 
 class User {
-  int id;
+  String id;
   String fullName;
   String password;
   String email;
@@ -9,7 +9,7 @@ class User {
   String address;
   String contact;
   String birthday;
-  List<int> myEvents;
+  List<String> myEvents;
   List<Activity> activities;
 
   User({
