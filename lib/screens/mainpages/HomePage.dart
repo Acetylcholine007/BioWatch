@@ -2,7 +2,7 @@ import 'package:bio_watch/components/NoEvent.dart';
 import 'package:bio_watch/components/NoInterest.dart';
 import 'package:bio_watch/components/TileCard.dart';
 import 'package:bio_watch/models/Event.dart';
-import 'package:bio_watch/models/User.dart';
+import 'package:bio_watch/models/Person.dart';
 import 'package:bio_watch/screens/subpages/EventDashboard.dart';
 import 'package:bio_watch/screens/subpages/EventViewer.dart';
 import 'package:bio_watch/shared/DataProvider.dart';
@@ -19,7 +19,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    User user = Provider.of<DataProvider>(context, listen: false).user;
+    Person user = Provider.of<DataProvider>(context, listen: false).user;
     List<String> eventIds = user.myEvents;
     List<PeopleEvent> events = Provider.of<DataProvider>(context, listen: true).events.where((event) => eventIds.indexOf(event.id) != -1).toList();
 

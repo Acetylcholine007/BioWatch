@@ -5,14 +5,13 @@ import 'package:bio_watch/screens/mainpages/ActivityPage.dart';
 import 'package:bio_watch/screens/mainpages/EventPage.dart';
 import 'package:bio_watch/screens/mainpages/HomePage.dart';
 import 'package:bio_watch/screens/subpages/EventEditor.dart';
-import 'package:bio_watch/screens/subpages/Scanner.dart';
 import 'package:bio_watch/shared/DataProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'models/User.dart';
+import 'models/Person.dart';
 
 class MainWrapper extends StatefulWidget {
-  final User user;
+  final Person user;
 
   MainWrapper({this.user});
 
@@ -21,7 +20,7 @@ class MainWrapper extends StatefulWidget {
 }
 
 class _MainWrapperState extends State<MainWrapper> {
-  User user;
+  Person user;
   int _currentIndex = 0;
 
   _MainWrapperState(this.user);

@@ -1,18 +1,18 @@
 import 'package:bio_watch/models/Activity.dart';
 import 'package:bio_watch/models/Event.dart';
-import 'package:bio_watch/models/User.dart';
+import 'package:bio_watch/models/Person.dart';
 import 'package:flutter/foundation.dart';
 
 class DataProvider extends ChangeNotifier {
   String _userId;
-  User _user;
-  List<User> _users;
+  Person _user;
+  List<Person> _users;
   List<PeopleEvent> _events;
 
   DataProvider() {
     _userId = '4';
     _users = [
-      User(
+      Person(
         id: '1',
         fullName: 'Juan Dela Cruz',
         password: '1234',
@@ -28,7 +28,7 @@ class DataProvider extends ChangeNotifier {
           Activity(heading: 'Activity Type', body: 'Lorem ipsum', date: 'March 3, 2021 4:30 pm')
         ]
       ),
-      User(
+      Person(
         id: '2',
         fullName: 'John Doe',
         password: '1234',
@@ -43,7 +43,7 @@ class DataProvider extends ChangeNotifier {
             Activity(heading: 'Activity Type', body: 'Lorem ipsum', date: 'March 3, 2021 4:45 pm')
           ]
       ),
-      User(
+      Person(
         id: '3',
         fullName: 'Franklin CLinton',
         password: '1234',
@@ -57,7 +57,7 @@ class DataProvider extends ChangeNotifier {
             Activity(heading: 'Activity Type', body: 'Lorem ipsum', date: 'March 3, 2021 4:30 pm')
           ]
       ),
-      User(
+      Person(
         id: '4',
         fullName: 'Trevor Phillips',
         password: '1234',
@@ -82,9 +82,9 @@ class DataProvider extends ChangeNotifier {
 
   String get userId => _userId;
 
-  User get user => _user;
+  Person get user => _user;
 
-  List<User> get users => _users;
+  List<Person> get users => _users;
 
   List<PeopleEvent> get events => _events;
 
@@ -114,7 +114,7 @@ class DataProvider extends ChangeNotifier {
 
   bool login(String email, String password) {
     print(email + password);
-    List<User> match = _users.where((user) => user.email == email && user.password == password).toList();
+    List<Person> match = _users.where((user) => user.email == email && user.password == password).toList();
     if(match.length == 1) {
       _userId = match[0].id;
       _user = match[0];
@@ -137,7 +137,7 @@ class DataProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void signIn(User user) {
+  void signIn(Person user) {
     _users.add(user);
     notifyListeners();
   }

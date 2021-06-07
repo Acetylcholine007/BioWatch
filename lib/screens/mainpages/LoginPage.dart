@@ -1,11 +1,10 @@
 import 'dart:math';
-
-import 'package:bio_watch/models/User.dart';
+import 'package:bio_watch/components/Loading.dart';
+import 'package:bio_watch/models/Person.dart';
 import 'package:bio_watch/screens/mainpages/SignInPage.dart';
-import 'package:bio_watch/shared/DataProvider.dart';
+import 'package:bio_watch/services/AuthService.dart';
 import 'package:bio_watch/shared/decorations.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key key}) : super(key: key);
@@ -15,33 +14,38 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final AuthService _auth = AuthService();
+  final _formKey = GlobalKey<FormState>();
   String email = '';
   String password = '';
+  String error = '';
+  bool loading = false;
   bool showPassword = true;
 
   @override
   Widget build(BuildContext context) {
-    Function login = Provider.of<DataProvider>(context, listen: true).login;
     final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Bio Watch Login'),
-      ),
-      body: GestureDetector(
-        onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
-        child: SingleChildScrollView(
+    return loading ? Loading() : GestureDetector(
+      onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Bio Watch Login'),
+        ),
+        body: SingleChildScrollView(
           physics: ClampingScrollPhysics(),
           child: Container(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Form(
+                key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     SizedBox(height: 100),
                     Center(child: Text('Biowatch', style: theme.textTheme.headline2)),
                     Center(child: Text('Keep events tracked and safe with Biowatch', style: theme.textTheme.bodyText2)),
+                    SizedBox(height: 60),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: TextFormField(
@@ -66,23 +70,30 @@ class _LoginPageState extends State<LoginPage> {
                         obscureText: showPassword,
                       ),
                     ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Center(child: Text(error, style: TextStyle(color: Colors.red, fontSize: 14)))
+                    ),
                     ElevatedButton(
                       child: Text('LOG IN'),
-                      onPressed: () {
-                        bool result = login(email, password);
-                        if(result) {
-                          //Navigator.of(context).pop();
-                          print('success');
-                        } else {
-                          print('error');
-                        }
-                      },
+                        onPressed: () async {
+                          if(_formKey.currentState.validate()) {
+                            setState(() => loading = true);
+                            dynamic result = await _auth.logIn(email, password);
+                            if(result == null) {
+                              setState(() {
+                                error = 'Invalid credentials';
+                                loading = false;
+                              });
+                            }
+                          }
+                        },
                       style: ElevatedButton.styleFrom(primary: theme.accentColor)
                     ),
                     Divider(),
                     ElevatedButton(
                       child: Text('CREATE ACCOUNT'),
-                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => SignInPage(user: User(
+                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => SignInPage(user: Person(
                         id: Random().nextInt(100).toString(),
                         fullName: '',
                         password: '',

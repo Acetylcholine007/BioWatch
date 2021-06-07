@@ -1,11 +1,12 @@
-import 'package:bio_watch/models/User.dart';
-import 'package:bio_watch/shared/DataProvider.dart';
+import 'package:bio_watch/components/Loading.dart';
+import 'package:bio_watch/models/Person.dart';
+import 'package:bio_watch/services/AuthService.dart';
 import 'package:bio_watch/shared/decorations.dart';
+import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class SignInPage extends StatefulWidget {
-  final User user;
+  final Person user;
 
   SignInPage({this.user});
 
@@ -14,25 +15,29 @@ class SignInPage extends StatefulWidget {
 }
 
 class _SignInPageState extends State<SignInPage> {
+  final AuthService _auth = AuthService();
+  final _formKey = GlobalKey<FormState>();
+  bool loading = false;
   bool hidePassword = true;
-  User user;
+  String error = '';
+  Person user;
   _SignInPageState(this.user);
 
   @override
   Widget build(BuildContext context) {
-    Function signIn = Provider.of<DataProvider>(context, listen: true).signIn;
     final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Sign In'),
-      ),
-      body: GestureDetector(
-        onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
-        child: Container(
+    return loading ? Loading() : GestureDetector(
+      onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Sign In'),
+        ),
+        body: Container(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Form(
+              key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -117,23 +122,42 @@ class _SignInPageState extends State<SignInPage> {
                         ),
                         SizedBox(width: 10),
                         Expanded(
-                          child: TextFormField(
-                            initialValue: user.birthday,
-                            decoration: textFieldDecoration.copyWith(hintText: 'Birthday'),
+                          child: DateTimePicker(
                             validator: (val) => val.isEmpty ? 'Enter Birthday' : null,
+                            type: DateTimePickerType.date,
+                            dateMask: 'MMMM d, yyyy',
+                            initialValue: user.birthday,
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime(DateTime.now().year + 5),
+                            dateLabelText: 'Birthday',
+                            decoration: textFieldDecoration.copyWith(hintText: 'Birthday'),
                             onChanged: (val) => setState(() => user.birthday = val)
                           ),
-                        ),
+                        )
                       ],
                     ),
                   ),
                   Expanded(
                     flex: 2,
+                    child: Text(error, style: TextStyle(color: Colors.red, fontSize: 14))
+                  ),
+                  Expanded(
+                    flex: 2,
                     child: ElevatedButton(
                       child: Text('CREATE ACCOUNT'),
-                      onPressed: () {
-                        signIn(user);
-                        Navigator.of(context).pop();
+                      onPressed: () async {
+                        if(_formKey.currentState.validate()) {
+                          setState(() => loading = true);
+                          dynamic result = await _auth.signIn(user);
+                          if(result == null) {
+                            setState(() {
+                              error = 'Invalid credentials';
+                              loading = false;
+                            });
+                          } else {
+                            Navigator.of(context).pop();
+                          }
+                        }
                       },
                       style: ElevatedButton.styleFrom(primary: theme.accentColor),
                     ),

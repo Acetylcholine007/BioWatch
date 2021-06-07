@@ -1,12 +1,12 @@
 import 'package:bio_watch/models/Event.dart';
-import 'package:bio_watch/models/User.dart';
+import 'package:bio_watch/models/Person.dart';
 import 'package:bio_watch/shared/DataProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class EventViewer extends StatefulWidget {
   final PeopleEvent event;
-  final User user;
+  final Person user;
 
   EventViewer({this.event, this.user});
 

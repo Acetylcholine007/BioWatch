@@ -1,15 +1,35 @@
+import 'package:bio_watch/services/AuthService.dart';
 import 'package:bio_watch/shared/DataProvider.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'AuthWrapper.dart';
+import 'models/UserModel.dart';
 
-void main() => runApp(ChangeNotifierProvider(
-  create: (context) => DataProvider(),
-  child: MaterialApp(
-    theme: appTheme,
-    home: AuthWrapper()
-  ),
-));
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(ChangeNotifierProvider(
+    create: (context) => DataProvider(),
+    child: MaterialApp(
+      theme: appTheme,
+      home: MyApp()
+    ),
+  ));
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamProvider<UserModel>.value(
+      initialData: null,
+      value: AuthService().user,
+      child: AuthWrapper(),
+    );
+  }
+}
 
 ThemeData appTheme = ThemeData(
   primaryColor: Color(0xFF2196F3),

@@ -1,6 +1,6 @@
 import 'Activity.dart';
 
-class User {
+class Person {
   String id;
   String fullName;
   String password;
@@ -12,7 +12,7 @@ class User {
   List<String> myEvents;
   List<Activity> activities;
 
-  User({
+  Person({
     this.id,
     this.fullName,
     this.password,
@@ -25,7 +25,7 @@ class User {
     this.activities
   });
 
-  User copy() => User(
+  Person copy() => Person(
     id: this.id,
     fullName: this.fullName,
     password: this.password,

@@ -1,6 +1,6 @@
 import 'package:bio_watch/components/BannerCard.dart';
 import 'package:bio_watch/models/Event.dart';
-import 'package:bio_watch/models/User.dart';
+import 'package:bio_watch/models/Person.dart';
 import 'package:bio_watch/screens/subpages/EventViewer.dart';
 import 'package:bio_watch/shared/DataProvider.dart';
 import 'package:bio_watch/shared/decorations.dart';
@@ -19,7 +19,7 @@ class _EventPageState extends State<EventPage> {
 
   @override
   Widget build(BuildContext context) {
-    User user = Provider.of<DataProvider>(context, listen: false).user;
+    Person user = Provider.of<DataProvider>(context, listen: false).user;
     List<PeopleEvent> events = Provider.of<DataProvider>(context, listen: false).events;
 
     if(queryName != '') {

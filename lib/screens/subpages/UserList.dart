@@ -1,6 +1,6 @@
 import 'package:bio_watch/components/NoInterested.dart';
 import 'package:bio_watch/components/NoParticipant.dart';
-import 'package:bio_watch/models/User.dart';
+import 'package:bio_watch/models/Person.dart';
 import 'package:bio_watch/screens/subpages/UserViewer.dart';
 import 'package:bio_watch/shared/DataProvider.dart';
 import 'package:bio_watch/shared/decorations.dart';
@@ -22,7 +22,7 @@ class _UserListState extends State<UserList> {
 
   @override
   Widget build(BuildContext context) {
-    List<User> users = Provider.of<DataProvider>(context, listen: false).users.where((user) => widget.userIds.indexOf(user.id) != -1).toList();
+    List<Person> users = Provider.of<DataProvider>(context, listen: false).users.where((user) => widget.userIds.indexOf(user.id) != -1).toList();
     if(queryName != '') {
      users = users.where((user) => user.fullName.contains(new RegExp(queryName, caseSensitive: false))).toList();
     }

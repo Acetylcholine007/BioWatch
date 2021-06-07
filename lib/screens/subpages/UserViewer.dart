@@ -1,8 +1,8 @@
-import 'package:bio_watch/models/User.dart';
+import 'package:bio_watch/models/Person.dart';
 import 'package:flutter/material.dart';
 
 class UserViewer extends StatelessWidget {
-  final User user;
+  final Person user;
 
   UserViewer({this.user});
 

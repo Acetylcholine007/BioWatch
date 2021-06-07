@@ -1,11 +1,11 @@
-import 'package:bio_watch/models/User.dart';
+import 'package:bio_watch/models/Person.dart';
 import 'package:bio_watch/shared/DataProvider.dart';
 import 'package:bio_watch/shared/decorations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class AccountEditor extends StatefulWidget {
-  final User user;
+  final Person user;
 
   AccountEditor({this.user});
 
@@ -14,7 +14,7 @@ class AccountEditor extends StatefulWidget {
 }
 
 class _AccountEditorState extends State<AccountEditor> {
-  User user;
+  Person user;
   bool showPassword = true;
 
   _AccountEditorState(this.user);

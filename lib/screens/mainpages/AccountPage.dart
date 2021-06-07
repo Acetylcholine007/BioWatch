@@ -1,5 +1,6 @@
-import 'package:bio_watch/models/User.dart';
+import 'package:bio_watch/models/Person.dart';
 import 'package:bio_watch/screens/subpages/AccountEditor.dart';
+import 'package:bio_watch/services/AuthService.dart';
 import 'package:bio_watch/shared/DataProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -12,10 +13,11 @@ class AccountPage extends StatefulWidget {
 }
 
 class _AccountPageState extends State<AccountPage> {
+  final AuthService _auth = AuthService();
+  
   @override
   Widget build(BuildContext context) {
-    Function logout = Provider.of<DataProvider>(context, listen: false).logout;
-    User user = Provider.of<DataProvider>(context, listen: false).user;
+    Person user = Provider.of<DataProvider>(context, listen: false).user;
     final theme = Theme.of(context);
 
     return Container(
@@ -79,7 +81,7 @@ class _AccountPageState extends State<AccountPage> {
                   Expanded(
                     child: ElevatedButton(
                       child: Text('LOG OUT'),
-                      onPressed: () => logout(),
+                      onPressed: () async => await _auth.logOut(),
                       style: ElevatedButton.styleFrom(primary: theme.accentColor),
                     ),
                   )

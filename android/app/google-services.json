@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "153079810628",
+    "project_id": "bio-watch",
+    "storage_bucket": "bio-watch.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:153079810628:android:979c8ab6f5299647804a11",
+        "android_client_info": {
+          "package_name": "com.cpe.bio_watch"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "153079810628-3fjspaierff5p1f0en6jqvr19mpoi6af.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbcH-Q-PsaskpNaki3NzLUuWg8aMznHdQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "153079810628-3fjspaierff5p1f0en6jqvr19mpoi6af.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
