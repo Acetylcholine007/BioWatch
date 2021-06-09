@@ -1,5 +1,7 @@
-import 'package:bio_watch/models/Event.dart';
-import 'package:bio_watch/shared/DataProvider.dart';
+import 'package:bio_watch/models/Account.dart';
+import 'package:bio_watch/models/Activity.dart';
+import 'package:bio_watch/models/PeopleEvent.dart';
+import 'package:bio_watch/services/DatabaseService.dart';
 import 'package:bio_watch/shared/decorations.dart';
 import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
@@ -21,8 +23,8 @@ class _EventEditorState extends State<EventEditor> {
 
   @override
   Widget build(BuildContext context) {
-    Function addEvent = Provider.of<DataProvider>(context, listen: true).addEvent;
-    Function editEvent = Provider.of<DataProvider>(context, listen: true).editEvent;
+    final user = Provider.of<Account>(context);
+    final DatabaseService _database = DatabaseService(uid: user.uid);
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
@@ -32,9 +34,19 @@ class _EventEditorState extends State<EventEditor> {
           actions: [
             IconButton(icon: Icon(Icons.save_rounded), onPressed: () {
               if(widget.isNew) {
-                addEvent(event);
+                _database.createEvent(event, Activity(
+                  heading: 'Event Created',
+                  time: TimeOfDay.now().format(context).split(' ')[0],
+                  date: DateTime.now().toString(),
+                  body: 'You\'ve created ${event.eventName}'
+                ));
               } else {
-                editEvent(event);
+                _database.editEvent(event, Activity(
+                  heading: 'Event Edited',
+                  time: TimeOfDay.now().format(context).split(' ')[0],
+                  date: DateTime.now().toString(),
+                  body: 'You\'ve edited ${event.eventName}'
+                ));
               }
               Navigator.of(context).pop();
             }),

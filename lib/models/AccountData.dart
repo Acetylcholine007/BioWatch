@@ -1,22 +1,18 @@
 import 'Activity.dart';
 
-class Person {
-  String id;
+class AccountData {
+  String uid;
   String fullName;
-  String password;
-  String email;
   String accountType;
   String address;
   String contact;
   String birthday;
-  List<String> myEvents;
+  List myEvents;
   List<Activity> activities;
 
-  Person({
-    this.id,
+  AccountData({
+    this.uid,
     this.fullName,
-    this.password,
-    this.email,
     this.accountType,
     this.address,
     this.contact,
@@ -25,11 +21,9 @@ class Person {
     this.activities
   });
 
-  Person copy() => Person(
-    id: this.id,
+  AccountData copy() => AccountData(
+    uid: this.uid,
     fullName: this.fullName,
-    password: this.password,
-    email: this.email,
     accountType: this.accountType,
     address: this.address,
     contact: this.contact,

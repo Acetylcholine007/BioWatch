@@ -1,44 +1,41 @@
 import 'package:barcode_scan2/barcode_scan2.dart';
-import 'package:bio_watch/models/Event.dart';
+import 'package:bio_watch/components/Loading.dart';
+import 'package:bio_watch/models/Account.dart';
+import 'package:bio_watch/models/AccountData.dart';
+import 'package:bio_watch/models/PeopleEvent.dart';
 import 'package:bio_watch/screens/mainpages/AccountPage.dart';
 import 'package:bio_watch/screens/mainpages/ActivityPage.dart';
 import 'package:bio_watch/screens/mainpages/EventPage.dart';
 import 'package:bio_watch/screens/mainpages/HomePage.dart';
 import 'package:bio_watch/screens/subpages/EventEditor.dart';
-import 'package:bio_watch/shared/DataProvider.dart';
+import 'package:bio_watch/services/DatabaseService.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'models/Person.dart';
 
 class MainWrapper extends StatefulWidget {
-  final Person user;
-
-  MainWrapper({this.user});
-
   @override
-  _MainWrapperState createState() => _MainWrapperState(user);
+  _MainWrapperState createState() => _MainWrapperState();
 }
 
 class _MainWrapperState extends State<MainWrapper> {
-  Person user;
   int _currentIndex = 0;
-
-  _MainWrapperState(this.user);
 
   Future<String> scanCode() async {
     var result = await BarcodeScanner.scan();
-
+    /*
     print(result.type); // The result type (barcode, cancelled, failed)
     print(result.rawContent); // The barcode content
     print(result.format); // The barcode format (as enum)
     print(result.formatNote); // If a unknown format was scanned this field contains a note
+    */
     return result.rawContent;
   }
 
   @override
   Widget build(BuildContext context) {
-    Function joinEvent = Provider.of<DataProvider>(context, listen: false).joinEvent;
-    String userId = Provider.of<DataProvider>(context, listen: false).userId;
+    final user = Provider.of<Account>(context);
+    final userData = Provider.of<AccountData>(context);
+    final DatabaseService _database = DatabaseService(uid: user.uid);
     final theme = Theme.of(context);
     final pages = [
       HomePage(),
@@ -47,15 +44,15 @@ class _MainWrapperState extends State<MainWrapper> {
       AccountPage()
     ];
 
-    return GestureDetector(
+    return userData != null ? GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
       child: Scaffold(
         appBar: AppBar(
           title: Text('Bio Watch'),
-          actions: user.accountType == 'HOST' ? [
+          actions: userData.accountType == 'HOST' ? [
             IconButton(icon: Icon(Icons.add), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => EventEditor(event: PeopleEvent(
               eventName: '',
-              hostName: user.fullName,
+              hostName: userData.fullName,
               address: '',
               time: TimeOfDay.now().format(context).split(' ')[0],
               date: DateTime.now().toString(),
@@ -65,7 +62,7 @@ class _MainWrapperState extends State<MainWrapper> {
           ] : [
             IconButton(icon: Icon(Icons.qr_code_scanner_rounded), onPressed: () async {
               String eventId = await scanCode();
-              joinEvent(eventId, userId);
+              _database.joinEvent(eventId);
             })
           ],
         ),
@@ -98,9 +95,9 @@ class _MainWrapperState extends State<MainWrapper> {
           ],
         ),
         body: Container(
-            child: pages[_currentIndex]
+          child: pages[_currentIndex]
         )
       ),
-    );
+    ) : Loading();
   }
 }

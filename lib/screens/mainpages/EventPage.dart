@@ -1,8 +1,9 @@
 import 'package:bio_watch/components/BannerCard.dart';
-import 'package:bio_watch/models/Event.dart';
-import 'package:bio_watch/models/Person.dart';
+import 'package:bio_watch/components/Loading.dart';
+import 'package:bio_watch/models/PeopleEvent.dart';
+import 'package:bio_watch/models/AccountData.dart';
 import 'package:bio_watch/screens/subpages/EventViewer.dart';
-import 'package:bio_watch/shared/DataProvider.dart';
+import 'package:bio_watch/services/DatabaseService.dart';
 import 'package:bio_watch/shared/decorations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -19,14 +20,15 @@ class _EventPageState extends State<EventPage> {
 
   @override
   Widget build(BuildContext context) {
-    Person user = Provider.of<DataProvider>(context, listen: false).user;
-    List<PeopleEvent> events = Provider.of<DataProvider>(context, listen: false).events;
+    final user = Provider.of<AccountData>(context);
+    final myEvents = Provider.of<List<String>>(context);
+    List<PeopleEvent> events = Provider.of<List<PeopleEvent>>(context);
 
     if(queryName != '') {
       events = events.where((event) => event.eventName.contains(new RegExp(queryName, caseSensitive: false))).toList();
     }
 
-    return Container(
+    return events != null && myEvents != null ? Container(
       child: Column(
         children: [
           Expanded(
@@ -45,7 +47,11 @@ class _EventPageState extends State<EventPage> {
                 itemCount: events.length,
                 itemBuilder: (BuildContext context, int index){
                   return GestureDetector(
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => EventViewer(event: events[index], user: user))),
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => StreamProvider<List<String>>.value(
+                      initialData: null,
+                      value: DatabaseService(uid: user.uid).myEventIds,
+                      child: EventViewer(event: events[index], user: user)))
+                    ),
                     child: BannerCard(event: events[index])
                   );
                 }
@@ -54,6 +60,6 @@ class _EventPageState extends State<EventPage> {
           ),
         ],
       )
-    );
+    ) : Loading();
   }
 }

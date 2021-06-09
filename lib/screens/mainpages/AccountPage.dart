@@ -1,7 +1,6 @@
-import 'package:bio_watch/models/Person.dart';
+import 'package:bio_watch/models/AccountData.dart';
 import 'package:bio_watch/screens/subpages/AccountEditor.dart';
 import 'package:bio_watch/services/AuthService.dart';
-import 'package:bio_watch/shared/DataProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -17,7 +16,7 @@ class _AccountPageState extends State<AccountPage> {
   
   @override
   Widget build(BuildContext context) {
-    Person user = Provider.of<DataProvider>(context, listen: false).user;
+    final user = Provider.of<AccountData>(context);
     final theme = Theme.of(context);
 
     return Container(
@@ -39,7 +38,7 @@ class _AccountPageState extends State<AccountPage> {
                       child: Icon(Icons.person_rounded),
                     ),
                     title: Text(user.fullName),
-                    subtitle: Text(user.email),
+                    //subtitle: Text(user.email),
                   ),
                   ListTile(
                     leading: CircleAvatar(

@@ -1,12 +1,12 @@
 import 'package:bio_watch/components/Loading.dart';
-import 'package:bio_watch/models/Person.dart';
+import 'package:bio_watch/models/AccountData.dart';
 import 'package:bio_watch/services/AuthService.dart';
 import 'package:bio_watch/shared/decorations.dart';
 import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
 
 class SignInPage extends StatefulWidget {
-  final Person user;
+  final AccountData user;
 
   SignInPage({this.user});
 
@@ -20,7 +20,9 @@ class _SignInPageState extends State<SignInPage> {
   bool loading = false;
   bool hidePassword = true;
   String error = '';
-  Person user;
+  String email = '';
+  String password = '';
+  AccountData user;
   _SignInPageState(this.user);
 
   @override
@@ -60,10 +62,10 @@ class _SignInPageState extends State<SignInPage> {
                   Expanded(
                     flex: 3,
                     child: TextFormField(
-                      initialValue: user.email,
+                      initialValue: email,
                       decoration: textFieldDecoration.copyWith(hintText: 'Email'),
                       validator: (val) => val.isEmpty ? 'Enter Email' : null,
-                      onChanged: (val) => setState(() => user.email = val)
+                      onChanged: (val) => setState(() => email = val)
                     ),
                   ),
                   Expanded(
@@ -82,7 +84,7 @@ class _SignInPageState extends State<SignInPage> {
                         SizedBox(width: 10),
                         Expanded(
                           child: TextFormField(
-                            initialValue: user.password,
+                            initialValue: password,
                             decoration: textFieldDecoration.copyWith(suffixIcon: IconButton(
                                 onPressed: () => setState(() => hidePassword = !hidePassword),
                                 icon: Icon(Icons.visibility)
@@ -90,7 +92,7 @@ class _SignInPageState extends State<SignInPage> {
                               hintText: 'Password'
                             ),
                             validator: (val) => val.isEmpty ? 'Enter Password' : null,
-                            onChanged: (val) => setState(() => user.password = val),
+                            onChanged: (val) => setState(() => password = val),
                             obscureText: hidePassword,
                           ),
                         ),
@@ -148,7 +150,7 @@ class _SignInPageState extends State<SignInPage> {
                       onPressed: () async {
                         if(_formKey.currentState.validate()) {
                           setState(() => loading = true);
-                          dynamic result = await _auth.signIn(user);
+                          dynamic result = await _auth.signIn(user, email, password);
                           if(result == null) {
                             setState(() {
                               error = 'Invalid credentials';

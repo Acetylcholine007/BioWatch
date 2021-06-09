@@ -1,7 +1,7 @@
+import 'package:bio_watch/components/Loading.dart';
 import 'package:bio_watch/components/NoActivity.dart';
 import 'package:bio_watch/models/Activity.dart';
 import 'package:bio_watch/screens/subpages/ActivityViewer.dart';
-import 'package:bio_watch/shared/DataProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -15,9 +15,9 @@ class ActivityPage extends StatefulWidget {
 class _ActivityPageState extends State<ActivityPage> {
   @override
   Widget build(BuildContext context) {
-    List<Activity> activities = Provider.of<DataProvider>(context, listen: false).user.activities;
+    final activities = Provider.of<List<Activity>>(context);
     
-    return Container(
+    return activities != null ? Container(
       child: activities.length != 0 ? ListView.builder(
         itemCount: activities.length,
         itemBuilder: (BuildContext context, int index){
@@ -33,6 +33,6 @@ class _ActivityPageState extends State<ActivityPage> {
           );
         }
       ) : NoActivity()
-    );
+    ) : Loading();
   }
 }

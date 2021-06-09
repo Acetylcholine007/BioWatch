@@ -1,4 +1,4 @@
-import 'package:bio_watch/models/Event.dart';
+import 'package:bio_watch/models/PeopleEvent.dart';
 import 'package:flutter/material.dart';
 
 class BannerCard extends StatelessWidget {

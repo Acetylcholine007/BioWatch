@@ -1,8 +1,8 @@
-import 'package:bio_watch/models/Person.dart';
+import 'package:bio_watch/models/AccountData.dart';
 import 'package:flutter/material.dart';
 
 class UserViewer extends StatelessWidget {
-  final Person user;
+  final AccountData user;
 
   UserViewer({this.user});
 
@@ -31,7 +31,7 @@ class UserViewer extends StatelessWidget {
                         child: Icon(Icons.person_rounded),
                       ),
                       title: Text(user.fullName),
-                      subtitle: Text(user.email),
+                      //subtitle: Text(user.email),
                     ),
                     ListTile(
                       leading: CircleAvatar(

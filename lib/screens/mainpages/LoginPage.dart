@@ -1,6 +1,5 @@
-import 'dart:math';
 import 'package:bio_watch/components/Loading.dart';
-import 'package:bio_watch/models/Person.dart';
+import 'package:bio_watch/models/AccountData.dart';
 import 'package:bio_watch/screens/mainpages/SignInPage.dart';
 import 'package:bio_watch/services/AuthService.dart';
 import 'package:bio_watch/shared/decorations.dart';
@@ -93,11 +92,8 @@ class _LoginPageState extends State<LoginPage> {
                     Divider(),
                     ElevatedButton(
                       child: Text('CREATE ACCOUNT'),
-                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => SignInPage(user: Person(
-                        id: Random().nextInt(100).toString(),
+                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => SignInPage(user: AccountData(
                         fullName: '',
-                        password: '',
-                        email: '',
                         accountType: '',
                         address: '',
                         contact: '',

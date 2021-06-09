@@ -1,16 +1,16 @@
-import 'package:bio_watch/models/Person.dart';
-import 'package:bio_watch/models/UserModel.dart';
+import 'package:bio_watch/models/AccountData.dart';
+import 'package:bio_watch/models/Account.dart';
 import 'package:bio_watch/services/DatabaseService.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  UserModel _userFromFirebaseUser(User user) {
-    return user != null ? UserModel(uid: user.uid) : null;
+  Account _userFromFirebaseUser(User user) {
+    return user != null ? Account(uid: user.uid) : null;
   }
 
-  Stream<UserModel> get user {
+  Stream<Account> get user {
     return _auth.authStateChanges().map((User user) => _userFromFirebaseUser(user));
   }
 
@@ -25,12 +25,12 @@ class AuthService {
     }
   }
 
-  Future<UserModel> signIn(Person person) async {
+  Future<Account> signIn(AccountData person, String email, String password) async {
     try {
-      UserCredential result = await _auth.createUserWithEmailAndPassword(email: person.email, password: person.password);
+      UserCredential result = await _auth.createUserWithEmailAndPassword(email: email, password: password);
       User user = result.user;
 
-      await DatabaseService(uid: user.uid).updateUserData(person.fullName, person.address, person.birthday, person.accountType, person.contact, person.myEvents);
+      await DatabaseService(uid: user.uid).createAccount(person.fullName, person.address, person.birthday, person.accountType, person.contact);
       //TODO: add email verification
       // if (user!= null && !user.emailVerified) {
       //   await user.sendEmailVerification();

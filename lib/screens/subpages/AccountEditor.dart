@@ -1,27 +1,24 @@
-import 'package:bio_watch/models/Person.dart';
-import 'package:bio_watch/shared/DataProvider.dart';
+import 'package:bio_watch/models/AccountData.dart';
 import 'package:bio_watch/shared/decorations.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class AccountEditor extends StatefulWidget {
-  final Person user;
+  final AccountData user;
 
   AccountEditor({this.user});
 
   @override
-  _AccountEditorState createState() => _AccountEditorState(user.copy());
+  _AccountEditorState createState() => _AccountEditorState(user);
 }
 
 class _AccountEditorState extends State<AccountEditor> {
-  Person user;
+  AccountData user;
   bool showPassword = true;
 
   _AccountEditorState(this.user);
 
   @override
   Widget build(BuildContext context) {
-    Function editAccount = Provider.of<DataProvider>(context, listen: true).editAccount;
     final theme = Theme.of(context);
 
     return GestureDetector(
@@ -52,30 +49,30 @@ class _AccountEditorState extends State<AccountEditor> {
                     onChanged: (val) => setState(() => user.fullName = val)
                   ),
                 ),
-                Expanded(
-                  flex: 3,
-                  child: TextFormField(
-                    initialValue: user.email,
-                    decoration: textFieldDecoration.copyWith(hintText: 'Email'),
-                    validator: (val) => val.isEmpty ? 'Enter Email' : null,
-                    onChanged: (val) => setState(() => user.email = val)
-                  ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: TextFormField(
-                    initialValue: user.password,
-                    decoration: textFieldDecoration.copyWith(suffixIcon: IconButton(
-                      onPressed: () => setState(() => showPassword = !showPassword),
-                      icon: Icon(Icons.visibility)
-                    ),
-                      hintText: 'Password'
-                    ),
-                    validator: (val) => val.isEmpty ? 'Enter Password' : null,
-                    onChanged: (val) => setState(() => user.password = val),
-                    obscureText: showPassword,
-                  ),
-                ),
+                // Expanded(
+                //   flex: 3,
+                //   child: TextFormField(
+                //     initialValue: user.email,
+                //     decoration: textFieldDecoration.copyWith(hintText: 'Email'),
+                //     validator: (val) => val.isEmpty ? 'Enter Email' : null,
+                //     onChanged: (val) => setState(() => user.email = val)
+                //   ),
+                // ),
+                // Expanded(
+                //   flex: 3,
+                //   child: TextFormField(
+                //     initialValue: user.password,
+                //     decoration: textFieldDecoration.copyWith(suffixIcon: IconButton(
+                //       onPressed: () => setState(() => showPassword = !showPassword),
+                //       icon: Icon(Icons.visibility)
+                //     ),
+                //       hintText: 'Password'
+                //     ),
+                //     validator: (val) => val.isEmpty ? 'Enter Password' : null,
+                //     onChanged: (val) => setState(() => user.password = val),
+                //     obscureText: showPassword,
+                //   ),
+                // ),
                 Expanded(
                   flex: 3,
                   child: TextFormField(
@@ -116,7 +113,6 @@ class _AccountEditorState extends State<AccountEditor> {
                   child: ElevatedButton(
                     child: Text('SAVE CHANGES'),
                     onPressed: () {
-                      editAccount(user.contact, user.password);
                       Navigator.of(context).pop();
                     },
                     style: ElevatedButton.styleFrom(primary: theme.accentColor),

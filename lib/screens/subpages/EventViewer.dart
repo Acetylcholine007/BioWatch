@@ -1,12 +1,14 @@
-import 'package:bio_watch/models/Event.dart';
-import 'package:bio_watch/models/Person.dart';
-import 'package:bio_watch/shared/DataProvider.dart';
+import 'package:bio_watch/components/Loading.dart';
+import 'package:bio_watch/models/PeopleEvent.dart';
+import 'package:bio_watch/models/AccountData.dart';
+import 'package:bio_watch/services/DatabaseService.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class EventViewer extends StatefulWidget {
   final PeopleEvent event;
-  final Person user;
+  final AccountData user;
+
 
   EventViewer({this.event, this.user});
 
@@ -17,19 +19,24 @@ class EventViewer extends StatefulWidget {
 class _EventViewerState extends State<EventViewer> {
   @override
   Widget build(BuildContext context) {
+    final DatabaseService _database = DatabaseService(uid: widget.user.uid);
+    final eventIds = Provider.of<List<String>>(context);
     final theme = Theme.of(context);
-    List<String> eventIds = widget.user.myEvents;
-    Function addInterested = Provider.of<DataProvider>(context, listen: true).addInterested;
-    Function removeInterested = Provider.of<DataProvider>(context, listen: true).removeInterested;
 
-    return Scaffold(
+    return eventIds != null ? Scaffold(
       appBar: AppBar(
         title: Text('Event Details'),
-        actions: widget.user.accountType == 'HOST' ? null : [
-          eventIds.indexOf(widget.event.id) != -1 ?
-          IconButton(icon: Icon(Icons.bookmark_rounded), onPressed: () => removeInterested(widget.event.id, widget.user.id)) :
-          IconButton(icon: Icon(Icons.bookmark_border_rounded), onPressed: () => addInterested(widget.event.id, widget.user.id))
-        ],
+        actions: widget.user.accountType == 'USER' ? [
+          eventIds.indexOf(widget.event.eventId) != -1 ?
+          IconButton(icon: Icon(Icons.bookmark_rounded), onPressed: () {
+            _database.unmarkEvent(widget.event.eventId);
+            setState(() {});
+          }) :
+          IconButton(icon: Icon(Icons.bookmark_border_rounded), onPressed: () {
+            _database.markEvent(widget.event.eventId);
+            setState(() {});
+          })
+        ] : null,
       ),
       body: Container(
         child: Column(
@@ -51,7 +58,7 @@ class _EventViewerState extends State<EventViewer> {
           ],
         ),
       ),
-    );
+    ) : Loading();
   }
 }
 

@@ -1,11 +1,11 @@
+import 'package:bio_watch/components/Loading.dart';
 import 'package:bio_watch/components/NoEvent.dart';
 import 'package:bio_watch/components/NoInterest.dart';
 import 'package:bio_watch/components/TileCard.dart';
-import 'package:bio_watch/models/Event.dart';
-import 'package:bio_watch/models/Person.dart';
+import 'package:bio_watch/models/AccountData.dart';
 import 'package:bio_watch/screens/subpages/EventDashboard.dart';
 import 'package:bio_watch/screens/subpages/EventViewer.dart';
-import 'package:bio_watch/shared/DataProvider.dart';
+import 'package:bio_watch/services/DatabaseService.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -19,34 +19,47 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    Person user = Provider.of<DataProvider>(context, listen: false).user;
-    List<String> eventIds = user.myEvents;
-    List<PeopleEvent> events = Provider.of<DataProvider>(context, listen: true).events.where((event) => eventIds.indexOf(event.id) != -1).toList();
+    final user = Provider.of<AccountData>(context);
+    final eventId = Provider.of<List<String>>(context);
+    final DatabaseService _database = DatabaseService(uid: user.uid);
 
-    return Container(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: events.length != 0 ? ListView.builder(
-          itemCount: events.length,
-          itemBuilder: (BuildContext context, int index) {
-            return GestureDetector(
-              onTap: () {
-                if(user.accountType == 'USER') {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => EventViewer(event: events[index], user: user)));
-                } else if (user.accountType == 'HOST') {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => EventDashboard(event: events[index])));
+    return eventId != null ? eventId.isNotEmpty ? FutureBuilder(
+      future: _database.myEvents(eventId),
+      builder: (context, snapshot) {
+        if(snapshot.connectionState == ConnectionState.done) {
+          return Container(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: snapshot.data.length != 0 ? ListView.builder(
+                itemCount: snapshot.data.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return GestureDetector(
+                    onTap: () {
+                      if(user.accountType == 'USER') {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => StreamProvider<List<String>>.value(
+                          initialData: null,
+                          value: DatabaseService(uid: user.uid).myEventIds,
+                          child: EventViewer(event: snapshot.data[index].event, user: user)))
+                        );
+                      } else if (user.accountType == 'HOST') {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => EventDashboard(event: snapshot.data[index].event)));
+                      }
+                    },
+                    child: TileCard(
+                      eventName: snapshot.data[index].event.eventName,
+                      hostName: snapshot.data[index].event.hostName,
+                      address: snapshot.data[index].event.address,
+                      uri: snapshot.data[index].event.bannerUri,
+                    ),
+                  );
                 }
-              },
-              child: TileCard(
-                eventName: events[index].eventName,
-                hostName: events[index].hostName,
-                address: events[index].address,
-                uri: events[index].bannerUri,
-              ),
-            );
-          }
-        ) : user.accountType == 'USER' ? NoInterest() : NoEvent(),
-      )
-    );
+              ) : user.accountType == 'USER' ? NoInterest() : NoEvent(),
+            )
+          );
+        } else {
+          return Loading();
+        }
+      }
+    ) : user.accountType == 'USER' ? NoInterest() : NoEvent() : Loading();
   }
 }

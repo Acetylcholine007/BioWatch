@@ -1,5 +1,6 @@
 class PeopleEvent {
-  String id;
+  String eventId;
+  String hostId;
   String eventName;
   String hostName;
   String address;
@@ -13,7 +14,8 @@ class PeopleEvent {
   String description;
 
   PeopleEvent({
-    this.id,
+    this.eventId,
+    this.hostId,
     this.eventName,
     this.hostName,
     this.address,
