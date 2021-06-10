@@ -6,48 +6,65 @@ import 'package:firebase_auth/firebase_auth.dart';
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  //MAPPING FUNCTION SECTION
+
   Account _userFromFirebaseUser(User user) {
-    return user != null ? Account(uid: user.uid) : null;
+    return user != null ? Account(uid: user.uid, email: user.email) : null;
   }
+
+  //STREAM SECTION
 
   Stream<Account> get user {
     return _auth.authStateChanges().map((User user) => _userFromFirebaseUser(user));
   }
 
-  Future<User> logIn(String email, String password) async {
+  //OPERATOR FUNCTIONS SECTION
+
+  Future<String> logIn(String email, String password) async {
     try {
-      UserCredential result = await _auth.signInWithEmailAndPassword(email: email, password: password);
-      User user = result.user;
-      return user;
+      await _auth.signInWithEmailAndPassword(email: email, password: password);
+      return 'SUCCESS';
     } catch (error) {
-      print(error.toString());
-      return null;
+      return error.toString();
     }
   }
 
-  Future<Account> signIn(AccountData person, String email, String password) async {
+  Future<String> signIn(AccountData person, String email, String password) async {
     try {
       UserCredential result = await _auth.createUserWithEmailAndPassword(email: email, password: password);
       User user = result.user;
-
-      await DatabaseService(uid: user.uid).createAccount(person.fullName, person.address, person.birthday, person.accountType, person.contact);
       //TODO: add email verification
       // if (user!= null && !user.emailVerified) {
       //   await user.sendEmailVerification();
       // }
-      return _userFromFirebaseUser(user);
+      await DatabaseService(uid: user.uid).createAccount(person.fullName, person.address, person.birthday, person.accountType, person.contact);
+      return 'SUCCESS';
     } catch (error) {
-      print(error.toString());
-      return null;
+      return error.toString();
     }
   }
 
-  Future logOut() async {
-    try {
-      return await _auth.signOut();
-    } catch (error) {
-      print(error.toString());
-      return null;
-    }
+  Future<String> logOut() async {
+    String result  = '';
+    await _auth.signOut()
+      .then((value) => result = 'SUCCESS')
+      .catchError((error) => result = error.toString());
+    return result;
+  }
+
+  Future<String> changeEmail(String newEmail) async {
+    String result  = '';
+    await _auth.currentUser.updateEmail(newEmail)
+      .then((value) => result = 'SUCCESS')
+      .catchError((error) => result = error.toString());
+    return result;
+  }
+
+  Future<String> changePassword(String newPassword) async {
+    String result  = '';
+    _auth.currentUser.updatePassword(newPassword)
+      .then((value) => result = 'SUCCESS')
+      .catchError((error) => result = error.toString());
+    return result;
   }
 }

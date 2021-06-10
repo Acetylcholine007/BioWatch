@@ -1,4 +1,7 @@
+import 'package:bio_watch/components/Loading.dart';
 import 'package:bio_watch/models/AccountData.dart';
+import 'package:bio_watch/services/AuthService.dart';
+import 'package:bio_watch/services/DatabaseService.dart';
 import 'package:bio_watch/shared/decorations.dart';
 import 'package:flutter/material.dart';
 
@@ -8,20 +11,27 @@ class AccountEditor extends StatefulWidget {
   AccountEditor({this.user});
 
   @override
-  _AccountEditorState createState() => _AccountEditorState(user);
+  _AccountEditorState createState() => _AccountEditorState(user.copy());
 }
 
 class _AccountEditorState extends State<AccountEditor> {
-  AccountData user;
+  final _formKey = GlobalKey<FormState>();
+  AccountData userData;
+  String error = '';
+  String email = '';
+  String password = '';
+  bool loading = false;
   bool showPassword = true;
 
-  _AccountEditorState(this.user);
+  _AccountEditorState(this.userData);
 
   @override
   Widget build(BuildContext context) {
+    final AuthService _auth = AuthService();
+    final DatabaseService _database = DatabaseService(uid: userData.uid);
     final theme = Theme.of(context);
 
-    return GestureDetector(
+    return loading ? Loading() : GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
       child: Scaffold(
         appBar: AppBar(
@@ -30,95 +40,69 @@ class _AccountEditorState extends State<AccountEditor> {
         body: Container(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  flex: 6,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Placeholder(),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(
+                    height: 200,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Placeholder(),
+                    ),
                   ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: TextFormField(
-                    initialValue: user.fullName,
-                    decoration: textFieldDecoration.copyWith(hintText: 'Full Name'),
-                    validator: (val) => val.isEmpty ? 'Enter Full Name' : null,
-                    onChanged: (val) => setState(() => user.fullName = val)
+                  SizedBox(height: 30),
+                  TextFormField(
+                    initialValue: email,
+                    decoration: textFieldDecoration.copyWith(hintText: 'New Email'),
+                    validator: (val) => val.isEmpty ? 'Enter Email' : null,
+                    onChanged: (val) => setState(() => email = val)
                   ),
-                ),
-                // Expanded(
-                //   flex: 3,
-                //   child: TextFormField(
-                //     initialValue: user.email,
-                //     decoration: textFieldDecoration.copyWith(hintText: 'Email'),
-                //     validator: (val) => val.isEmpty ? 'Enter Email' : null,
-                //     onChanged: (val) => setState(() => user.email = val)
-                //   ),
-                // ),
-                // Expanded(
-                //   flex: 3,
-                //   child: TextFormField(
-                //     initialValue: user.password,
-                //     decoration: textFieldDecoration.copyWith(suffixIcon: IconButton(
-                //       onPressed: () => setState(() => showPassword = !showPassword),
-                //       icon: Icon(Icons.visibility)
-                //     ),
-                //       hintText: 'Password'
-                //     ),
-                //     validator: (val) => val.isEmpty ? 'Enter Password' : null,
-                //     onChanged: (val) => setState(() => user.password = val),
-                //     obscureText: showPassword,
-                //   ),
-                // ),
-                Expanded(
-                  flex: 3,
-                  child: TextFormField(
-                      initialValue: user.address,
-                      decoration: textFieldDecoration.copyWith(hintText: 'Permanent Address'),
-                      validator: (val) => val.isEmpty ? 'Enter Permanent Address' : null,
-                      onChanged: (val) => setState(() => user.address = val)
+                  TextFormField(
+                    initialValue: password,
+                    decoration: textFieldDecoration.copyWith(suffixIcon: IconButton(
+                      onPressed: () => setState(() => showPassword = !showPassword),
+                      icon: Icon(Icons.visibility)
+                    ),
+                      hintText: 'New Password'
+                    ),
+                    validator: (val) => val.isEmpty ? 'Enter Password' : null,
+                    onChanged: (val) => setState(() => password = val),
+                    obscureText: showPassword,
                   ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                            keyboardType: TextInputType.number,
-                            initialValue: user.contact,
-                            decoration: textFieldDecoration.copyWith(hintText: 'Contact No.'),
-                            validator: (val) => val.isEmpty ? 'Enter Contact No.' : null,
-                            onChanged: (val) => setState(() => user.contact = val)
-                        ),
-                      ),
-                      SizedBox(width: 10),
-                      Expanded(
-                        child: TextFormField(
-                            initialValue: user.birthday,
-                            decoration: textFieldDecoration.copyWith(hintText: 'Birthday'),
-                            validator: (val) => val.isEmpty ? 'Enter Birthday' : null,
-                            onChanged: (val) => setState(() => user.birthday = val)
-                        ),
-                      ),
-                    ],
+                  TextFormField(
+                    keyboardType: TextInputType.number,
+                    initialValue: userData.contact,
+                    decoration: textFieldDecoration.copyWith(hintText: 'Contact No.'),
+                    validator: (val) => val.isEmpty ? 'Enter Contact No.' : null,
+                    onChanged: (val) => setState(() => userData.contact = val)
                   ),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: ElevatedButton(
+                  Text(error, style: TextStyle(color: Colors.red, fontSize: 14)),
+                  SizedBox(height: 30),
+                  ElevatedButton(
                     child: Text('SAVE CHANGES'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
+                    onPressed: () async {
+                      if(_formKey.currentState.validate()) {
+                        setState(() => loading = true);
+                        String result1 = await _auth.changePassword(password);
+                        String result2 = await _auth.changeEmail(email);
+                        String result3 = await _database.editAccount(userData);
+                        if(result1 == 'SUCCESS' || result2 == 'SUCCESS' || result3 == 'SUCCESS') {
+                          Navigator.of(context).pop();
+                        } else {
+                          setState(() {
+                            error = result1 + result2 + result3;
+                            loading = false;
+                          });
+
+                        }
+                      }
                     },
                     style: ElevatedButton.styleFrom(primary: theme.accentColor),
-                  ),
-                )
-              ],
+                  )
+                ],
+              ),
             ),
           )
         ),

@@ -78,10 +78,10 @@ class _LoginPageState extends State<LoginPage> {
                         onPressed: () async {
                           if(_formKey.currentState.validate()) {
                             setState(() => loading = true);
-                            dynamic result = await _auth.logIn(email, password);
-                            if(result == null) {
+                            String result = await _auth.logIn(email, password);
+                            if(result != 'SUCCESS') {
                               setState(() {
-                                error = 'Invalid credentials';
+                                error = result;
                                 loading = false;
                               });
                             }
@@ -98,8 +98,6 @@ class _LoginPageState extends State<LoginPage> {
                         address: '',
                         contact: '',
                         birthday: '',
-                        myEvents: [],
-                        activities: []
                       )))),
                       style: ElevatedButton.styleFrom(primary: theme.accentColor),
                     )

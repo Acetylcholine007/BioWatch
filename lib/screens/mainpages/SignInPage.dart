@@ -150,10 +150,10 @@ class _SignInPageState extends State<SignInPage> {
                       onPressed: () async {
                         if(_formKey.currentState.validate()) {
                           setState(() => loading = true);
-                          dynamic result = await _auth.signIn(user, email, password);
-                          if(result == null) {
+                          String result = await _auth.signIn(user, email, password);
+                          if(result != 'SUCCESS') {
                             setState(() {
-                              error = 'Invalid credentials';
+                              error = result;
                               loading = false;
                             });
                           } else {

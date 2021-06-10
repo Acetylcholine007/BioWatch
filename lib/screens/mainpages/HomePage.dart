@@ -3,6 +3,8 @@ import 'package:bio_watch/components/NoEvent.dart';
 import 'package:bio_watch/components/NoInterest.dart';
 import 'package:bio_watch/components/TileCard.dart';
 import 'package:bio_watch/models/AccountData.dart';
+import 'package:bio_watch/models/Interested.dart';
+import 'package:bio_watch/models/Participant.dart';
 import 'package:bio_watch/screens/subpages/EventDashboard.dart';
 import 'package:bio_watch/screens/subpages/EventViewer.dart';
 import 'package:bio_watch/services/DatabaseService.dart';
@@ -42,7 +44,13 @@ class _HomePageState extends State<HomePage> {
                           child: EventViewer(event: snapshot.data[index].event, user: user)))
                         );
                       } else if (user.accountType == 'HOST') {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => EventDashboard(event: snapshot.data[index].event)));
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => MultiProvider(
+                          providers: [
+                            StreamProvider<List<Interested>>.value(value: DatabaseService(uid: user.uid).interestedUserIds(snapshot.data[index].event.eventId), initialData: null),
+                            StreamProvider<List<Participant>>.value(value: DatabaseService(uid: user.uid).participantUserIds(snapshot.data[index].event.eventId), initialData: null)
+                          ],
+                          child: EventDashboard(event: snapshot.data[index].event)))
+                        );
                       }
                     },
                     child: TileCard(

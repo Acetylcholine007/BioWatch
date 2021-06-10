@@ -1,6 +1,9 @@
+import 'package:bio_watch/components/Loading.dart';
 import 'package:bio_watch/components/QRDisplay.dart';
 import 'package:bio_watch/models/Account.dart';
 import 'package:bio_watch/models/Activity.dart';
+import 'package:bio_watch/models/Interested.dart';
+import 'package:bio_watch/models/Participant.dart';
 import 'package:bio_watch/models/PeopleEvent.dart';
 import 'package:bio_watch/screens/subpages/EventEditor.dart';
 import 'package:bio_watch/screens/subpages/UserList.dart';
@@ -22,9 +25,11 @@ class _EventDashboardState extends State<EventDashboard> {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<Account>(context);
+    final interested = Provider.of<List<Interested>>(context);
+    final participants = Provider.of<List<Participant>>(context);
     final DatabaseService _database = DatabaseService(uid: user.uid);
 
-    return DefaultTabController(
+    return interested != null && participants != null ? DefaultTabController(
       length: 3,
       child: GestureDetector(
         onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
@@ -56,12 +61,12 @@ class _EventDashboardState extends State<EventDashboard> {
           body: TabBarView(
             children: [
               Statistics(),
-              UserList(userIds: widget.event.interested),
-              UserList(userIds: widget.event.participants)
+              UserList(userIds: interested.map((interested) => interested.uid).toList()),
+              UserList(userIds: participants.map((participant) => participant.uid).toList())
             ],
           )
         ),
       ),
-    );
+    ) : Loading();
   }
 }

@@ -1,5 +1,6 @@
 class Account {
   final String uid;
+  final String email;
 
-  Account({this.uid});
+  Account({this.uid, this.email});
 }

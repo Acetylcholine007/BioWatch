@@ -1,5 +1,7 @@
 import 'package:bio_watch/models/Activity.dart';
+import 'package:bio_watch/models/Interested.dart';
 import 'package:bio_watch/models/MyEvent.dart';
+import 'package:bio_watch/models/Participant.dart';
 import 'package:bio_watch/models/PeopleEvent.dart';
 import 'package:bio_watch/models/AccountData.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -14,15 +16,14 @@ class DatabaseService {
 
   //MAPPING FUNCTION SECTION
 
-  AccountData _personFromSnapshot(DocumentSnapshot snapshot) {
+  AccountData _accountFromSnapshot(DocumentSnapshot snapshot) {
     return AccountData(
       uid: snapshot.id,
       fullName: snapshot.get('fullName') ?? '',
       accountType: snapshot.get('accountType') ?? '',
       address: snapshot.get('address') ?? '',
       contact: snapshot.get('contact') ?? '',
-      birthday: snapshot.get('birthday') ?? '',
-      myEvents: []
+      birthday: snapshot.get('birthday') ?? ''
     );
   }
 
@@ -49,29 +50,7 @@ class DatabaseService {
         date: doc.get('date') ?? '',
         time: doc.get('time') ?? '',
         bannerUri: doc.get('bannerUri') ?? '',
-        description: doc.get('description') ?? '',
-        // interested: doc.get('interested').then((snapshot) {
-        //   return snapshot.docs.map((doc) => AccountData(
-        //     uid: snapshot.id,
-        //     fullName: snapshot.get('fullName') ?? '',
-        //     accountType: snapshot.get('accountType') ?? '',
-        //     address: snapshot.get('address') ?? '',
-        //     contact: snapshot.get('contact') ?? '',
-        //     birthday: snapshot.get('birthday') ?? '',
-        //     myEvents: []
-        //   ));
-        // }) ?? [],
-        // participants: doc.get('participants').then((snapshot) {
-        //   return snapshot.docs.map((doc) => AccountData(
-        //     uid: snapshot.id,
-        //     fullName: snapshot.get('fullName') ?? '',
-        //     accountType: snapshot.get('accountType') ?? '',
-        //     address: snapshot.get('address') ?? '',
-        //     contact: snapshot.get('contact') ?? '',
-        //     birthday: snapshot.get('birthday') ?? '',
-        //     myEvents: []
-        //   ));
-        // }) ?? []
+        description: doc.get('description') ?? ''
       );
     }).toList();
   }
@@ -89,6 +68,31 @@ class DatabaseService {
         bannerUri: doc.get('bannerUri') ?? '',
         description: doc.get('description') ?? '',
       ));
+    }).toList();
+  }
+
+  List<AccountData> _accountListFromSnapshot(QuerySnapshot snapshot) {
+    return snapshot.docs.map((doc) {
+      return AccountData(
+        uid: doc.id,
+        fullName: doc.get('fullName') ?? '',
+        accountType: doc.get('accountType') ?? '',
+        address: doc.get('address') ?? '',
+        contact: doc.get('contact') ?? '',
+        birthday: doc.get('birthday') ?? ''
+      );
+    }).toList();
+  }
+
+  List<Interested> _interestedListFromSnapshot(QuerySnapshot snapshot) {
+    return snapshot.docs.map((doc) {
+      return Interested(uid: doc.get('uid') ?? '');
+    }).toList();
+  }
+
+  List<Participant> _participantListFromSnapshot(QuerySnapshot snapshot) {
+    return snapshot.docs.map((doc) {
+      return Participant(uid: doc.get('uid') ?? '');
     }).toList();
   }
 
@@ -141,10 +145,6 @@ class DatabaseService {
         print('You\'ve joined the event');
       })
       .catchError((error) => print('Failed to join event $eventId'));
-  }
-
-  Future viewEvent() async {
-
   }
 
   Future createEvent(PeopleEvent event, Activity activity) async {
@@ -241,21 +241,31 @@ class DatabaseService {
   }
 
   Future editAccount(AccountData user) async {
-    return userCollection.doc(uid).update({
-      'fullName': user.fullName,
-      'address': user.address,
-      'birthday': user.birthday,
-      'accountType': user.accountType,
+    String result = '';
+    await userCollection.doc(uid).update({
       'contact': user.contact
     })
-    .then((value) => print('User data updated'))
-    .catchError((error) => print('Failed to update user data'));
+    .then((value) => result = 'SUCCESS')
+    .catchError((error) => result = error.toString());
+    return result;
+  }
+
+  Future<List<MyEvent>> myEvents(List<String> eventId) {
+    return eventCollection.where('__name__', whereIn: eventId).get().then(_myEventListFromSnapshot);
+  }
+
+  Future<List<AccountData>> interestedUsers(List<String> userIds) {
+    return userCollection.where('__name__', whereIn: userIds).get().then(_accountListFromSnapshot);
+  }
+
+  Future<List<AccountData>> participantUsers(List<String> userIds) {
+    return userCollection.where('__name__', whereIn: userIds).get().then(_accountListFromSnapshot);
   }
 
   //STREAM SECTION
 
   Stream<AccountData> get user {
-    return userCollection.doc(uid).snapshots().map(_personFromSnapshot);
+    return userCollection.doc(uid).snapshots().map(_accountFromSnapshot);
   }
 
   Stream<List<Activity>> get activity {
@@ -266,11 +276,15 @@ class DatabaseService {
     return eventCollection.snapshots().map(_eventListFromSnapshot);
   }
 
-  Future<List<MyEvent>> myEvents(List<String> eventId) {
-    return eventCollection.where('__name__', whereIn: eventId).get().then(_myEventListFromSnapshot);
-  }
-
   Stream<List<String>> get myEventIds {
     return userCollection.doc(uid).collection('myEvents').snapshots().map((snapshot) => snapshot.docs.map((doc) => doc.get('eventId').toString()).toList());
+  }
+
+  Stream<List<Interested>> interestedUserIds(String eventId) {
+    return eventCollection.doc(eventId).collection('interested').snapshots().map(_interestedListFromSnapshot);
+  }
+
+  Stream<List<Participant>> participantUserIds(String eventId) {
+    return eventCollection.doc(eventId).collection('participants').snapshots().map(_participantListFromSnapshot);
   }
 }

@@ -1,5 +1,3 @@
-import 'Activity.dart';
-
 class AccountData {
   String uid;
   String fullName;
@@ -7,8 +5,6 @@ class AccountData {
   String address;
   String contact;
   String birthday;
-  List myEvents;
-  List<Activity> activities;
 
   AccountData({
     this.uid,
@@ -17,8 +13,6 @@ class AccountData {
     this.address,
     this.contact,
     this.birthday,
-    this.myEvents,
-    this.activities
   });
 
   AccountData copy() => AccountData(
@@ -28,7 +22,5 @@ class AccountData {
     address: this.address,
     contact: this.contact,
     birthday: this.birthday,
-    myEvents: [...this.myEvents],
-    activities: [...this.activities]
   );
 }
