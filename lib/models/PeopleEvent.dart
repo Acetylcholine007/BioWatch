@@ -7,10 +7,8 @@ class PeopleEvent {
   String date;
   String time;
   String bannerUri;
-  List<String> photoUri;
-  List<String> permitUri;
-  List<String> interested;
-  List<String> participants;
+  List<String> showcaseUris;
+  List<String> permitUris;
   String description;
 
   PeopleEvent({
@@ -22,10 +20,8 @@ class PeopleEvent {
     this.date,
     this.time,
     this.bannerUri,
-    this.photoUri,
-    this.permitUri,
-    this.interested,
-    this.participants,
+    this.showcaseUris,
+    this.permitUris,
     this.description
   });
 }

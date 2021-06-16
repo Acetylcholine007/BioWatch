@@ -2,6 +2,7 @@ import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:bio_watch/components/Loading.dart';
 import 'package:bio_watch/models/Account.dart';
 import 'package:bio_watch/models/AccountData.dart';
+import 'package:bio_watch/models/EventImage.dart';
 import 'package:bio_watch/models/PeopleEvent.dart';
 import 'package:bio_watch/screens/mainpages/AccountPage.dart';
 import 'package:bio_watch/screens/mainpages/ActivityPage.dart';
@@ -58,7 +59,7 @@ class _MainWrapperState extends State<MainWrapper> {
               date: DateTime.now().toString(),
               description: '',
               bannerUri: 'assets/events/img1.jpg'
-            ), isNew: true))))
+            ), isNew: true, eventImage: EventImage()))))
           ] : [
             IconButton(icon: Icon(Icons.qr_code_scanner_rounded), onPressed: () async {
               String eventId = await scanCode();

@@ -1,5 +1,6 @@
 class AccountData {
   String uid;
+  String idUri;
   String fullName;
   String accountType;
   String address;
@@ -8,6 +9,7 @@ class AccountData {
 
   AccountData({
     this.uid,
+    this.idUri,
     this.fullName,
     this.accountType,
     this.address,
@@ -17,6 +19,7 @@ class AccountData {
 
   AccountData copy() => AccountData(
     uid: this.uid,
+    idUri: this.idUri,
     fullName: this.fullName,
     accountType: this.accountType,
     address: this.address,

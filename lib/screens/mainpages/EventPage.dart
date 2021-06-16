@@ -50,8 +50,18 @@ class _EventPageState extends State<EventPage> {
                     onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => StreamProvider<List<String>>.value(
                       initialData: null,
                       value: DatabaseService(uid: user.uid).myEventIds,
-                      child: EventViewer(event: events[index], user: user)))
-                    ),
+                      child: FutureBuilder(
+                        //TODO: Implement image fetching
+                        future: null,
+                        builder: (context, snapshot) {
+                          if(/*snapshot.connectionState == ConnectionState.done*/ true) {
+                            return EventViewer(event: events[index], user: user, eventImage: snapshot.data);
+                          } else {
+                            return Loading();
+                          }
+                        }
+                      )
+                    ))),
                     child: BannerCard(event: events[index])
                   );
                 }

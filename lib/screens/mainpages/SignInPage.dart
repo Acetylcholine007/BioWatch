@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:bio_watch/components/Loading.dart';
 import 'package:bio_watch/models/AccountData.dart';
 import 'package:bio_watch/services/AuthService.dart';
+import 'package:bio_watch/shared/ImageManager.dart';
 import 'package:bio_watch/shared/decorations.dart';
 import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
@@ -15,8 +18,10 @@ class SignInPage extends StatefulWidget {
 }
 
 class _SignInPageState extends State<SignInPage> {
+  final imagePicker = ImageManager();
   final AuthService _auth = AuthService();
   final _formKey = GlobalKey<FormState>();
+  File userId;
   bool loading = false;
   bool hidePassword = true;
   String error = '';
@@ -44,10 +49,29 @@ class _SignInPageState extends State<SignInPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Expanded(
-                    flex: 6,
+                    flex: 8,
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: Placeholder(),
+                      child: GestureDetector(
+                        onTap: () async {
+                          dynamic result = await imagePicker.showPicker(context);
+                          if(result['image'] != null) {
+                            if(userId != null)
+                              await userId.delete();
+                            setState(() {
+                              userId = result['image'];
+                            });
+                          }
+                        },
+                        child: SizedBox(
+                          height: 300,
+                          width: 200,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(5),
+                            child: userId != null ? Image(image: FileImage(userId), fit: BoxFit.fitWidth) : Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.fitWidth)
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                   Expanded(
@@ -86,8 +110,8 @@ class _SignInPageState extends State<SignInPage> {
                           child: TextFormField(
                             initialValue: password,
                             decoration: textFieldDecoration.copyWith(suffixIcon: IconButton(
-                                onPressed: () => setState(() => hidePassword = !hidePassword),
-                                icon: Icon(Icons.visibility)
+                              onPressed: () => setState(() => hidePassword = !hidePassword),
+                              icon: Icon(Icons.visibility)
                               ),
                               hintText: 'Password'
                             ),
@@ -150,7 +174,7 @@ class _SignInPageState extends State<SignInPage> {
                       onPressed: () async {
                         if(_formKey.currentState.validate()) {
                           setState(() => loading = true);
-                          String result = await _auth.signIn(user, email, password);
+                          String result = await _auth.signIn(user, email, password, userId);
                           if(result != 'SUCCESS') {
                             setState(() {
                               error = result;

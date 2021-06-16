@@ -2,6 +2,7 @@ import 'package:bio_watch/components/Loading.dart';
 import 'package:bio_watch/components/QRDisplay.dart';
 import 'package:bio_watch/models/Account.dart';
 import 'package:bio_watch/models/Activity.dart';
+import 'package:bio_watch/models/EventImage.dart';
 import 'package:bio_watch/models/Interested.dart';
 import 'package:bio_watch/models/Participant.dart';
 import 'package:bio_watch/models/PeopleEvent.dart';
@@ -37,7 +38,17 @@ class _EventDashboardState extends State<EventDashboard> {
           appBar: AppBar(
             title: Text('Event Dashboard'),
             actions: [
-              IconButton(icon: Icon(Icons.edit_rounded), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => EventEditor(event: widget.event, isNew: false)))),
+              IconButton(icon: Icon(Icons.edit_rounded), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => FutureBuilder(
+                //TODO: Implement file fetching
+                  future: null,
+                builder: (context, snapshot) {
+                  if(/*snapshot.connectionState == ConnectionState.done*/ true) {
+                    return EventEditor(event: widget.event, isNew: false, eventImage: EventImage());
+                  } else {
+                    return Loading();
+                  }
+                }
+              )))),
               IconButton(icon: Icon(Icons.import_export_rounded), onPressed: () {}),
               IconButton(icon: Icon(Icons.qr_code_rounded), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => QRDisplay(eventId: widget.event.eventId)))),
               IconButton(icon: Icon(Icons.cancel_outlined), onPressed: () {

@@ -1,4 +1,5 @@
 import 'package:bio_watch/components/Loading.dart';
+import 'package:bio_watch/models/EventImage.dart';
 import 'package:bio_watch/models/PeopleEvent.dart';
 import 'package:bio_watch/models/AccountData.dart';
 import 'package:bio_watch/services/DatabaseService.dart';
@@ -8,9 +9,10 @@ import 'package:provider/provider.dart';
 class EventViewer extends StatefulWidget {
   final PeopleEvent event;
   final AccountData user;
+  final EventImage eventImage;
 
 
-  EventViewer({this.event, this.user});
+  EventViewer({this.event, this.user, this.eventImage});
 
   @override
   _EventViewerState createState() => _EventViewerState();
@@ -39,6 +41,7 @@ class _EventViewerState extends State<EventViewer> {
         ] : null,
       ),
       body: Container(
+        //TODO: implement eventImage viewing widgets
         child: Column(
           children: [
             Image(image: AssetImage(widget.event.bannerUri), fit: BoxFit.cover),

@@ -22,11 +22,12 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<AccountData>(context);
-    final eventId = Provider.of<List<String>>(context);
+    final myEventIds = Provider.of<List<String>>(context);
     final DatabaseService _database = DatabaseService(uid: user.uid);
 
-    return eventId != null ? eventId.isNotEmpty ? FutureBuilder(
-      future: _database.myEvents(eventId),
+    return myEventIds != null ? myEventIds.isNotEmpty ? FutureBuilder(
+      //TODO: implement myEvent banner fetching
+      future: _database.myEvents(myEventIds),
       builder: (context, snapshot) {
         if(snapshot.connectionState == ConnectionState.done) {
           return Container(
@@ -41,7 +42,17 @@ class _HomePageState extends State<HomePage> {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => StreamProvider<List<String>>.value(
                           initialData: null,
                           value: DatabaseService(uid: user.uid).myEventIds,
-                          child: EventViewer(event: snapshot.data[index].event, user: user)))
+                          child: FutureBuilder(
+                            //TODO: Implement image fetching
+                            future: null,
+                            builder: (context, snapshot) {
+                              if (/*snapshot.connectionState == ConnectionState.done*/ true) {
+                                return EventViewer(event: snapshot.data[index].event, user: user, eventImage: snapshot.data);
+                              } else {
+                                return Loading();
+                              }
+                            }
+                          )))
                         );
                       } else if (user.accountType == 'HOST') {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => MultiProvider(

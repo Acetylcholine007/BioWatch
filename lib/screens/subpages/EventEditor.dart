@@ -1,22 +1,28 @@
 import 'package:bio_watch/models/Account.dart';
 import 'package:bio_watch/models/Activity.dart';
+import 'package:bio_watch/models/EventAsset.dart';
+import 'package:bio_watch/models/EventImage.dart';
 import 'package:bio_watch/models/PeopleEvent.dart';
 import 'package:bio_watch/services/DatabaseService.dart';
+import 'package:bio_watch/shared/ImageManager.dart';
 import 'package:bio_watch/shared/decorations.dart';
 import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class EventEditor extends StatefulWidget {
+  EventEditor({this.event, this.isNew, this.eventImage});
+  final EventImage eventImage;
   final PeopleEvent event;
   final bool isNew;
-  EventEditor({this.event, this.isNew});
 
   @override
   _EventEditorState createState() => _EventEditorState(event);
 }
 
 class _EventEditorState extends State<EventEditor> {
+  final imagePicker = ImageManager();
+  EventAsset eventAsset = EventAsset();
   PeopleEvent event;
 
   _EventEditorState(this.event);
@@ -56,7 +62,23 @@ class _EventEditorState extends State<EventEditor> {
           child: Form(
             child: Column(
               children: [
-                Expanded(flex: 3, child: Image(image: AssetImage(event.bannerUri), fit: BoxFit.cover)),
+                Expanded(
+                  flex: 3,
+                  child: GestureDetector(
+                    onTap: () async {
+                      dynamic result = await imagePicker.showPicker(context);
+                      if(result['image'] != null) {
+                        if(eventAsset.banner != null)
+                          await eventAsset.banner.delete();
+                        setState(() {
+                          eventAsset.banner = result['image'];
+                        });
+                      }
+                    },
+                    child: eventAsset.banner != null ? Image(image: FileImage(eventAsset.banner), fit: BoxFit.fitHeight) :
+                      widget.eventImage.banner != null ? widget.eventImage.banner : Image(image: AssetImage(event.bannerUri), fit: BoxFit.fitHeight)
+                  )
+                ),
                 Expanded(
                   flex: 9,
                   child: Padding(
@@ -128,11 +150,17 @@ class _EventEditorState extends State<EventEditor> {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               Expanded(
-                                child: Placeholder(),
+                                child: GestureDetector(
+                                  onTap: () {},
+                                  child: Placeholder()
+                                ),
                               ),
                               SizedBox(width: 10),
                               Expanded(
-                                child: Placeholder(),
+                                child: GestureDetector(
+                                  onTap: () {},
+                                  child: Placeholder(),
+                                )
                               ),
                             ],
                           ),

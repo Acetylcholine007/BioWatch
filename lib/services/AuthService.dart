@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:bio_watch/models/AccountData.dart';
 import 'package:bio_watch/models/Account.dart';
 import 'package:bio_watch/services/DatabaseService.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
+import 'StorageService.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -29,7 +33,7 @@ class AuthService {
     }
   }
 
-  Future<String> signIn(AccountData person, String email, String password) async {
+  Future<String> signIn(AccountData person, String email, String password, File file) async {
     try {
       UserCredential result = await _auth.createUserWithEmailAndPassword(email: email, password: password);
       User user = result.user;
@@ -37,7 +41,8 @@ class AuthService {
       // if (user!= null && !user.emailVerified) {
       //   await user.sendEmailVerification();
       // }
-      await DatabaseService(uid: user.uid).createAccount(person.fullName, person.address, person.birthday, person.accountType, person.contact);
+      await DatabaseService(uid: user.uid).createAccount(person);
+      await StorageService().uploadId(file, '${user.uid}.${file.path.split('.').last}', user.uid);
       return 'SUCCESS';
     } catch (error) {
       return error.toString();
@@ -62,7 +67,7 @@ class AuthService {
 
   Future<String> changePassword(String newPassword) async {
     String result  = '';
-    _auth.currentUser.updatePassword(newPassword)
+    await _auth.currentUser.updatePassword(newPassword)
       .then((value) => result = 'SUCCESS')
       .catchError((error) => result = error.toString());
     return result;

@@ -19,6 +19,7 @@ class DatabaseService {
   AccountData _accountFromSnapshot(DocumentSnapshot snapshot) {
     return AccountData(
       uid: snapshot.id,
+      //idUri: snapshot.get('idUri') ?? '',
       fullName: snapshot.get('fullName') ?? '',
       accountType: snapshot.get('accountType') ?? '',
       address: snapshot.get('address') ?? '',
@@ -50,6 +51,8 @@ class DatabaseService {
         date: doc.get('date') ?? '',
         time: doc.get('time') ?? '',
         bannerUri: doc.get('bannerUri') ?? '',
+        //showcaseUris: doc.get('showcaseUris') ?? '',
+        //permitUris: doc.get('permitUris') ?? '',
         description: doc.get('description') ?? ''
       );
     }).toList();
@@ -66,6 +69,8 @@ class DatabaseService {
         date: doc.get('date') ?? '',
         time: doc.get('time') ?? '',
         bannerUri: doc.get('bannerUri') ?? '',
+        //showcaseUris: doc.get('showcaseUris') ?? '',
+        //permitUris: doc.get('permitUris') ?? '',
         description: doc.get('description') ?? '',
       ));
     }).toList();
@@ -75,6 +80,7 @@ class DatabaseService {
     return snapshot.docs.map((doc) {
       return AccountData(
         uid: doc.id,
+        //idUri: doc.get('idUri') ?? '',
         fullName: doc.get('fullName') ?? '',
         accountType: doc.get('accountType') ?? '',
         address: doc.get('address') ?? '',
@@ -157,6 +163,8 @@ class DatabaseService {
         'date': event.date,
         'time': event.time,
         'bannerUri': event.bannerUri,
+        'showcaseUris': event.showcaseUris,
+        'permitUris': event.permitUris,
         'description': event.description
       })
       .then((value) {
@@ -177,11 +185,12 @@ class DatabaseService {
         'date': event.date,
         'time': event.time,
         'bannerUri': event.bannerUri,
+        'showcaseUris': event.showcaseUris,
+        'permitUris': event.permitUris,
         'description': event.description
       })
       .then((value) {
         createActivity(activity);
-        //TODO: Mechanism for changing photoUri and permitUri
         print('Event updated');
       })
       .catchError((error) => print('Failed to edit event'));
@@ -210,10 +219,6 @@ class DatabaseService {
       .catchError((error) => print('Failed to record activity'));
   }
 
-  Future viewActivity() async {
-
-  }
-
   Future removeActivity(String actId) async {
     return activityCollection.doc(uid).collection('activities')
       .doc(actId).delete()
@@ -228,13 +233,14 @@ class DatabaseService {
       .catchError((error) => print('Failed to clear activities'));
   }
 
-  Future createAccount(String fullName, String address, String birthday, String accountType, String contact) async {
+  Future createAccount(AccountData person) async {
     return await userCollection.doc(uid).set({
-      'fullName': fullName,
-      'address': address,
-      'birthday': birthday,
-      'accountType': accountType,
-      'contact': contact
+      'idUri': person.idUri,
+      'fullName': person.fullName,
+      'address': person.address,
+      'birthday': person.birthday,
+      'accountType': person.accountType,
+      'contact': person.contact
     })
     .then((value) => print('User data created'))
     .catchError((error) => print('Failed to create user data'));
@@ -243,6 +249,7 @@ class DatabaseService {
   Future editAccount(AccountData user) async {
     String result = '';
     await userCollection.doc(uid).update({
+      'idUri': user.idUri,
       'contact': user.contact
     })
     .then((value) => result = 'SUCCESS')

@@ -35,7 +35,7 @@ class _UserListState extends State<UserList> {
       builder: (context, snapshot) {
         if(snapshot.connectionState == ConnectionState.done) {
           List<AccountData> users = snapshot.data;
-
+          print(userIds);
           if(queryName != '') {
             users = users.where((user) => user.fullName.contains(new RegExp(queryName, caseSensitive: false))).toList();
           }
