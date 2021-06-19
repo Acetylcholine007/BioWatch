@@ -10,19 +10,23 @@ import 'package:bio_watch/screens/subpages/EventEditor.dart';
 import 'package:bio_watch/screens/subpages/UserList.dart';
 import 'package:bio_watch/screens/subpages/Statistics.dart';
 import 'package:bio_watch/services/DatabaseService.dart';
+import 'package:bio_watch/services/StorageService.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class EventDashboard extends StatefulWidget {
   final PeopleEvent event;
+  final Function refresh;
 
-  EventDashboard({this.event});
+  EventDashboard({this.event, this.refresh});
 
   @override
   _EventDashboardState createState() => _EventDashboardState();
 }
 
 class _EventDashboardState extends State<EventDashboard> {
+  final StorageService _storage = StorageService();
+
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<Account>(context);
@@ -39,11 +43,10 @@ class _EventDashboardState extends State<EventDashboard> {
             title: Text('Event Dashboard'),
             actions: [
               IconButton(icon: Icon(Icons.edit_rounded), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => FutureBuilder(
-                //TODO: Implement file fetching
-                  future: null,
+                future: _storage.getEventImage(widget.event.eventId, widget.event.bannerUri, widget.event.showcaseUris, widget.event.permitUris),
                 builder: (context, snapshot) {
-                  if(/*snapshot.connectionState == ConnectionState.done*/ true) {
-                    return EventEditor(event: widget.event, isNew: false, eventImage: EventImage());
+                  if(snapshot.connectionState == ConnectionState.done) {
+                    return EventEditor(event: widget.event, isNew: false, eventImage: snapshot.data ?? EventImage(), refresh: widget.refresh);
                   } else {
                     return Loading();
                   }

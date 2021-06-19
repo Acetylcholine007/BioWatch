@@ -4,9 +4,9 @@ class TileCard extends StatelessWidget {
   final String eventName;
   final String hostName;
   final String address;
-  final String uri;
+  final Image banner;
 
-  TileCard({this.eventName, this.hostName, this.address, this.uri});
+  TileCard({this.eventName, this.hostName, this.address, this.banner});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class TileCard extends StatelessWidget {
                 children: [
                   Expanded(
                     flex: 2,
-                    child: ClipRRect(borderRadius: BorderRadius.circular(5), child: SizedBox(height: 100, width: 100, child: Image(image: AssetImage(uri), fit: BoxFit.fitHeight))),
+                    child: ClipRRect(borderRadius: BorderRadius.circular(5), child: SizedBox(height: 100, width: 100, child: banner)),
                   ),
                   Expanded(
                     flex: 3,

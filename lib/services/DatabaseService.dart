@@ -19,7 +19,7 @@ class DatabaseService {
   AccountData _accountFromSnapshot(DocumentSnapshot snapshot) {
     return AccountData(
       uid: snapshot.id,
-      //idUri: snapshot.get('idUri') ?? '',
+      idUri: snapshot.get('idUri') ?? '',
       fullName: snapshot.get('fullName') ?? '',
       accountType: snapshot.get('accountType') ?? '',
       address: snapshot.get('address') ?? '',
@@ -51,8 +51,8 @@ class DatabaseService {
         date: doc.get('date') ?? '',
         time: doc.get('time') ?? '',
         bannerUri: doc.get('bannerUri') ?? '',
-        //showcaseUris: doc.get('showcaseUris') ?? '',
-        //permitUris: doc.get('permitUris') ?? '',
+        showcaseUris: doc.get('showcaseUris') ?? [],
+        permitUris: doc.get('permitUris') ?? [],
         description: doc.get('description') ?? ''
       );
     }).toList();
@@ -69,8 +69,8 @@ class DatabaseService {
         date: doc.get('date') ?? '',
         time: doc.get('time') ?? '',
         bannerUri: doc.get('bannerUri') ?? '',
-        //showcaseUris: doc.get('showcaseUris') ?? '',
-        //permitUris: doc.get('permitUris') ?? '',
+        showcaseUris: doc.get('showcaseUris') ?? [],
+        permitUris: doc.get('permitUris') ?? [],
         description: doc.get('description') ?? '',
       ));
     }).toList();
@@ -80,7 +80,7 @@ class DatabaseService {
     return snapshot.docs.map((doc) {
       return AccountData(
         uid: doc.id,
-        //idUri: doc.get('idUri') ?? '',
+        idUri: doc.get('idUri') ?? '',
         fullName: doc.get('fullName') ?? '',
         accountType: doc.get('accountType') ?? '',
         address: doc.get('address') ?? '',
@@ -153,8 +153,9 @@ class DatabaseService {
       .catchError((error) => print('Failed to join event $eventId'));
   }
 
-  Future createEvent(PeopleEvent event, Activity activity) async {
-    return eventCollection
+  Future<String> createEvent(PeopleEvent event, Activity activity) async {
+    String eventId = '';
+    eventCollection
       .add({
         'hostId': uid,
         'eventName': event.eventName,
@@ -168,16 +169,18 @@ class DatabaseService {
         'description': event.description
       })
       .then((value) {
+        eventId = value.id;
         addToMyEvents(value.id);
         createActivity(activity);
         //TODO: Mechanism for adding photoUri and permitUri
         print('Event ${value.id} created');
       })
       .catchError((error) => print('Failed to create event'));
+    return eventId;
   }
 
-  Future editEvent(PeopleEvent event, Activity activity) async {
-    return eventCollection.doc(event.eventId)
+  Future<String> editEvent(PeopleEvent event, Activity activity) async {
+    eventCollection.doc(event.eventId)
       .update({
         'eventName': event.eventName,
         'hostName': event.hostName,
@@ -194,6 +197,7 @@ class DatabaseService {
         print('Event updated');
       })
       .catchError((error) => print('Failed to edit event'));
+    return event.eventId;
   }
 
   Future cancelEvent(String eventId, Activity activity) async {
@@ -258,7 +262,7 @@ class DatabaseService {
   }
 
   Future<List<MyEvent>> myEvents(List<String> eventId) {
-    return eventCollection.where('__name__', whereIn: eventId).get().then(_myEventListFromSnapshot);
+    return eventCollection.where('__name__', whereIn: eventId).get().then(_myEventListFromSnapshot).catchError((error){print(error);});
   }
 
   Future<List<AccountData>> interestedUsers(List<String> userIds) {

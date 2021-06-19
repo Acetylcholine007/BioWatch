@@ -10,10 +10,12 @@ import 'package:bio_watch/shared/decorations.dart';
 import 'package:flutter/material.dart';
 
 class AccountEditor extends StatefulWidget {
+  final Function refresh;
+  final Directory cachePath;
   final AccountData user;
   final Image image;
 
-  AccountEditor({this.user, this.image});
+  AccountEditor({this.user, this.image, this.cachePath, this.refresh});
 
   @override
   _AccountEditorState createState() => _AccountEditorState(user.copy(), image);
@@ -64,6 +66,7 @@ class _AccountEditorState extends State<AccountEditor> {
                             await userId.delete();
                           setState(() {
                             userId = result['image'];
+                            userData.idUri = userId.path.split('/').last;
                             profile = Image(image: FileImage(userId), fit: BoxFit.fitWidth);
                           });
                         }
@@ -114,8 +117,9 @@ class _AccountEditorState extends State<AccountEditor> {
                         String result1 = await _auth.changePassword(password);
                         String result2 = await _auth.changeEmail(email);
                         String result3 = await _database.editAccount(userData);
-                        String result4 = userId != null ? await _storage.uploadId(userId, '${userData.uid}.${userId.path.split('.').last}', userData.uid) : 'SUCCESS';
+                        String result4 = userId != null ? await _storage.uploadId(userData.uid, userId, widget.cachePath) : 'SUCCESS';
                         if(result1 == 'SUCCESS' && result2 == 'SUCCESS' && result3 == 'SUCCESS' && result4 == 'SUCCESS') {
+                          widget.refresh();
                           Navigator.of(context).pop();
                         } else {
                           setState(() {

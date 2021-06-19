@@ -4,6 +4,7 @@ import 'package:bio_watch/models/PeopleEvent.dart';
 import 'package:bio_watch/models/AccountData.dart';
 import 'package:bio_watch/screens/subpages/EventViewer.dart';
 import 'package:bio_watch/services/DatabaseService.dart';
+import 'package:bio_watch/services/StorageService.dart';
 import 'package:bio_watch/shared/decorations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -16,6 +17,7 @@ class EventPage extends StatefulWidget {
 }
 
 class _EventPageState extends State<EventPage> {
+  final StorageService _storage = StorageService();
   String queryName = '';
 
   @override
@@ -51,10 +53,9 @@ class _EventPageState extends State<EventPage> {
                       initialData: null,
                       value: DatabaseService(uid: user.uid).myEventIds,
                       child: FutureBuilder(
-                        //TODO: Implement image fetching
-                        future: null,
+                        future: _storage.getEventImage(events[index].eventId, events[index].bannerUri, events[index].showcaseUris, events[index].permitUris),
                         builder: (context, snapshot) {
-                          if(/*snapshot.connectionState == ConnectionState.done*/ true) {
+                          if(snapshot.connectionState == ConnectionState.done) {
                             return EventViewer(event: events[index], user: user, eventImage: snapshot.data);
                           } else {
                             return Loading();

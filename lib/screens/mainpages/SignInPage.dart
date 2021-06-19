@@ -60,6 +60,7 @@ class _SignInPageState extends State<SignInPage> {
                               await userId.delete();
                             setState(() {
                               userId = result['image'];
+                              user.idUri = userId.path.split('/').last;
                             });
                           }
                         },

@@ -4,6 +4,7 @@ import 'package:bio_watch/models/AccountData.dart';
 import 'package:bio_watch/models/Account.dart';
 import 'package:bio_watch/services/DatabaseService.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'StorageService.dart';
 
@@ -33,7 +34,7 @@ class AuthService {
     }
   }
 
-  Future<String> signIn(AccountData person, String email, String password, File file) async {
+  Future<String> signIn(AccountData accountData, String email, String password, File file) async {
     try {
       UserCredential result = await _auth.createUserWithEmailAndPassword(email: email, password: password);
       User user = result.user;
@@ -41,8 +42,8 @@ class AuthService {
       // if (user!= null && !user.emailVerified) {
       //   await user.sendEmailVerification();
       // }
-      await DatabaseService(uid: user.uid).createAccount(person);
-      await StorageService().uploadId(file, '${user.uid}.${file.path.split('.').last}', user.uid);
+      await DatabaseService(uid: user.uid).createAccount(accountData);
+      await StorageService().uploadId(user.uid, file, await getTemporaryDirectory());
       return 'SUCCESS';
     } catch (error) {
       return error.toString();

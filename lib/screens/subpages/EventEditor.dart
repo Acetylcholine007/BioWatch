@@ -1,9 +1,11 @@
+import 'package:bio_watch/components/Loading.dart';
 import 'package:bio_watch/models/Account.dart';
 import 'package:bio_watch/models/Activity.dart';
 import 'package:bio_watch/models/EventAsset.dart';
 import 'package:bio_watch/models/EventImage.dart';
 import 'package:bio_watch/models/PeopleEvent.dart';
 import 'package:bio_watch/services/DatabaseService.dart';
+import 'package:bio_watch/services/StorageService.dart';
 import 'package:bio_watch/shared/ImageManager.dart';
 import 'package:bio_watch/shared/decorations.dart';
 import 'package:date_time_picker/date_time_picker.dart';
@@ -11,19 +13,22 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class EventEditor extends StatefulWidget {
-  EventEditor({this.event, this.isNew, this.eventImage});
+  EventEditor({this.event, this.isNew, this.eventImage, this.refresh});
   final EventImage eventImage;
   final PeopleEvent event;
   final bool isNew;
+  final Function refresh;
 
   @override
   _EventEditorState createState() => _EventEditorState(event);
 }
 
 class _EventEditorState extends State<EventEditor> {
+  final _formKey = GlobalKey<FormState>();
   final imagePicker = ImageManager();
   EventAsset eventAsset = EventAsset();
   PeopleEvent event;
+  bool loading = false;
 
   _EventEditorState(this.event);
 
@@ -31,35 +36,47 @@ class _EventEditorState extends State<EventEditor> {
   Widget build(BuildContext context) {
     final user = Provider.of<Account>(context);
     final DatabaseService _database = DatabaseService(uid: user.uid);
+    final StorageService _storage = StorageService();
 
-    return GestureDetector(
+    return loading ? Loading() : GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
       child: Scaffold(
         appBar: AppBar(
           title: Text('Event Editor'),
           actions: [
-            IconButton(icon: Icon(Icons.save_rounded), onPressed: () {
-              if(widget.isNew) {
-                _database.createEvent(event, Activity(
-                  heading: 'Event Created',
-                  time: TimeOfDay.now().format(context).split(' ')[0],
-                  date: DateTime.now().toString(),
-                  body: 'You\'ve created ${event.eventName}'
-                ));
-              } else {
-                _database.editEvent(event, Activity(
-                  heading: 'Event Edited',
-                  time: TimeOfDay.now().format(context).split(' ')[0],
-                  date: DateTime.now().toString(),
-                  body: 'You\'ve edited ${event.eventName}'
-                ));
+            IconButton(icon: Icon(Icons.save_rounded), onPressed: () async {
+              if(_formKey.currentState.validate()) {
+                setState(() => loading = true);
+                event.bannerUri = eventAsset.banner.path.split('/').last;
+                event.permitUris = eventAsset.permits.map((permit) => permit.path.split('/').last).toList();
+                event.showcaseUris = eventAsset.showcases.map((showcase) => showcase.path.split('/').last).toList();
+                if(widget.isNew) {
+                  String eventId = await _database.createEvent(event, Activity(
+                    heading: 'Event Created',
+                    time: TimeOfDay.now().format(context).split(' ')[0],
+                    date: DateTime.now().toString(),
+                    body: 'You\'ve created ${event.eventName}'
+                  ));
+                  await _storage.uploadEventAsset(eventId, eventAsset.banner, eventAsset.showcases, eventAsset.permits);
+                } else {
+                  String eventId = await _database.editEvent(event, Activity(
+                    heading: 'Event Edited',
+                    time: TimeOfDay.now().format(context).split(' ')[0],
+                    date: DateTime.now().toString(),
+                    body: 'You\'ve edited ${event.eventName}'
+                  ));
+                  await _storage.uploadEventAsset(eventId, eventAsset.banner, eventAsset.showcases, eventAsset.permits);
+                }
+                widget.refresh();
+                Navigator.of(context).pop();
+                //TODO: Check for success or failure and update loading state
               }
-              Navigator.of(context).pop();
             }),
           ],
         ),
         body: Container(
           child: Form(
+            key: _formKey,
             child: Column(
               children: [
                 Expanded(
@@ -151,15 +168,35 @@ class _EventEditorState extends State<EventEditor> {
                             children: [
                               Expanded(
                                 child: GestureDetector(
-                                  onTap: () {},
-                                  child: Placeholder()
+                                  onTap: () async {
+                                    dynamic result = await imagePicker.showPicker(context);
+                                    if(result['image'] != null) {
+                                      if(eventAsset.showcases.isNotEmpty)
+                                        await eventAsset.showcases.removeAt(0).delete();
+                                      setState(() {
+                                        eventAsset.showcases.add(result['image']);
+                                      });
+                                    }
+                                  },
+                                  child: eventAsset.showcases.isNotEmpty ? Image(image: FileImage(eventAsset.showcases[0]), fit: BoxFit.fitHeight) :
+                                    widget.eventImage.showcases.isNotEmpty ? widget.eventImage.showcases[0] : Image(image: AssetImage(event.bannerUri), fit: BoxFit.fitHeight)
                                 ),
                               ),
                               SizedBox(width: 10),
                               Expanded(
                                 child: GestureDetector(
-                                  onTap: () {},
-                                  child: Placeholder(),
+                                  onTap: () async {
+                                    dynamic result = await imagePicker.showPicker(context);
+                                    if(result['image'] != null) {
+                                      if(eventAsset.permits.isNotEmpty)
+                                        await eventAsset.permits.removeAt(0).delete();
+                                      setState(() {
+                                        eventAsset.permits.add(result['image']);
+                                      });
+                                    }
+                                  },
+                                  child: eventAsset.permits.isNotEmpty ? Image(image: FileImage(eventAsset.permits[0]), fit: BoxFit.fitHeight) :
+                                    widget.eventImage.permits.isNotEmpty ? widget.eventImage.permits[0] : Image(image: AssetImage(event.bannerUri), fit: BoxFit.fitHeight)
                                 )
                               ),
                             ],

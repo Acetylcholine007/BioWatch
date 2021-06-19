@@ -5,5 +5,8 @@ class EventImage {
   List<Image> showcases;
   List<Image> permits;
 
-  EventImage({this.banner, this.showcases, this.permits});
+  EventImage({this.banner, showcases, permits}) {
+    this.showcases = showcases != null ? showcases : [];
+    this.permits = permits != null ? permits : [];
+  }
 }

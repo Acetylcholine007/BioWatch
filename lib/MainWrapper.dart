@@ -23,20 +23,14 @@ class _MainWrapperState extends State<MainWrapper> {
 
   Future<String> scanCode() async {
     var result = await BarcodeScanner.scan();
-    /*
-    print(result.type); // The result type (barcode, cancelled, failed)
-    print(result.rawContent); // The barcode content
-    print(result.format); // The barcode format (as enum)
-    print(result.formatNote); // If a unknown format was scanned this field contains a note
-    */
     return result.rawContent;
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<Account>(context);
-    final userData = Provider.of<AccountData>(context);
-    final DatabaseService _database = DatabaseService(uid: user.uid);
+    final account = Provider.of<Account>(context);
+    final accountData = Provider.of<AccountData>(context);
+    final DatabaseService _database = DatabaseService(uid: account.uid);
     final theme = Theme.of(context);
     final pages = [
       HomePage(),
@@ -45,20 +39,22 @@ class _MainWrapperState extends State<MainWrapper> {
       AccountPage()
     ];
 
-    return userData != null ? GestureDetector(
+    return accountData != null ? GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
       child: Scaffold(
         appBar: AppBar(
           title: Text('Bio Watch'),
-          actions: userData.accountType == 'HOST' ? [
+          actions: accountData.accountType == 'HOST' ? [
             IconButton(icon: Icon(Icons.add), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => EventEditor(event: PeopleEvent(
               eventName: '',
-              hostName: userData.fullName,
+              hostName: accountData.fullName,
               address: '',
               time: TimeOfDay.now().format(context).split(' ')[0],
               date: DateTime.now().toString(),
               description: '',
-              bannerUri: 'assets/events/img1.jpg'
+              bannerUri: 'assets/events/img1.jpg',
+              showcaseUris: [],
+              permitUris: []
             ), isNew: true, eventImage: EventImage()))))
           ] : [
             IconButton(icon: Icon(Icons.qr_code_scanner_rounded), onPressed: () async {

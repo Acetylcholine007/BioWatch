@@ -7,8 +7,8 @@ class PeopleEvent {
   String date;
   String time;
   String bannerUri;
-  List<String> showcaseUris;
-  List<String> permitUris;
+  List showcaseUris;
+  List permitUris;
   String description;
 
   PeopleEvent({

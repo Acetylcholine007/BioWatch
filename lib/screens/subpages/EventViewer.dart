@@ -44,7 +44,7 @@ class _EventViewerState extends State<EventViewer> {
         //TODO: implement eventImage viewing widgets
         child: Column(
           children: [
-            Image(image: AssetImage(widget.event.bannerUri), fit: BoxFit.cover),
+            widget.eventImage.banner,
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -54,7 +54,15 @@ class _EventViewerState extends State<EventViewer> {
                   Text(widget.event.hostName, style: theme.textTheme.subtitle1),
                   Text(widget.event.address, style: theme.textTheme.subtitle2),
                   Divider(),
-                  Text(widget.event.description, style: theme.textTheme.bodyText2)
+                  Text(widget.event.description, style: theme.textTheme.bodyText2),
+                  SizedBox(height: 50),
+                  Row(
+                    children: [
+                      Expanded(child: widget.eventImage.showcases[0]),
+                      SizedBox(width: 10),
+                      Expanded(child: widget.eventImage.permits[0])
+                    ],
+                  )
                 ],
               ),
             )
