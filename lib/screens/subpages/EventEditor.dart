@@ -1,8 +1,9 @@
+import 'dart:io';
+
 import 'package:bio_watch/components/Loading.dart';
 import 'package:bio_watch/models/Account.dart';
 import 'package:bio_watch/models/Activity.dart';
 import 'package:bio_watch/models/EventAsset.dart';
-import 'package:bio_watch/models/EventImage.dart';
 import 'package:bio_watch/models/PeopleEvent.dart';
 import 'package:bio_watch/services/DatabaseService.dart';
 import 'package:bio_watch/services/StorageService.dart';
@@ -13,14 +14,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class EventEditor extends StatefulWidget {
-  EventEditor({this.event, this.isNew, this.eventImage, this.refresh});
-  final EventImage eventImage;
+  EventEditor({this.event, this.isNew, this.eventAsset, this.refresh});
+  final EventAsset eventAsset;
   final PeopleEvent event;
   final bool isNew;
   final Function refresh;
 
   @override
-  _EventEditorState createState() => _EventEditorState(event);
+  _EventEditorState createState() => _EventEditorState(event, eventAsset);
 }
 
 class _EventEditorState extends State<EventEditor> {
@@ -30,10 +31,67 @@ class _EventEditorState extends State<EventEditor> {
   PeopleEvent event;
   bool loading = false;
 
-  _EventEditorState(this.event);
+  _EventEditorState(this.event, this.eventAsset);
+
+  void showAssetPicker(BuildContext context, String title, List<File> collection) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        final theme = Theme.of(context);
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Column(
+              children: [
+                ListTile(
+                  title: Text(title, style: theme.textTheme.headline6.copyWith(color: Colors.white)),
+                  tileColor: theme.primaryColor,
+                ),
+                LimitedBox(
+                  maxHeight: 400,
+                  child: GridView.count(
+                    padding: EdgeInsets.all(10),
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 10,
+                    crossAxisCount: 3,
+                    children: (collection.length < 6 ? <Card>[Card(child: GestureDetector(
+                      onTap: () async {
+                        dynamic result = await imagePicker.showPicker(context);
+                        if(result['image'] != null) {
+                          setState(() {
+                            collection.add(result['image']);
+                          });
+                          setModalState((){});
+                        }
+                      },
+                      child: Icon(Icons.add, size: 36))
+                    )] : <Card>[]) + collection.map((showcase) => Card(child: Stack(
+                      alignment: Alignment.topRight,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Expanded(child: Image(image: FileImage(showcase), fit: BoxFit.cover)),
+                          ],
+                        ),
+                        IconButton(icon: Icon(Icons.remove_circle_rounded, color: theme.accentColor), onPressed: (){
+                          setState(() => collection.remove(showcase));
+                          setModalState((){});
+                        })
+                      ]
+                    ))).toList(),
+                  ),
+                )
+              ],
+            );
+          },
+        );
+      }
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final user = Provider.of<Account>(context);
     final DatabaseService _database = DatabaseService(uid: user.uid);
     final StorageService _storage = StorageService();
@@ -51,13 +109,16 @@ class _EventEditorState extends State<EventEditor> {
                 event.permitUris = eventAsset.permits.map((permit) => permit.path.split('/').last).toList();
                 event.showcaseUris = eventAsset.showcases.map((showcase) => showcase.path.split('/').last).toList();
                 if(widget.isNew) {
-                  String eventId = await _database.createEvent(event, Activity(
+                  String eventId = await _database.createEvent(event);
+                  await _storage.uploadEventAsset(eventId, eventAsset.banner, eventAsset.showcases, eventAsset.permits);
+                  await _database.addToMyEvents(eventId);
+                  await _database.createActivity(Activity(
                     heading: 'Event Created',
                     time: TimeOfDay.now().format(context).split(' ')[0],
                     date: DateTime.now().toString(),
                     body: 'You\'ve created ${event.eventName}'
                   ));
-                  await _storage.uploadEventAsset(eventId, eventAsset.banner, eventAsset.showcases, eventAsset.permits);
+                  //widget.refresh();
                 } else {
                   String eventId = await _database.editEvent(event, Activity(
                     heading: 'Event Edited',
@@ -66,8 +127,8 @@ class _EventEditorState extends State<EventEditor> {
                     body: 'You\'ve edited ${event.eventName}'
                   ));
                   await _storage.uploadEventAsset(eventId, eventAsset.banner, eventAsset.showcases, eventAsset.permits);
+                  widget.refresh();
                 }
-                widget.refresh();
                 Navigator.of(context).pop();
                 //TODO: Check for success or failure and update loading state
               }
@@ -81,19 +142,30 @@ class _EventEditorState extends State<EventEditor> {
               children: [
                 Expanded(
                   flex: 3,
-                  child: GestureDetector(
-                    onTap: () async {
-                      dynamic result = await imagePicker.showPicker(context);
-                      if(result['image'] != null) {
-                        if(eventAsset.banner != null)
-                          await eventAsset.banner.delete();
-                        setState(() {
-                          eventAsset.banner = result['image'];
-                        });
-                      }
-                    },
-                    child: eventAsset.banner != null ? Image(image: FileImage(eventAsset.banner), fit: BoxFit.fitHeight) :
-                      widget.eventImage.banner != null ? widget.eventImage.banner : Image(image: AssetImage(event.bannerUri), fit: BoxFit.fitHeight)
+                  child: Stack(
+                    alignment: Alignment.topRight,
+                    children: <Widget>[
+                      GestureDetector(
+                      onTap: () async {
+                        dynamic result = await imagePicker.showPicker(context);
+                        if(result['image'] != null) {
+                          if(eventAsset.banner != null)
+                            await eventAsset.banner.delete();
+                          setState(() {
+                            eventAsset.banner = result['image'];
+                          });
+                        }
+                      },
+                      child: eventAsset.banner != null ? Image(image: FileImage(eventAsset.banner), fit: BoxFit.cover) :
+                        Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.cover)
+                      )
+                    ] + (eventAsset.banner != null ? [
+                    IconButton(icon: Icon(Icons.remove_circle_rounded, color: theme.accentColor), onPressed: () async {
+                      if(eventAsset.banner != null)
+                        await eventAsset.banner.delete();
+                      setState(() => eventAsset.banner = null);
+                    })
+                    ] : []),
                   )
                 ),
                 Expanded(
@@ -168,35 +240,17 @@ class _EventEditorState extends State<EventEditor> {
                             children: [
                               Expanded(
                                 child: GestureDetector(
-                                  onTap: () async {
-                                    dynamic result = await imagePicker.showPicker(context);
-                                    if(result['image'] != null) {
-                                      if(eventAsset.showcases.isNotEmpty)
-                                        await eventAsset.showcases.removeAt(0).delete();
-                                      setState(() {
-                                        eventAsset.showcases.add(result['image']);
-                                      });
-                                    }
-                                  },
-                                  child: eventAsset.showcases.isNotEmpty ? Image(image: FileImage(eventAsset.showcases[0]), fit: BoxFit.fitHeight) :
-                                    widget.eventImage.showcases.isNotEmpty ? widget.eventImage.showcases[0] : Image(image: AssetImage(event.bannerUri), fit: BoxFit.fitHeight)
+                                  onTap: () => showAssetPicker(context, 'Showcase Collection', eventAsset.showcases),
+                                  child: eventAsset.showcases.isNotEmpty ? Image(image: FileImage(eventAsset.showcases[0]), fit: BoxFit.cover) :
+                                    Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.cover)
                                 ),
                               ),
                               SizedBox(width: 10),
                               Expanded(
                                 child: GestureDetector(
-                                  onTap: () async {
-                                    dynamic result = await imagePicker.showPicker(context);
-                                    if(result['image'] != null) {
-                                      if(eventAsset.permits.isNotEmpty)
-                                        await eventAsset.permits.removeAt(0).delete();
-                                      setState(() {
-                                        eventAsset.permits.add(result['image']);
-                                      });
-                                    }
-                                  },
-                                  child: eventAsset.permits.isNotEmpty ? Image(image: FileImage(eventAsset.permits[0]), fit: BoxFit.fitHeight) :
-                                    widget.eventImage.permits.isNotEmpty ? widget.eventImage.permits[0] : Image(image: AssetImage(event.bannerUri), fit: BoxFit.fitHeight)
+                                  onTap: () => showAssetPicker(context, 'Permit Collection', eventAsset.permits),
+                                  child: eventAsset.permits.isNotEmpty ? Image(image: FileImage(eventAsset.permits[0]), fit: BoxFit.cover) :
+                                    Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.cover)
                                 )
                               ),
                             ],

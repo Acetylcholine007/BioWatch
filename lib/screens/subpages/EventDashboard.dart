@@ -2,7 +2,7 @@ import 'package:bio_watch/components/Loading.dart';
 import 'package:bio_watch/components/QRDisplay.dart';
 import 'package:bio_watch/models/Account.dart';
 import 'package:bio_watch/models/Activity.dart';
-import 'package:bio_watch/models/EventImage.dart';
+import 'package:bio_watch/models/EventAsset.dart';
 import 'package:bio_watch/models/Interested.dart';
 import 'package:bio_watch/models/Participant.dart';
 import 'package:bio_watch/models/PeopleEvent.dart';
@@ -10,23 +10,21 @@ import 'package:bio_watch/screens/subpages/EventEditor.dart';
 import 'package:bio_watch/screens/subpages/UserList.dart';
 import 'package:bio_watch/screens/subpages/Statistics.dart';
 import 'package:bio_watch/services/DatabaseService.dart';
-import 'package:bio_watch/services/StorageService.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class EventDashboard extends StatefulWidget {
   final PeopleEvent event;
   final Function refresh;
+  final EventAsset eventAsset;
 
-  EventDashboard({this.event, this.refresh});
+  EventDashboard({this.event, this.refresh, this.eventAsset});
 
   @override
   _EventDashboardState createState() => _EventDashboardState();
 }
 
 class _EventDashboardState extends State<EventDashboard> {
-  final StorageService _storage = StorageService();
-
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<Account>(context);
@@ -42,15 +40,8 @@ class _EventDashboardState extends State<EventDashboard> {
           appBar: AppBar(
             title: Text('Event Dashboard'),
             actions: [
-              IconButton(icon: Icon(Icons.edit_rounded), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => FutureBuilder(
-                future: _storage.getEventImage(widget.event.eventId, widget.event.bannerUri, widget.event.showcaseUris, widget.event.permitUris),
-                builder: (context, snapshot) {
-                  if(snapshot.connectionState == ConnectionState.done) {
-                    return EventEditor(event: widget.event, isNew: false, eventImage: snapshot.data ?? EventImage(), refresh: widget.refresh);
-                  } else {
-                    return Loading();
-                  }
-                }
+              IconButton(icon: Icon(Icons.edit_rounded), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => EventEditor(
+                event: widget.event, isNew: false, eventAsset: widget.eventAsset, refresh: widget.refresh
               )))),
               IconButton(icon: Icon(Icons.import_export_rounded), onPressed: () {}),
               IconButton(icon: Icon(Icons.qr_code_rounded), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => QRDisplay(eventId: widget.event.eventId)))),

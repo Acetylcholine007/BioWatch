@@ -48,13 +48,11 @@ class _HomePageState extends State<HomePage> {
                         initialData: null,
                         value: DatabaseService(uid: accountData.uid).myEventIds,
                         child: FutureBuilder(
+                          initialData: snapshot.data[data.myEvents[index].event.eventId].toEventImage(),
                           future: _storage.getEventImage(data.myEvents[index].event.eventId, data.myEvents[index].event.bannerUri, data.myEvents[index].event.showcaseUris, data.myEvents[index].event.permitUris),
                           builder: (context, imageSnapshot) {
-                            if (imageSnapshot.connectionState == ConnectionState.done) {
-                              return EventViewer(event: data.myEvents[index].event, user: accountData, eventImage: imageSnapshot.data);
-                            } else {
-                              return Loading();
-                            }
+                            print('DONE');
+                            return EventViewer(event: data.myEvents[index].event, user: accountData, eventImage: imageSnapshot.data);
                           }
                         )))
                       );
@@ -64,7 +62,7 @@ class _HomePageState extends State<HomePage> {
                           StreamProvider<List<Interested>>.value(value: DatabaseService(uid: accountData.uid).interestedUserIds(data.myEvents[index].event.eventId), initialData: null),
                           StreamProvider<List<Participant>>.value(value: DatabaseService(uid: accountData.uid).participantUserIds(data.myEvents[index].event.eventId), initialData: null)
                         ],
-                        child: EventDashboard(event: data.myEvents[index].event, refresh: refresh)))
+                        child: EventDashboard(event: data.myEvents[index].event, refresh: refresh, eventAsset: snapshot.data[data.myEvents[index].event.eventId])))
                       );
                     }
                   },

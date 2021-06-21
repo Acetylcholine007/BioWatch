@@ -2,7 +2,6 @@ import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:bio_watch/components/Loading.dart';
 import 'package:bio_watch/models/Account.dart';
 import 'package:bio_watch/models/AccountData.dart';
-import 'package:bio_watch/models/EventImage.dart';
 import 'package:bio_watch/models/PeopleEvent.dart';
 import 'package:bio_watch/screens/mainpages/AccountPage.dart';
 import 'package:bio_watch/screens/mainpages/ActivityPage.dart';
@@ -12,6 +11,8 @@ import 'package:bio_watch/screens/subpages/EventEditor.dart';
 import 'package:bio_watch/services/DatabaseService.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import 'models/EventAsset.dart';
 
 class MainWrapper extends StatefulWidget {
   @override
@@ -25,6 +26,8 @@ class _MainWrapperState extends State<MainWrapper> {
     var result = await BarcodeScanner.scan();
     return result.rawContent;
   }
+
+  void refresh() => setState((){});
 
   @override
   Widget build(BuildContext context) {
@@ -45,17 +48,21 @@ class _MainWrapperState extends State<MainWrapper> {
         appBar: AppBar(
           title: Text('Bio Watch'),
           actions: accountData.accountType == 'HOST' ? [
-            IconButton(icon: Icon(Icons.add), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => EventEditor(event: PeopleEvent(
-              eventName: '',
-              hostName: accountData.fullName,
-              address: '',
-              time: TimeOfDay.now().format(context).split(' ')[0],
-              date: DateTime.now().toString(),
-              description: '',
-              bannerUri: 'assets/events/img1.jpg',
-              showcaseUris: [],
-              permitUris: []
-            ), isNew: true, eventImage: EventImage()))))
+            IconButton(icon: Icon(Icons.add), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => EventEditor(
+              event: PeopleEvent(
+                eventName: '',
+                hostName: accountData.fullName,
+                address: '',
+                time: TimeOfDay.now().format(context).split(' ')[0],
+                date: DateTime.now().toString(),
+                description: '',
+                bannerUri: 'assets/events/img1.jpg',
+                showcaseUris: [],
+                permitUris: []
+              ),
+              isNew: true,
+              eventAsset: EventAsset(),
+              refresh: refresh))))
           ] : [
             IconButton(icon: Icon(Icons.qr_code_scanner_rounded), onPressed: () async {
               String eventId = await scanCode();

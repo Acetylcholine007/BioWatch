@@ -153,9 +153,9 @@ class DatabaseService {
       .catchError((error) => print('Failed to join event $eventId'));
   }
 
-  Future<String> createEvent(PeopleEvent event, Activity activity) async {
+  Future<String> createEvent(PeopleEvent event) async {
     String eventId = '';
-    eventCollection
+    await eventCollection
       .add({
         'hostId': uid,
         'eventName': event.eventName,
@@ -170,9 +170,6 @@ class DatabaseService {
       })
       .then((value) {
         eventId = value.id;
-        addToMyEvents(value.id);
-        createActivity(activity);
-        //TODO: Mechanism for adding photoUri and permitUri
         print('Event ${value.id} created');
       })
       .catchError((error) => print('Failed to create event'));
@@ -180,7 +177,7 @@ class DatabaseService {
   }
 
   Future<String> editEvent(PeopleEvent event, Activity activity) async {
-    eventCollection.doc(event.eventId)
+    await eventCollection.doc(event.eventId)
       .update({
         'eventName': event.eventName,
         'hostName': event.hostName,

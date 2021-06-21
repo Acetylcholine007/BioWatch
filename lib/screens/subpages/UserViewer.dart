@@ -1,5 +1,9 @@
+import 'package:bio_watch/components/Loading.dart';
 import 'package:bio_watch/models/AccountData.dart';
+import 'package:bio_watch/services/StorageService.dart';
 import 'package:flutter/material.dart';
+
+import 'PhotoViewer.dart';
 
 class UserViewer extends StatelessWidget {
   final AccountData user;
@@ -8,6 +12,8 @@ class UserViewer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final StorageService _storage = StorageService();
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Person Viewer'),
@@ -18,8 +24,20 @@ class UserViewer extends StatelessWidget {
           child: Column(
             children: [
               Expanded(
-                  flex: 3,
-                  child: Placeholder()
+                flex: 3,
+                child: FutureBuilder(
+                  future: _storage.getUserId(user.uid, user.idUri),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      return GestureDetector(
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => PhotoViewer(title: 'User Profile', image: snapshot.data))),
+                        child: snapshot.data,
+                      );
+                    } else {
+                      return Loading();
+                    }
+                  },
+                )
               ),
               Divider(),
               Expanded(

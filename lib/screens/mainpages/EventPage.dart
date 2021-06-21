@@ -1,5 +1,6 @@
 import 'package:bio_watch/components/BannerCard.dart';
 import 'package:bio_watch/components/Loading.dart';
+import 'package:bio_watch/models/Data.dart';
 import 'package:bio_watch/models/PeopleEvent.dart';
 import 'package:bio_watch/models/AccountData.dart';
 import 'package:bio_watch/screens/subpages/EventViewer.dart';
@@ -22,8 +23,10 @@ class _EventPageState extends State<EventPage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<AccountData>(context);
+    final accountData = Provider.of<AccountData>(context);
     final myEvents = Provider.of<List<String>>(context);
+    final data = Provider.of<Data>(context);
+
     List<PeopleEvent> events = Provider.of<List<PeopleEvent>>(context);
 
     if(queryName != '') {
@@ -51,19 +54,19 @@ class _EventPageState extends State<EventPage> {
                   return GestureDetector(
                     onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => StreamProvider<List<String>>.value(
                       initialData: null,
-                      value: DatabaseService(uid: user.uid).myEventIds,
+                      value: DatabaseService(uid: accountData.uid).myEventIds,
                       child: FutureBuilder(
                         future: _storage.getEventImage(events[index].eventId, events[index].bannerUri, events[index].showcaseUris, events[index].permitUris),
                         builder: (context, snapshot) {
                           if(snapshot.connectionState == ConnectionState.done) {
-                            return EventViewer(event: events[index], user: user, eventImage: snapshot.data);
+                            return EventViewer(event: events[index], user: accountData, eventImage: snapshot.data);
                           } else {
                             return Loading();
                           }
                         }
                       )
                     ))),
-                    child: BannerCard(event: events[index])
+                    child: BannerCard(event: events[index], cachePath: data.cachePath, uid: accountData.uid)
                   );
                 }
               ),

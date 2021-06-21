@@ -4,6 +4,7 @@ import 'package:bio_watch/models/Account.dart';
 import 'package:bio_watch/models/AccountData.dart';
 import 'package:bio_watch/models/Data.dart';
 import 'package:bio_watch/screens/subpages/AccountEditor.dart';
+import 'package:bio_watch/screens/subpages/PhotoViewer.dart';
 import 'package:bio_watch/services/AuthService.dart';
 import 'package:bio_watch/services/StorageService.dart';
 import 'package:bio_watch/shared/ImageManager.dart';
@@ -44,9 +45,12 @@ class _AccountPageState extends State<AccountPage> {
               children: [
                 Expanded(
                   flex: 3,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(5),
-                    child: snapshot.data
+                  child: GestureDetector(
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => PhotoViewer(title: 'User Profile', image: snapshot.data))),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(5),
+                      child: snapshot.data
+                    ),
                   )
                 ),
                 Divider(),
