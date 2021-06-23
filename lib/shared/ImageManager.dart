@@ -106,7 +106,7 @@ class ImageManager {
       EventAsset eventAsset = EventAsset();
       Directory eventPath = Directory('${cachePath.path}/$uid/$eventId');
 
-      eventAsset.banner = File('${eventPath.path}/$banner');
+      eventAsset.banner = banner != '' ? File('${eventPath.path}/$banner') : null;
       showcases.forEach((showcase) => eventAsset.showcases.add(File('${eventPath.path}/showcases/$showcase')));
       permits.forEach((permit) => eventAsset.permits.add(File('${eventPath.path}/permits/$permit')));
       return eventAsset;

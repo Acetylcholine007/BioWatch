@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class QRDisplay extends StatelessWidget {
-  final String eventId;
+  final String data;
 
-  QRDisplay({this.eventId});
+  QRDisplay({this.data});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +15,7 @@ class QRDisplay extends StatelessWidget {
       body: Container(
         child: Center(
           child: QrImage(
-            data:eventId,
+            data: data,
             version: QrVersions.auto,
             size: 300.0,
           ),

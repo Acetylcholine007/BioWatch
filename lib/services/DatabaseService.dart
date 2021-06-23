@@ -142,12 +142,13 @@ class DatabaseService {
       .catchError((error) => print('Failed to remove event $eventId'));
   }
 
-  Future joinEvent(String eventId) async {
+  Future joinEvent(String eventId, Activity activity) async {
     return eventCollection
       .doc(eventId).collection('participants').doc(uid).set({
         'uid': uid
       })
       .then((value) {
+        createActivity(activity);
         print('You\'ve joined the event');
       })
       .catchError((error) => print('Failed to join event $eventId'));
@@ -227,11 +228,21 @@ class DatabaseService {
       .catchError((error) => print('Failed to remove activity'));
   }
 
-  Future removeActivities() async {
-    return activityCollection
-      .doc(uid).delete()
-      .then((value) => print('User activities cleared'))
-      .catchError((error) => print('Failed to clear activities'));
+  Future<String> removeActivities() async {
+    String result = 'SUCCESS';
+    await activityCollection
+      .doc(uid).collection('activities').get()
+      .then((value) {
+        value.docs.forEach((activity) =>
+          activityCollection.doc(uid).collection('activities')
+            .doc(activity.id).delete()
+            .then((result) => print('deleted')));
+      })
+      .catchError((error) {
+        print('Failed to clear activities');
+        result = error.toString();
+      });
+    return result;
   }
 
   Future createAccount(AccountData person) async {
@@ -247,15 +258,28 @@ class DatabaseService {
     .catchError((error) => print('Failed to create user data'));
   }
 
-  Future editAccount(AccountData user) async {
+  Future editAccount(AccountData user, Activity activity) async {
     String result = '';
     await userCollection.doc(uid).update({
       'idUri': user.idUri,
       'contact': user.contact
     })
-    .then((value) => result = 'SUCCESS')
+    .then((value) {
+      createActivity(activity);
+      result = 'SUCCESS';
+    })
     .catchError((error) => result = error.toString());
     return result;
+  }
+
+  //GETTER FUNCTIONS
+
+  Future<AccountData> getAccount(String uid) async {
+    return userCollection.doc(uid).get().then(_accountFromSnapshot);
+  }
+
+  Future<String> getInterestedCount(String eventId) async {
+    return eventCollection.doc(eventId).collection('interested').get().then((querySnapshot) => querySnapshot.docs.length.toString());
   }
 
   Future<List<MyEvent>> myEvents(List<String> eventId) {

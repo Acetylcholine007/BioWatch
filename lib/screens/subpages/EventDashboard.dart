@@ -40,20 +40,62 @@ class _EventDashboardState extends State<EventDashboard> {
           appBar: AppBar(
             title: Text('Event Dashboard'),
             actions: [
-              IconButton(icon: Icon(Icons.edit_rounded), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => EventEditor(
-                event: widget.event, isNew: false, eventAsset: widget.eventAsset, refresh: widget.refresh
-              )))),
-              IconButton(icon: Icon(Icons.import_export_rounded), onPressed: () {}),
-              IconButton(icon: Icon(Icons.qr_code_rounded), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => QRDisplay(eventId: widget.event.eventId)))),
-              IconButton(icon: Icon(Icons.cancel_outlined), onPressed: () {
-                _database.cancelEvent(widget.event.eventId, Activity(
-                  heading: 'Event Cancelled',
-                  time: TimeOfDay.now().format(context).split(' ')[0],
-                  date: DateTime.now().toString(),
-                  body: 'You\'ve cancelled ${widget.event.eventName}'
-                ));
-                Navigator.of(context).pop();
-              })
+              IconButton(icon: Icon(Icons.qr_code_rounded), onPressed: () =>
+                Navigator.push(context, MaterialPageRoute(builder: (context) => QRDisplay(data: widget.event.eventId + '<=>' + widget.event.eventName)))
+              ),
+              PopupMenuButton(
+                icon: Icon(Icons.more_vert_rounded),
+                itemBuilder: (BuildContext context) => <PopupMenuEntry>[
+                  PopupMenuItem(child: GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(context, MaterialPageRoute(
+                        builder: (context) =>
+                          EventEditor(
+                            event: widget.event,
+                            isNew: false,
+                            eventAsset: widget.eventAsset,
+                            refresh: widget.refresh
+                          )
+                      ));
+                    },
+                    child: Text('Edit Event')
+                  )),
+                  PopupMenuItem(child: GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                      _database.cancelEvent(widget.event.eventId, Activity(
+                        heading: 'Event Cancelled',
+                        time: TimeOfDay.now().format(context).split(' ')[0],
+                        date: DateTime.now().toString(),
+                        body: 'You\'ve cancelled ${widget.event.eventName}'
+                      ));
+                      final snackBar = SnackBar(
+                        duration: Duration(seconds: 2),
+                        behavior: SnackBarBehavior.floating,
+                        content: Text('Event Cancelled'),
+                        action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('Cancel Event')
+                  )),
+                  PopupMenuItem(child: GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                      final snackBar = SnackBar(
+                        duration: Duration(seconds: 2),
+                        behavior: SnackBarBehavior.floating,
+                        content: Text('Data Exported'),
+                        action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    },
+                    child: Text('Export Data')
+                  )),
+                ],
+              ),
             ],
             bottom: TabBar(
               tabs: [
@@ -66,8 +108,27 @@ class _EventDashboardState extends State<EventDashboard> {
           body: TabBarView(
             children: [
               Statistics(),
-              UserList(userIds: interested.map((interested) => interested.uid).toList()),
-              UserList(userIds: participants.map((participant) => participant.uid).toList())
+              //TODO: Move User extraction future here
+              FutureBuilder(
+                future: _database.interestedUsers(interested.map((interested) => interested.uid).toList()),
+                builder: (context, snapshot) {
+                  if(snapshot.connectionState == ConnectionState.done) {
+                    return UserList(users: snapshot.data, type: 'INTERESTED');
+                  } else {
+                    return Loading();
+                  }
+                }
+              ),
+              FutureBuilder(
+                future: _database.participantUsers(participants.map((participant) => participant.uid).toList()),
+                builder: (context, snapshot) {
+                  if(snapshot.connectionState == ConnectionState.done) {
+                    return UserList(users: snapshot.data, type: 'PARTICIPANT');
+                  } else {
+                    return Loading();
+                  }
+                }
+              )
             ],
           )
         ),

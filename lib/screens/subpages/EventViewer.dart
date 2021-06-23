@@ -2,12 +2,13 @@ import 'package:bio_watch/components/Loading.dart';
 import 'package:bio_watch/models/EventImage.dart';
 import 'package:bio_watch/models/PeopleEvent.dart';
 import 'package:bio_watch/models/AccountData.dart';
+import 'package:bio_watch/screens/subpages/PhotoViewer.dart';
+import 'package:bio_watch/screens/subpages/UserViewer.dart';
 import 'package:bio_watch/services/DatabaseService.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'PhotoViewer.dart';
 
 class EventViewer extends StatefulWidget {
   final PeopleEvent event;
@@ -55,10 +56,24 @@ class _EventViewerState extends State<EventViewer> {
           IconButton(icon: Icon(Icons.bookmark_rounded), onPressed: () {
             _database.unmarkEvent(widget.event.eventId);
             setState(() {});
+            final snackBar = SnackBar(
+              duration: Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              content: Text('Removed from interests'),
+              action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
+            );
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
           }) :
           IconButton(icon: Icon(Icons.bookmark_border_rounded), onPressed: () {
             _database.markEvent(widget.event.eventId);
             setState(() {});
+            final snackBar = SnackBar(
+              duration: Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              content: Text('Added to interests'),
+              action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
+            );
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
           })
         ] : null,
       ),
@@ -66,23 +81,42 @@ class _EventViewerState extends State<EventViewer> {
         child: ListView(
           shrinkWrap: true,
           children: [
-            SizedBox(height: 200, child: widget.eventImage.banner),
+            SizedBox(height: 180, child: OverflowBox(
+              maxHeight: 180,
+              child: widget.eventImage != null ? widget.eventImage.banner : Image(
+                image: AssetImage('assets/placeholder.jpg'),
+                fit: BoxFit.cover
+              )
+            )),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(widget.event.eventName, style: theme.textTheme.headline4),
-                  Text(widget.event.hostName, style: theme.textTheme.subtitle1),
+                  Text(widget.event.date + ' ' + widget.event.time, style: theme.textTheme.subtitle2),
                   Text(widget.event.address, style: theme.textTheme.subtitle2),
+                  TextButton(
+                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => FutureBuilder(
+                      future: _database.getAccount(widget.event.hostId),
+                      builder: (context, snapshot) {
+                        if(snapshot.connectionState == ConnectionState.done) {
+                          return UserViewer(user: snapshot.data);
+                        } else {
+                          return Loading();
+                        }
+                      },
+                    ))),
+                    child: Text('Hosted by: ' + widget.event.hostName),
+                  ),
                   Divider(),
                   Text(widget.event.description, style: theme.textTheme.bodyText2),
                   Divider(),
                   SizedBox(height: 50),
                   Text('Showcases', style: theme.textTheme.headline6),
-                  carousel(widget.eventImage.showcases, 'Showcase'),
+                  carousel(widget.eventImage != null ? widget.eventImage.showcases : [Image(image: AssetImage('assets/placeholder.jpg'))], 'Showcase'),
                   Text('Permits', style: theme.textTheme.headline6),
-                  carousel(widget.eventImage.permits, 'Permit'),
+                  carousel(widget.eventImage != null ? widget.eventImage.permits : [Image(image: AssetImage('assets/placeholder.jpg'))], 'Permit'),
                 ],
               ),
             )

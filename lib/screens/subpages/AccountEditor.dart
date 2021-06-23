@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:bio_watch/components/Loading.dart';
 import 'package:bio_watch/models/AccountData.dart';
+import 'package:bio_watch/models/Activity.dart';
 import 'package:bio_watch/services/AuthService.dart';
 import 'package:bio_watch/services/DatabaseService.dart';
 import 'package:bio_watch/services/StorageService.dart';
@@ -116,17 +117,50 @@ class _AccountEditorState extends State<AccountEditor> {
                         setState(() => loading = true);
                         String result1 = await _auth.changePassword(password);
                         String result2 = await _auth.changeEmail(email);
-                        String result3 = await _database.editAccount(userData);
+                        String result3 = await _database.editAccount(userData, Activity(
+                          heading: 'Account Edited',
+                          time: TimeOfDay.now().format(context).split(' ')[0],
+                          date: DateTime.now().toString(),
+                          body: 'You\'ve edited your account'
+                        ));
                         String result4 = userId != null ? await _storage.uploadId(userData.uid, userId, widget.cachePath) : 'SUCCESS';
                         if(result1 == 'SUCCESS' && result2 == 'SUCCESS' && result3 == 'SUCCESS' && result4 == 'SUCCESS') {
                           widget.refresh();
+                          final snackBar = SnackBar(
+                            duration: Duration(seconds: 2),
+                            behavior: SnackBarBehavior.floating,
+                            content: Text('Account Edited'),
+                            action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
                           Navigator.of(context).pop();
                         } else {
                           setState(() {
-                            error = '1.$result1 2.$result2 3.$result3 4.$result4';
+                            error = 'Error editing account';
                             loading = false;
                           });
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text('Edit Account'),
+                              content: Text('$result1\n$result2\n$result3\n$result4'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: Text('OK')
+                                )
+                              ],
+                            )
+                          );
                         }
+                      } else {
+                        final snackBar = SnackBar(
+                          duration: Duration(seconds: 2),
+                          behavior: SnackBarBehavior.floating,
+                          content: Text('Fill up all the fields'),
+                          action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       }
                     },
                     style: ElevatedButton.styleFrom(primary: theme.accentColor),

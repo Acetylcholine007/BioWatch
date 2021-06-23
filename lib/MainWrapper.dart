@@ -12,6 +12,7 @@ import 'package:bio_watch/services/DatabaseService.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'models/Activity.dart';
 import 'models/EventAsset.dart';
 
 class MainWrapper extends StatefulWidget {
@@ -47,7 +48,36 @@ class _MainWrapperState extends State<MainWrapper> {
       child: Scaffold(
         appBar: AppBar(
           title: Text('Bio Watch'),
-          actions: accountData.accountType == 'HOST' ? [
+          actions: (_currentIndex == 1 ? <Widget>[
+            IconButton(
+              icon: Icon(Icons.delete_rounded),
+              onPressed: () async {
+                String result = await _database.removeActivities();
+                final snackBar = SnackBar(
+                  duration: Duration(seconds: 2),
+                  behavior: SnackBarBehavior.floating,
+                  content: Text('Activities Cleared'),
+                  action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
+                );
+                if(result == 'SUCCESS') {
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                } else {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text('Clear Activities'),
+                      content: Text(result),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text('OK')
+                        )
+                      ],
+                    )
+                  );
+                }
+              }
+            )] : <Widget>[]) + (accountData.accountType == 'HOST' ? <Widget>[
             IconButton(icon: Icon(Icons.add), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => EventEditor(
               event: PeopleEvent(
                 eventName: '',
@@ -63,12 +93,17 @@ class _MainWrapperState extends State<MainWrapper> {
               isNew: true,
               eventAsset: EventAsset(),
               refresh: refresh))))
-          ] : [
+          ] : <Widget>[
             IconButton(icon: Icon(Icons.qr_code_scanner_rounded), onPressed: () async {
-              String eventId = await scanCode();
-              _database.joinEvent(eventId);
+              List<String> data = (await scanCode()).split('<=>');
+              _database.joinEvent(data[0], Activity(
+                heading: 'Joined an Event',
+                time: TimeOfDay.now().format(context).split(' ')[0],
+                date: DateTime.now().toString(),
+                body: 'You\'ve joined in ${data[1]}'
+              ));
             })
-          ],
+          ]),
         ),
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,

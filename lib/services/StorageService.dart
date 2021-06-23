@@ -68,14 +68,19 @@ class StorageService {
   Future<String> uploadEventAsset(String eventId, File banner, List<File> showcases, List<File> permits) async {
     String result = '';
     try {
-      await storage.ref('events/$eventId/${banner.path.split('/').last}').putFile(banner);
-      for(int i = 0; i < showcases.length; i++) {
-        await storage.ref('events/$eventId/showcases/${showcases[i].path.split('/').last}').putFile(showcases[i]);
+      if(banner != null) {
+        await storage.ref('events/$eventId/${banner.path.split('/').last}').putFile(banner);
       }
-      for(int i = 0; i < permits.length; i++) {
-        await storage.ref('events/$eventId/permits/${permits[i].path.split('/').last}').putFile(permits[i]);
+      if(showcases.isNotEmpty) {
+        for(int i = 0; i < showcases.length; i++) {
+          await storage.ref('events/$eventId/showcases/${showcases[i].path.split('/').last}').putFile(showcases[i]);
+        }
       }
-
+      if(permits.isNotEmpty) {
+        for(int i = 0; i < permits.length; i++) {
+          await storage.ref('events/$eventId/permits/${permits[i].path.split('/').last}').putFile(permits[i]);
+        }
+      }
       //TODO: old file removal
       result = 'SUCCESS';
     } on FirebaseException catch (e) {
@@ -89,12 +94,12 @@ class StorageService {
     List<Image> showcases = [];
     List<Image> permits = [];
     try{
-      banner = Image.network(await storage.ref('events/$eventId/$bannerUri').getDownloadURL());
+      banner = Image.network(await storage.ref('events/$eventId/$bannerUri').getDownloadURL(), fit: BoxFit.cover);
       for(int i = 0; i < showcaseUris.length; i++) {
-        showcases.add(Image.network(await storage.ref('events/$eventId/showcases/${showcaseUris[i]}').getDownloadURL()));
+        showcases.add(Image.network(await storage.ref('events/$eventId/showcases/${showcaseUris[i]}').getDownloadURL(), fit: BoxFit.cover));
       }
       for(int i = 0; i < permitUris.length; i++) {
-        permits.add(Image.network(await storage.ref('events/$eventId/permits/${permitUris[i]}').getDownloadURL()));
+        permits.add(Image.network(await storage.ref('events/$eventId/permits/${permitUris[i]}').getDownloadURL(), fit: BoxFit.cover));
       }
       return EventImage(banner: banner, showcases: showcases, permits: permits);
     } catch(e) {
@@ -136,9 +141,13 @@ class StorageService {
         PeopleEvent event = myEvents[eventIndex].event;
         myEventAssets[event.eventId] = EventAsset();
 
-        File banner = await File('${cachePath.path}/$uid/${event.eventId}/${event.bannerUri}').create(recursive: true);
-        await storage.ref('events/${event.eventId}/${event.bannerUri}').writeToFile(banner);
-        myEventAssets[event.eventId].banner = banner;
+        if(event.bannerUri != '') {
+          File banner = await File('${cachePath.path}/$uid/${event.eventId}/${event.bannerUri}').create(recursive: true);
+          await storage.ref('events/${event.eventId}/${event.bannerUri}').writeToFile(banner);
+          myEventAssets[event.eventId].banner = banner;
+        } else {
+          myEventAssets[event.eventId].banner = null;
+        }
 
         for(int showcaseIndex = 0; showcaseIndex < event.showcaseUris.length; showcaseIndex++) {
           File showcase = await File('${cachePath.path}/$uid/${event.eventId}/showcases/${event.showcaseUris[showcaseIndex]}').create(recursive: true);

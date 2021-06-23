@@ -21,7 +21,7 @@ class _SignInPageState extends State<SignInPage> {
   final imagePicker = ImageManager();
   final AuthService _auth = AuthService();
   final _formKey = GlobalKey<FormState>();
-  File userId;
+  File userProfile;
   bool loading = false;
   bool hidePassword = true;
   String error = '';
@@ -56,11 +56,11 @@ class _SignInPageState extends State<SignInPage> {
                         onTap: () async {
                           dynamic result = await imagePicker.showPicker(context);
                           if(result['image'] != null) {
-                            if(userId != null)
-                              await userId.delete();
+                            if(userProfile != null)
+                              await userProfile.delete();
                             setState(() {
-                              userId = result['image'];
-                              user.idUri = userId.path.split('/').last;
+                              userProfile = result['image'];
+                              user.idUri = userProfile.path.split('/').last;
                             });
                           }
                         },
@@ -69,7 +69,7 @@ class _SignInPageState extends State<SignInPage> {
                           width: 200,
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(5),
-                            child: userId != null ? Image(image: FileImage(userId), fit: BoxFit.fitWidth) : Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.fitWidth)
+                            child: userProfile != null ? Image(image: FileImage(userProfile), fit: BoxFit.fitWidth) : Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.fitWidth)
                           ),
                         ),
                       ),
@@ -166,24 +166,45 @@ class _SignInPageState extends State<SignInPage> {
                   ),
                   Expanded(
                     flex: 2,
-                    child: Text(error, style: TextStyle(color: Colors.red, fontSize: 14))
+                    child: Center(child: Text(error, style: TextStyle(color: Colors.red, fontSize: 14)))
                   ),
                   Expanded(
                     flex: 2,
                     child: ElevatedButton(
                       child: Text('CREATE ACCOUNT'),
                       onPressed: () async {
-                        if(_formKey.currentState.validate()) {
+                        if(_formKey.currentState.validate() && userProfile != null) {
                           setState(() => loading = true);
-                          String result = await _auth.signIn(user, email, password, userId);
+                          String result = await _auth.signIn(user, email, password, userProfile);
                           if(result != 'SUCCESS') {
                             setState(() {
                               error = result;
                               loading = false;
                             });
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: Text('Sign In'),
+                                content: Text(error),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: Text('OK')
+                                  )
+                                ],
+                              )
+                            );
                           } else {
                             Navigator.of(context).pop();
                           }
+                        } else {
+                          final snackBar = SnackBar(
+                            duration: Duration(seconds: 2),
+                            behavior: SnackBarBehavior.floating,
+                            content: Text('Fill up all the fields'),
+                            action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
                         }
                       },
                       style: ElevatedButton.styleFrom(primary: theme.accentColor),

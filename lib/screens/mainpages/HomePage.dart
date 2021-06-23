@@ -70,9 +70,11 @@ class _HomePageState extends State<HomePage> {
                     eventName: data.myEvents[index].event.eventName,
                     hostName: data.myEvents[index].event.hostName,
                     address: data.myEvents[index].event.address,
-                    banner: snapshot.data != null && snapshot.data[data.myEvents[index].event.eventId].banner.existsSync() ?
-                    Image(image: FileImage(snapshot.data[data.myEvents[index].event.eventId].banner), fit: BoxFit.cover) :
-                    Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.cover),
+                    banner: snapshot.data != null && snapshot.data[data.myEvents[index].event.eventId] != null
+                      && snapshot.data[data.myEvents[index].event.eventId].banner != null
+                      && snapshot.data[data.myEvents[index].event.eventId].banner.existsSync() ?
+                      Image(image: FileImage(snapshot.data[data.myEvents[index].event.eventId].banner), fit: BoxFit.cover) :
+                      Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.cover),
                   ),
                 );
               }

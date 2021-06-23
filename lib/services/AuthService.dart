@@ -29,8 +29,8 @@ class AuthService {
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
       return 'SUCCESS';
-    } catch (error) {
-      return error.toString();
+    } on FirebaseAuthException catch (error) {
+      return error.message;
     }
   }
 
@@ -45,8 +45,8 @@ class AuthService {
       await DatabaseService(uid: user.uid).createAccount(accountData);
       await StorageService().uploadId(user.uid, file, await getTemporaryDirectory());
       return 'SUCCESS';
-    } catch (error) {
-      return error.toString();
+    } on FirebaseAuthException catch (error) {
+      return error.message;
     }
   }
 

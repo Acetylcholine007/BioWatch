@@ -84,7 +84,28 @@ class _LoginPageState extends State<LoginPage> {
                                 error = result;
                                 loading = false;
                               });
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: Text('Log In'),
+                                  content: Text(error),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: Text('OK')
+                                    )
+                                  ],
+                                )
+                              );
                             }
+                          } else {
+                            final snackBar = SnackBar(
+                              duration: Duration(seconds: 2),
+                              behavior: SnackBarBehavior.floating,
+                              content: Text('Fill up all the fields'),
+                              action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
+                            );
+                            ScaffoldMessenger.of(context).showSnackBar(snackBar);
                           }
                         },
                       style: ElevatedButton.styleFrom(primary: theme.accentColor)

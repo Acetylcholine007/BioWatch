@@ -105,9 +105,9 @@ class _EventEditorState extends State<EventEditor> {
             IconButton(icon: Icon(Icons.save_rounded), onPressed: () async {
               if(_formKey.currentState.validate()) {
                 setState(() => loading = true);
-                event.bannerUri = eventAsset.banner.path.split('/').last;
-                event.permitUris = eventAsset.permits.map((permit) => permit.path.split('/').last).toList();
-                event.showcaseUris = eventAsset.showcases.map((showcase) => showcase.path.split('/').last).toList();
+                event.bannerUri = eventAsset.banner != null ? eventAsset.banner.path.split('/').last : '';
+                event.permitUris = eventAsset.permits.isNotEmpty ? eventAsset.permits.map((permit) => permit.path.split('/').last).toList() : [];
+                event.showcaseUris = eventAsset.showcases.isNotEmpty ? eventAsset.showcases.map((showcase) => showcase.path.split('/').last).toList() : [];
                 if(widget.isNew) {
                   String eventId = await _database.createEvent(event);
                   await _storage.uploadEventAsset(eventId, eventAsset.banner, eventAsset.showcases, eventAsset.permits);
@@ -118,7 +118,13 @@ class _EventEditorState extends State<EventEditor> {
                     date: DateTime.now().toString(),
                     body: 'You\'ve created ${event.eventName}'
                   ));
-                  //widget.refresh();
+                  final snackBar = SnackBar(
+                    duration: Duration(seconds: 2),
+                    behavior: SnackBarBehavior.floating,
+                    content: Text('Event Created'),
+                    action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
                 } else {
                   String eventId = await _database.editEvent(event, Activity(
                     heading: 'Event Edited',
@@ -128,9 +134,23 @@ class _EventEditorState extends State<EventEditor> {
                   ));
                   await _storage.uploadEventAsset(eventId, eventAsset.banner, eventAsset.showcases, eventAsset.permits);
                   widget.refresh();
+                  final snackBar = SnackBar(
+                    duration: Duration(seconds: 2),
+                    behavior: SnackBarBehavior.floating,
+                    content: Text('Event Edited'),
+                    action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
                 }
                 Navigator.of(context).pop();
-                //TODO: Check for success or failure and update loading state
+              } else {
+                final snackBar = SnackBar(
+                  duration: Duration(seconds: 2),
+                  behavior: SnackBarBehavior.floating,
+                  content: Text('Fill up all the fields'),
+                  action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
+                );
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
               }
             }),
           ],
@@ -163,7 +183,10 @@ class _EventEditorState extends State<EventEditor> {
                     IconButton(icon: Icon(Icons.remove_circle_rounded, color: theme.accentColor), onPressed: () async {
                       if(eventAsset.banner != null)
                         await eventAsset.banner.delete();
-                      setState(() => eventAsset.banner = null);
+                      setState(() {
+                        eventAsset.banner = null;
+                        event.bannerUri = '';
+                      });
                     })
                     ] : []),
                   )
