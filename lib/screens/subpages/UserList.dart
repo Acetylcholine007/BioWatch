@@ -8,8 +8,9 @@ import 'package:flutter/material.dart';
 class UserList extends StatefulWidget {
   final List<AccountData> users;
   final String type;
+  final Map<String, String> datetimes;
 
-  UserList({this.users, this.type});
+  UserList({this.users, this.type, this.datetimes});
 
   @override
   _UserListState createState() => _UserListState(users);
@@ -48,9 +49,9 @@ class _UserListState extends State<UserList> {
                   return GestureDetector(
                     onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => UserViewer(user: usersLocal[index]))),
                     child: ListTile(
-                      leading: CircleAvatar(),
+                      leading: CircleAvatar(child: Text(usersLocal[index].fullName[0].toUpperCase())),
                       title: Text(usersLocal[index].fullName),
-                      subtitle: Text('Joined: '),
+                      subtitle: Text('Joined: ${widget.datetimes[usersLocal[index].uid]}'),
                     )
                   );
                 }

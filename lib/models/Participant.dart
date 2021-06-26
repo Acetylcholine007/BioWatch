@@ -1,4 +1,5 @@
 class Participant {
   String uid;
-  Participant({this.uid});
+  String datetime;
+  Participant({this.uid, this.datetime});
 }

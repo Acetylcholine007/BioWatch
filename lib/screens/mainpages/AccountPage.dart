@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:bio_watch/models/Account.dart';
 import 'package:bio_watch/models/AccountData.dart';
-import 'package:bio_watch/models/Data.dart';
+import 'package:bio_watch/models/Resource.dart';
 import 'package:bio_watch/screens/subpages/AccountEditor.dart';
 import 'package:bio_watch/screens/subpages/PhotoViewer.dart';
 import 'package:bio_watch/services/AuthService.dart';
@@ -29,7 +29,7 @@ class _AccountPageState extends State<AccountPage> {
   Widget build(BuildContext context) {
     final account = Provider.of<Account>(context);
     final accountData = Provider.of<AccountData>(context);
-    final data = Provider.of<Data>(context);
+    final data = Provider.of<Resource>(context);
     final theme = Theme.of(context);
 
     File profile = File('${data.cachePath.path}/${accountData.uid}/id/${accountData.idUri}');

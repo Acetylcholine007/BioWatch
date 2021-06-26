@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:bio_watch/models/PeopleEvent.dart';
-import 'package:bio_watch/services/DatabaseService.dart';
 import 'package:bio_watch/services/StorageService.dart';
 import 'package:flutter/material.dart';
 
@@ -9,14 +8,14 @@ class BannerCard extends StatelessWidget {
   final PeopleEvent event;
   final Directory cachePath;
   final String uid;
+  final String interestedCount;
 
-  BannerCard({this.event, this.cachePath, this.uid});
+  BannerCard({this.event, this.cachePath, this.uid, this.interestedCount});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final StorageService _storage = StorageService();
-    final DatabaseService _database = DatabaseService(uid: uid);
     final File bannerFile = File('${cachePath.path}/$uid/${event.eventId}/${event.bannerUri}');
     final bool bannerExists = bannerFile.existsSync();
 
@@ -42,13 +41,7 @@ class BannerCard extends StatelessWidget {
             Expanded(flex: 1, child: Row(
               children: [
                 Expanded(flex: 10, child: Text(event.eventName, style: theme.textTheme.headline6)),
-                Expanded(flex: 1, child: FutureBuilder(
-                  initialData: '',
-                  future: _database.getInterestedCount(event.eventId),
-                  builder: (context, snapshot) {
-                    return Text(snapshot.data);
-                  }
-                )),
+                Expanded(flex: 1, child: Text(interestedCount)),
                 Expanded(flex: 1, child: Icon(Icons.bookmark_rounded, color: theme.accentColor))
               ],
             )),

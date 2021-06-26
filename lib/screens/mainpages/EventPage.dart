@@ -1,6 +1,6 @@
 import 'package:bio_watch/components/BannerCard.dart';
 import 'package:bio_watch/components/Loading.dart';
-import 'package:bio_watch/models/Data.dart';
+import 'package:bio_watch/models/Resource.dart';
 import 'package:bio_watch/models/PeopleEvent.dart';
 import 'package:bio_watch/models/AccountData.dart';
 import 'package:bio_watch/screens/subpages/EventViewer.dart';
@@ -24,8 +24,9 @@ class _EventPageState extends State<EventPage> {
   @override
   Widget build(BuildContext context) {
     final accountData = Provider.of<AccountData>(context);
+    final DatabaseService _database = DatabaseService(uid: accountData.uid);
     final myEvents = Provider.of<List<String>>(context);
-    final data = Provider.of<Data>(context);
+    final data = Provider.of<Resource>(context);
 
     List<PeopleEvent> events = Provider.of<List<PeopleEvent>>(context);
 
@@ -51,22 +52,28 @@ class _EventPageState extends State<EventPage> {
               child: ListView.builder(
                 itemCount: events.length,
                 itemBuilder: (BuildContext context, int index){
-                  return GestureDetector(
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => StreamProvider<List<String>>.value(
-                      initialData: null,
-                      value: DatabaseService(uid: accountData.uid).myEventIds,
-                      child: FutureBuilder(
-                        future: _storage.getEventImage(events[index].eventId, events[index].bannerUri, events[index].showcaseUris, events[index].permitUris),
-                        builder: (context, snapshot) {
-                          if(snapshot.connectionState == ConnectionState.done) {
-                            return EventViewer(event: events[index], user: accountData, eventImage: snapshot.data);
-                          } else {
-                            return Loading();
-                          }
-                        }
-                      )
-                    ))),
-                    child: BannerCard(event: events[index], cachePath: data.cachePath, uid: accountData.uid)
+                  return FutureBuilder(
+                    initialData: '',
+                    future: _database.getInterestedCount(events[index].eventId),
+                    builder: (context, countSnapshot) {
+                      return GestureDetector(
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => StreamProvider<List<String>>.value(
+                          initialData: null,
+                          value: DatabaseService(uid: accountData.uid).myEventIds,
+                          child: FutureBuilder(
+                            future: _storage.getEventImage(events[index].eventId, events[index].bannerUri, events[index].showcaseUris, events[index].permitUris),
+                            builder: (context, snapshot) {
+                              if(snapshot.connectionState == ConnectionState.done) {
+                                return EventViewer(event: events[index], user: accountData, eventImage: snapshot.data, interestedCount: countSnapshot.data);
+                              } else {
+                                return Loading();
+                              }
+                            }
+                          )
+                        ))),
+                        child: BannerCard(event: events[index], cachePath: data.cachePath, uid: accountData.uid, interestedCount: countSnapshot.data)
+                      );
+                    }
                   );
                 }
               ),

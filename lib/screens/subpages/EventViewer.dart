@@ -14,8 +14,9 @@ class EventViewer extends StatefulWidget {
   final PeopleEvent event;
   final AccountData user;
   final EventImage eventImage;
+  final String interestedCount;
 
-  EventViewer({this.event, this.user, this.eventImage});
+  EventViewer({this.event, this.user, this.eventImage, this.interestedCount});
 
   @override
   _EventViewerState createState() => _EventViewerState();
@@ -109,10 +110,11 @@ class _EventViewerState extends State<EventViewer> {
                     ))),
                     child: Text('Hosted by: ' + widget.event.hostName),
                   ),
+                  Text('Interested: ${widget.interestedCount}', style: theme.textTheme.subtitle2),
                   Divider(),
                   Text(widget.event.description, style: theme.textTheme.bodyText2),
                   Divider(),
-                  SizedBox(height: 50),
+                  SizedBox(height: 20),
                   Text('Showcases', style: theme.textTheme.headline6),
                   carousel(widget.eventImage != null ? widget.eventImage.showcases : [Image(image: AssetImage('assets/placeholder.jpg'))], 'Showcase'),
                   Text('Permits', style: theme.textTheme.headline6),

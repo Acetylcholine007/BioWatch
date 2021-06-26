@@ -10,6 +10,17 @@ class UserViewer extends StatelessWidget {
 
   UserViewer({this.user});
 
+  int getAge(String birthdayString) {
+    int age = 0;
+    DateTime birthday = DateTime.parse(birthdayString);
+    DateTime today = DateTime.now();
+
+    print(birthday.year);
+    age = today.year - birthday.year;
+
+    return today.month >= birthday.month && today.day >= birthday.day ? age : age - 1;
+  }
+
   @override
   Widget build(BuildContext context) {
     final StorageService _storage = StorageService();
@@ -69,8 +80,8 @@ class UserViewer extends StatelessWidget {
                       leading: CircleAvatar(
                         child: Icon(Icons.cake_rounded),
                       ),
-                      title: Text('Birthday'),
-                      subtitle: Text(user.birthday),
+                      title: Text('Age'),
+                      subtitle: Text('${getAge(user.birthday)}'),
                     ),
                   ],
                 ),

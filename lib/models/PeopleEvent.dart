@@ -10,6 +10,7 @@ class PeopleEvent {
   List showcaseUris;
   List permitUris;
   String description;
+  String createdAt;
 
   PeopleEvent({
     this.eventId,
@@ -22,6 +23,7 @@ class PeopleEvent {
     this.bannerUri,
     this.showcaseUris,
     this.permitUris,
-    this.description
+    this.description,
+    this.createdAt
   });
 }

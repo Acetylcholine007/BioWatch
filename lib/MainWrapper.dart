@@ -51,31 +51,50 @@ class _MainWrapperState extends State<MainWrapper> {
           actions: (_currentIndex == 1 ? <Widget>[
             IconButton(
               icon: Icon(Icons.delete_rounded),
-              onPressed: () async {
-                String result = await _database.removeActivities();
-                final snackBar = SnackBar(
-                  duration: Duration(seconds: 2),
-                  behavior: SnackBarBehavior.floating,
-                  content: Text('Activities Cleared'),
-                  action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text('Clear Activities'),
+                    content: Text('Do you really want to clear all your activity records?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text('NO')
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          Navigator.pop(context);
+                          String result = await _database.removeActivities();
+                          final snackBar = SnackBar(
+                            duration: Duration(seconds: 2),
+                            behavior: SnackBarBehavior.floating,
+                            content: Text('Activities Cleared'),
+                            action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
+                          );
+                          if(result == 'SUCCESS') {
+                            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                          } else {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: Text('Clear Activities'),
+                                content: Text(result),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: Text('OK')
+                                  )
+                                ],
+                              )
+                            );
+                          }
+                        },
+                        child: Text('YES')
+                      )
+                    ],
+                  )
                 );
-                if(result == 'SUCCESS') {
-                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                } else {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text('Clear Activities'),
-                      content: Text(result),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text('OK')
-                        )
-                      ],
-                    )
-                  );
-                }
               }
             )] : <Widget>[]) + (accountData.accountType == 'HOST' ? <Widget>[
             IconButton(icon: Icon(Icons.add), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => EventEditor(
@@ -88,7 +107,8 @@ class _MainWrapperState extends State<MainWrapper> {
                 description: '',
                 bannerUri: 'assets/events/img1.jpg',
                 showcaseUris: [],
-                permitUris: []
+                permitUris: [],
+                createdAt: DateTime.now().toString()
               ),
               isNew: true,
               eventAsset: EventAsset(),
@@ -96,12 +116,35 @@ class _MainWrapperState extends State<MainWrapper> {
           ] : <Widget>[
             IconButton(icon: Icon(Icons.qr_code_scanner_rounded), onPressed: () async {
               List<String> data = (await scanCode()).split('<=>');
-              _database.joinEvent(data[0], Activity(
+              String result = await _database.joinEvent(data[0], Activity(
                 heading: 'Joined an Event',
                 time: TimeOfDay.now().format(context).split(' ')[0],
                 date: DateTime.now().toString(),
                 body: 'You\'ve joined in ${data[1]}'
               ));
+              final snackBar = SnackBar(
+                duration: Duration(seconds: 2),
+                behavior: SnackBarBehavior.floating,
+                content: Text('You\'ve joined the Event'),
+                action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
+              );
+              if(result == 'SUCCESS') {
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              } else {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text('Join Event'),
+                    content: Text(result),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text('OK')
+                      )
+                    ],
+                  )
+                );
+              }
             })
           ]),
         ),

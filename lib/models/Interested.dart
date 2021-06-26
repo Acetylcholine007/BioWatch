@@ -1,4 +1,5 @@
 class Interested {
   String uid;
-  Interested({this.uid});
+  String datetime;
+  Interested({this.uid, this.datetime});
 }

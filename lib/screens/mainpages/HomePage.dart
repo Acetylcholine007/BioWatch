@@ -3,7 +3,7 @@ import 'package:bio_watch/components/NoEvent.dart';
 import 'package:bio_watch/components/NoInterest.dart';
 import 'package:bio_watch/components/TileCard.dart';
 import 'package:bio_watch/models/AccountData.dart';
-import 'package:bio_watch/models/Data.dart';
+import 'package:bio_watch/models/Resource.dart';
 import 'package:bio_watch/models/Interested.dart';
 import 'package:bio_watch/models/Participant.dart';
 import 'package:bio_watch/screens/subpages/EventDashboard.dart';
@@ -29,7 +29,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final accountData = Provider.of<AccountData>(context);
     final myEventIds = Provider.of<List<String>>(context);
-    final data = Provider.of<Data>(context);
+    final data = Provider.of<Resource>(context);
 
     return myEventIds != null ? myEventIds.isNotEmpty ? FutureBuilder(
       initialData: data.myEventAssets,

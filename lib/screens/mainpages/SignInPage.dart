@@ -154,7 +154,7 @@ class _SignInPageState extends State<SignInPage> {
                             type: DateTimePickerType.date,
                             dateMask: 'MMMM d, yyyy',
                             initialValue: user.birthday,
-                            firstDate: DateTime.now(),
+                            firstDate: DateTime(1900),
                             lastDate: DateTime(DateTime.now().year + 5),
                             dateLabelText: 'Birthday',
                             decoration: textFieldDecoration.copyWith(hintText: 'Birthday'),

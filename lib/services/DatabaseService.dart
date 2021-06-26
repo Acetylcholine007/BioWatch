@@ -53,7 +53,8 @@ class DatabaseService {
         bannerUri: doc.get('bannerUri') ?? '',
         showcaseUris: doc.get('showcaseUris') ?? [],
         permitUris: doc.get('permitUris') ?? [],
-        description: doc.get('description') ?? ''
+        description: doc.get('description') ?? '',
+        createdAt: doc.get('createdAt') ?? ''
       );
     }).toList();
   }
@@ -72,6 +73,7 @@ class DatabaseService {
         showcaseUris: doc.get('showcaseUris') ?? [],
         permitUris: doc.get('permitUris') ?? [],
         description: doc.get('description') ?? '',
+        createdAt: doc.get('createdAt') ?? ''
       ));
     }).toList();
   }
@@ -92,13 +94,13 @@ class DatabaseService {
 
   List<Interested> _interestedListFromSnapshot(QuerySnapshot snapshot) {
     return snapshot.docs.map((doc) {
-      return Interested(uid: doc.get('uid') ?? '');
+      return Interested(uid: doc.get('uid') ?? '', datetime: doc.get('datetime') ?? '');
     }).toList();
   }
 
   List<Participant> _participantListFromSnapshot(QuerySnapshot snapshot) {
     return snapshot.docs.map((doc) {
-      return Participant(uid: doc.get('uid') ?? '');
+      return Participant(uid: doc.get('uid') ?? '', datetime: doc.get('datetime') ?? '');
     }).toList();
   }
 
@@ -123,7 +125,8 @@ class DatabaseService {
   Future markEvent(String eventId) async {
     return eventCollection
       .doc(eventId).collection('interested').doc(uid).set({
-        'uid': uid
+        'uid': uid,
+        'datetime': DateTime.now().toString()
       })
       .then((value) {
         addToMyEvents(eventId);
@@ -142,16 +145,23 @@ class DatabaseService {
       .catchError((error) => print('Failed to remove event $eventId'));
   }
 
-  Future joinEvent(String eventId, Activity activity) async {
-    return eventCollection
+  Future<String> joinEvent(String eventId, Activity activity) async {
+    String result = '';
+    await eventCollection
       .doc(eventId).collection('participants').doc(uid).set({
-        'uid': uid
+        'uid': uid,
+        'datetime': DateTime.now().toString()
       })
       .then((value) {
         createActivity(activity);
         print('You\'ve joined the event');
+        result = 'SUCCESS';
       })
-      .catchError((error) => print('Failed to join event $eventId'));
+      .catchError((error) {
+      print('Failed to join event $eventId');
+      result = error.toString();
+    });
+    return result;
   }
 
   Future<String> createEvent(PeopleEvent event) async {
@@ -167,7 +177,8 @@ class DatabaseService {
         'bannerUri': event.bannerUri,
         'showcaseUris': event.showcaseUris,
         'permitUris': event.permitUris,
-        'description': event.description
+        'description': event.description,
+        'createdAt': event.createdAt
       })
       .then((value) {
         eventId = value.id;
@@ -198,15 +209,21 @@ class DatabaseService {
     return event.eventId;
   }
 
-  Future cancelEvent(String eventId, Activity activity) async {
-    return eventCollection
+  Future<String> cancelEvent(String eventId, Activity activity) async {
+    String result = '';
+    await eventCollection
       .doc(eventId).delete()
       .then((value) {
         removeToMyEvents(eventId);
         createActivity(activity);
         print('Event $eventId deleted');
+        result = 'SUCCESS';
       })
-      .catchError((error) => print('Failed to remove event $eventId'));
+      .catchError((error) {
+        print('Failed to remove event $eventId');
+        result = error.toString();
+      });
+    return result;
   }
 
   Future createActivity(Activity activity) async {
@@ -287,11 +304,19 @@ class DatabaseService {
   }
 
   Future<List<AccountData>> interestedUsers(List<String> userIds) {
-    return userCollection.where('__name__', whereIn: userIds).get().then(_accountListFromSnapshot);
+    if(userIds.isNotEmpty) {
+      return userCollection.where('__name__', whereIn: userIds).get().then(_accountListFromSnapshot);
+    } else {
+      return Future(() => <AccountData>[]);
+    }
   }
 
   Future<List<AccountData>> participantUsers(List<String> userIds) {
-    return userCollection.where('__name__', whereIn: userIds).get().then(_accountListFromSnapshot);
+    if(userIds.isNotEmpty) {
+      return userCollection.where('__name__', whereIn: userIds).get().then(_accountListFromSnapshot);
+    } else {
+      return Future(() => <AccountData>[]);
+    }
   }
 
   //STREAM SECTION
