@@ -8,6 +8,7 @@ import 'package:bio_watch/services/DatabaseService.dart';
 import 'package:bio_watch/services/StorageService.dart';
 import 'package:bio_watch/shared/ImageManager.dart';
 import 'package:bio_watch/shared/decorations.dart';
+import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
 
 class AccountEditor extends StatefulWidget {
@@ -15,11 +16,12 @@ class AccountEditor extends StatefulWidget {
   final Directory cachePath;
   final AccountData user;
   final Image image;
+  final String email;
 
-  AccountEditor({this.user, this.image, this.cachePath, this.refresh});
+  AccountEditor({this.user, this.image, this.cachePath, this.refresh, this.email});
 
   @override
-  _AccountEditorState createState() => _AccountEditorState(user.copy(), image);
+  _AccountEditorState createState() => _AccountEditorState(user, image, email);
 }
 
 class _AccountEditorState extends State<AccountEditor> {
@@ -27,14 +29,18 @@ class _AccountEditorState extends State<AccountEditor> {
   final _formKey = GlobalKey<FormState>();
   File userId;
   Image profile;
+  String email;
   AccountData userData;
   String error = '';
-  String email = '';
   String password = '';
   bool loading = false;
-  bool showPassword = true;
+  bool hidePassword = true;
+  bool profileChanged = false;
+  bool passwordChanged = false;
+  bool emailChanged = false;
+  bool userDataChanged = false;
 
-  _AccountEditorState(this.userData, this.profile);
+  _AccountEditorState(this.userData, this.profile, this.email);
 
   @override
   Widget build(BuildContext context) {
@@ -43,11 +49,84 @@ class _AccountEditorState extends State<AccountEditor> {
     final DatabaseService _database = DatabaseService(uid: userData.uid);
     final theme = Theme.of(context);
 
+    void saveChanges() async {
+      if(_formKey.currentState.validate()) {
+        setState(() => loading = true);
+        String result1 = passwordChanged ? await _auth.changePassword(password) : 'SUCCESS';
+        String result2 = emailChanged ? await _auth.changeEmail(email) : 'SUCCESS';
+        String result3 = userDataChanged ? await _database.editAccount(userData, Activity(
+          heading: 'Account Edited',
+          time: TimeOfDay.now().format(context).split(' ')[0],
+          date: DateTime.now().toString(),
+          body: 'You\'ve edited your account'
+        )) : 'SUCCESS';
+        String result4 = userId != null && profileChanged ? await _storage.uploadId(userData.uid, userId, widget.cachePath) : 'SUCCESS';
+        if(result1 == 'SUCCESS' && result2 == 'SUCCESS' && result3 == 'SUCCESS' && result4 == 'SUCCESS') {
+          widget.refresh();
+          final snackBar = SnackBar(
+            duration: Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+            content: Text('Account Edited'),
+            action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          Navigator.of(context).pop();
+        } else {
+          setState(() {
+            error = 'Error editing account';
+            loading = false;
+          });
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text('Edit Account'),
+              content: Text('$result1\n$result2\n$result3\n$result4'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('OK')
+                )
+              ],
+            )
+          );
+        }
+      } else {
+        final snackBar = SnackBar(
+          duration: Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          content: Text('Fill up all the fields'),
+          action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      }
+    }
+
     return loading ? Loading() : GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
       child: Scaffold(
         appBar: AppBar(
           title: Text('Edit Account'),
+          leading: new IconButton(
+            icon: new Icon(Icons.arrow_back),
+            onPressed: profileChanged || passwordChanged || emailChanged || userDataChanged ? () async {
+              return showDialog(context: context, builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text('Edit Account'),
+                  content: Text('Do you want to save your changes?'),
+                  actions: [
+                    TextButton(onPressed: () async {
+                      Navigator.of(context).pop();
+                      saveChanges();
+                    }, child: Text('Yes')),
+                    TextButton(onPressed: () async {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop();
+                    }, child: Text('No'))
+                  ],
+                );
+              });
+            } : () => Navigator.of(context).pop(),
+          ),
         ),
         body: Container(
           child: Padding(
@@ -69,6 +148,7 @@ class _AccountEditorState extends State<AccountEditor> {
                             userId = result['image'];
                             userData.idUri = userId.path.split('/').last;
                             profile = Image(image: FileImage(userId), fit: BoxFit.fitWidth);
+                            profileChanged = true;
                           });
                         }
                       },
@@ -83,86 +163,59 @@ class _AccountEditorState extends State<AccountEditor> {
                     ),
                   ),
                   SizedBox(height: 30),
+                  DateTimePicker(
+                    validator: (val) => val.isEmpty ? 'Enter Birthday' : null,
+                    type: DateTimePickerType.date,
+                    dateMask: 'MMMM d, yyyy',
+                    initialValue: userData.birthday,
+                    firstDate: DateTime(1900),
+                    lastDate: DateTime(DateTime.now().year),
+                    dateLabelText: 'Birthday',
+                    decoration: textFieldDecoration.copyWith(hintText: 'Birthday'),
+                    onChanged: (val) => setState(() {
+                      userData.birthday = val;
+                      userDataChanged = true;
+                    })
+                  ),
                   TextFormField(
                     initialValue: email,
                     decoration: textFieldDecoration.copyWith(hintText: 'New Email'),
                     validator: (val) => val.isEmpty ? 'Enter Email' : null,
-                    onChanged: (val) => setState(() => email = val)
+                    onChanged: (val) => setState(() {
+                      email = val;
+                      emailChanged = true;
+                    })
                   ),
                   TextFormField(
                     initialValue: password,
                     decoration: textFieldDecoration.copyWith(suffixIcon: IconButton(
-                      onPressed: () => setState(() => showPassword = !showPassword),
+                      onPressed: () => setState(() => hidePassword = !hidePassword),
                       icon: Icon(Icons.visibility)
                     ),
                       hintText: 'New Password'
                     ),
-                    validator: (val) => val.isEmpty ? 'Enter Password' : null,
-                    onChanged: (val) => setState(() => password = val),
-                    obscureText: showPassword,
+                    validator: (val) => val.length < 7 && passwordChanged ? 'Length should be at least 7 characters' : null,
+                    onChanged: (val) => setState(() {
+                      password = val;
+                      passwordChanged = true;
+                    }),
+                    obscureText: hidePassword,
                   ),
                   TextFormField(
                     keyboardType: TextInputType.number,
                     initialValue: userData.contact,
                     decoration: textFieldDecoration.copyWith(hintText: 'Contact No.'),
                     validator: (val) => val.isEmpty ? 'Enter Contact No.' : null,
-                    onChanged: (val) => setState(() => userData.contact = val)
+                    onChanged: (val) => setState(() {
+                      userData.contact = val;
+                      userDataChanged = true;
+                    })
                   ),
                   Text(error, style: TextStyle(color: Colors.red, fontSize: 14)),
                   SizedBox(height: 30),
                   ElevatedButton(
                     child: Text('SAVE CHANGES'),
-                    onPressed: () async {
-                      if(_formKey.currentState.validate()) {
-                        setState(() => loading = true);
-                        String result1 = await _auth.changePassword(password);
-                        String result2 = await _auth.changeEmail(email);
-                        String result3 = await _database.editAccount(userData, Activity(
-                          heading: 'Account Edited',
-                          time: TimeOfDay.now().format(context).split(' ')[0],
-                          date: DateTime.now().toString(),
-                          body: 'You\'ve edited your account'
-                        ));
-                        String result4 = userId != null ? await _storage.uploadId(userData.uid, userId, widget.cachePath) : 'SUCCESS';
-                        if(result1 == 'SUCCESS' && result2 == 'SUCCESS' && result3 == 'SUCCESS' && result4 == 'SUCCESS') {
-                          widget.refresh();
-                          final snackBar = SnackBar(
-                            duration: Duration(seconds: 2),
-                            behavior: SnackBarBehavior.floating,
-                            content: Text('Account Edited'),
-                            action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                          Navigator.of(context).pop();
-                        } else {
-                          setState(() {
-                            error = 'Error editing account';
-                            loading = false;
-                          });
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text('Edit Account'),
-                              content: Text('$result1\n$result2\n$result3\n$result4'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: Text('OK')
-                                )
-                              ],
-                            )
-                          );
-                        }
-                      } else {
-                        final snackBar = SnackBar(
-                          duration: Duration(seconds: 2),
-                          behavior: SnackBarBehavior.floating,
-                          content: Text('Fill up all the fields'),
-                          action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                      }
-                    },
+                    onPressed: saveChanges,
                     style: ElevatedButton.styleFrom(primary: theme.accentColor),
                   )
                 ],

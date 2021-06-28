@@ -23,8 +23,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final StorageService _storage = StorageService();
 
-  void refresh() => setState((){});
-
   @override
   Widget build(BuildContext context) {
     final accountData = Provider.of<AccountData>(context);
@@ -62,7 +60,7 @@ class _HomePageState extends State<HomePage> {
                           StreamProvider<List<Interested>>.value(value: DatabaseService(uid: accountData.uid).interestedUserIds(data.myEvents[index].event.eventId), initialData: null),
                           StreamProvider<List<Participant>>.value(value: DatabaseService(uid: accountData.uid).participantUserIds(data.myEvents[index].event.eventId), initialData: null)
                         ],
-                        child: EventDashboard(event: data.myEvents[index].event, refresh: refresh, eventAsset: snapshot.data[data.myEvents[index].event.eventId])))
+                        child: EventDashboard(event: data.myEvents[index].event, refresh: data.refresh, eventAsset: snapshot.data[data.myEvents[index].event.eventId])))
                       );
                     }
                   },

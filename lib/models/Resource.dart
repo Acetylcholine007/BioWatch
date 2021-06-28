@@ -7,6 +7,7 @@ class Resource {
   Directory cachePath;
   List<MyEvent> myEvents;
   Map<String, EventAsset> myEventAssets;
+  Function refresh;
 
-  Resource({this.cachePath, this.myEvents, this.myEventAssets});
+  Resource({this.cachePath, this.myEvents, this.myEventAssets, this.refresh});
 }

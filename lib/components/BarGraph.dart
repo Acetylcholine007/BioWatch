@@ -24,7 +24,8 @@ class _BarGraphState extends State<BarGraph> {
         id: 'Interested',
         domainFn: (point, _) => point[0],
         measureFn: (point, _) => point[1],
-        data: widget.interested.sublist(offset, offset + sectionLength),
+        data: widget.interested.length >= sectionLength ?
+        widget.interested.sublist(offset, offset + sectionLength) : widget.interested.sublist(0, widget.interested.length),
         labelAccessorFn: (point, _) => '${point[1]}'
       )
     ];

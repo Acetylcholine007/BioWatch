@@ -53,7 +53,7 @@ class _EventDashboardState extends State<EventDashboard> {
                       Navigator.push(context, MaterialPageRoute(
                         builder: (context) =>
                           EventEditor(
-                            event: widget.event,
+                            event: widget.event.copy(),
                             isNew: false,
                             eventAsset: widget.eventAsset,
                             refresh: widget.refresh
@@ -77,12 +77,13 @@ class _EventDashboardState extends State<EventDashboard> {
                             ),
                             TextButton(
                               onPressed: () async {
-                                String result = await _database.cancelEvent(widget.event.eventId, Activity(
+                                String result = DateTime.parse(widget.event.date).compareTo(DateTime.now()) != -1 ?
+                                await _database.cancelEvent(widget.event.eventId, Activity(
                                   heading: 'Event Cancelled',
                                   time: TimeOfDay.now().format(context).split(' ')[0],
                                   date: DateTime.now().toString(),
                                   body: 'You\'ve cancelled ${widget.event.eventName}'
-                                ));
+                                )) : 'Can no longer cancel an event passed to its set event date.';
                                 Navigator.of(context).pop();
                                 if(result == 'SUCCESS') {
                                   final snackBar = SnackBar(

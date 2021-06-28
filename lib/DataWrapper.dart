@@ -12,7 +12,14 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
-class DataWrapper extends StatelessWidget {
+class DataWrapper extends StatefulWidget {
+  @override
+  _DataWrapperState createState() => _DataWrapperState();
+}
+
+class _DataWrapperState extends State<DataWrapper> {
+  void refresh() => setState((){});
+
   @override
   Widget build(BuildContext context) {
     Future<Resource> getData() async {
@@ -36,7 +43,7 @@ class DataWrapper extends StatelessWidget {
         }
       }
 
-      return Resource(cachePath: cachePath, myEvents: myEvents, myEventAssets: myEventAssets);
+      return Resource(cachePath: cachePath, myEvents: myEvents, myEventAssets: myEventAssets, refresh: refresh);
     }
 
     return FutureBuilder(

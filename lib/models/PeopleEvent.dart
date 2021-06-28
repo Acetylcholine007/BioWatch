@@ -26,4 +26,21 @@ class PeopleEvent {
     this.description,
     this.createdAt
   });
+
+  PeopleEvent copy() {
+    return PeopleEvent(
+      eventId: this.eventId,
+      hostId: this.hostId,
+      eventName: this.eventName,
+      hostName: this.hostName,
+      address: this.address,
+      date: this.date,
+      time: this.time,
+      bannerUri: this.bannerUri,
+      showcaseUris: [...this.showcaseUris],
+      permitUris: [...this.permitUris],
+      description: this.description,
+      createdAt: this.createdAt
+    );
+  }
 }

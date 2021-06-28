@@ -98,7 +98,9 @@ class _AccountPageState extends State<AccountPage> {
                       Expanded(
                         child: ElevatedButton(
                           child: Text('EDIT ACCOUNT'),
-                          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => AccountEditor(user: accountData, image: snapshot.data, refresh: refresh, cachePath: data.cachePath))),
+                          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => AccountEditor(
+                              user: accountData.copy(), image: snapshot.data, refresh: refresh, cachePath: data.cachePath, email: account.email
+                          ))),
                           style: ElevatedButton.styleFrom(primary: theme.accentColor),
                         ),
                       ),

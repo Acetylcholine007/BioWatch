@@ -155,7 +155,7 @@ class _SignInPageState extends State<SignInPage> {
                             dateMask: 'MMMM d, yyyy',
                             initialValue: user.birthday,
                             firstDate: DateTime(1900),
-                            lastDate: DateTime(DateTime.now().year + 5),
+                            lastDate: DateTime(DateTime.now().year),
                             dateLabelText: 'Birthday',
                             decoration: textFieldDecoration.copyWith(hintText: 'Birthday'),
                             onChanged: (val) => setState(() => user.birthday = val)

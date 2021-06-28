@@ -34,6 +34,7 @@ class _MainWrapperState extends State<MainWrapper> {
   Widget build(BuildContext context) {
     final account = Provider.of<Account>(context);
     final accountData = Provider.of<AccountData>(context);
+    final myEventIds = Provider.of<List<String>>(context);
     final DatabaseService _database = DatabaseService(uid: account.uid);
     final theme = Theme.of(context);
     final pages = [
@@ -116,12 +117,12 @@ class _MainWrapperState extends State<MainWrapper> {
           ] : <Widget>[
             IconButton(icon: Icon(Icons.qr_code_scanner_rounded), onPressed: () async {
               List<String> data = (await scanCode()).split('<=>');
-              String result = await _database.joinEvent(data[0], Activity(
+              String result = myEventIds.contains(data[0]) ? await _database.joinEvent(data[0], Activity(
                 heading: 'Joined an Event',
                 time: TimeOfDay.now().format(context).split(' ')[0],
                 date: DateTime.now().toString(),
                 body: 'You\'ve joined in ${data[1]}'
-              ));
+              )) : 'Mark the event as interested first. Head over to Event page, open the said event and tap the bookmark button.';
               final snackBar = SnackBar(
                 duration: Duration(seconds: 2),
                 behavior: SnackBarBehavior.floating,

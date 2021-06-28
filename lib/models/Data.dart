@@ -62,7 +62,8 @@ class Data {
         'address': user.address,
         'contact': user.contact,
         'age': getAge(user.birthday).toString(),
-        'joined': datetimes[user.uid],
+        'date': datetimes[user.uid].split(' ').first,
+        'time': datetimes[user.uid].split(' ').last,
       }
     ));
 
@@ -74,7 +75,7 @@ class Data {
       await jsonFile.writeAsString(json);
 
       //Create csv file
-      String csv = ListToCsvConverter().convert(<List<dynamic>>[['uid', 'fullName', 'address', 'contact', 'age', 'joined']] + csvData);
+      String csv = ListToCsvConverter().convert(<List<dynamic>>[['uid', 'fullName', 'address', 'contact', 'age', 'date', 'time']] + csvData);
       await csvFile.writeAsString(csv);
 
       //archive and share
