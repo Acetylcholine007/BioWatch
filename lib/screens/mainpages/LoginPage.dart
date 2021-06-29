@@ -115,10 +115,11 @@ class _LoginPageState extends State<LoginPage> {
                       child: Text('CREATE ACCOUNT'),
                       onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => SignInPage(user: AccountData(
                         fullName: '',
-                        accountType: '',
+                        accountType: 'USER',
                         address: '',
                         contact: '',
                         birthday: '',
+                        sex: 'Male'
                       )))),
                       style: ElevatedButton.styleFrom(primary: theme.accentColor),
                     )

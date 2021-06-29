@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:bio_watch/components/Loading.dart';
 import 'package:bio_watch/models/AccountData.dart';
 import 'package:bio_watch/models/Activity.dart';
+import 'package:bio_watch/models/Enum.dart';
 import 'package:bio_watch/services/AuthService.dart';
 import 'package:bio_watch/services/DatabaseService.dart';
 import 'package:bio_watch/services/StorageService.dart';
@@ -56,9 +57,9 @@ class _AccountEditorState extends State<AccountEditor> {
         String result2 = emailChanged ? await _auth.changeEmail(email) : 'SUCCESS';
         String result3 = userDataChanged ? await _database.editAccount(userData, Activity(
           heading: 'Account Edited',
-          time: TimeOfDay.now().format(context).split(' ')[0],
-          date: DateTime.now().toString(),
-          body: 'You\'ve edited your account'
+          datetime: DateTime.now().toString(),
+          body: 'You\'ve edited your account',
+          type: ActivityType.editEvent
         )) : 'SUCCESS';
         String result4 = userId != null && profileChanged ? await _storage.uploadId(userData.uid, userId, widget.cachePath) : 'SUCCESS';
         if(result1 == 'SUCCESS' && result2 == 'SUCCESS' && result3 == 'SUCCESS' && result4 == 'SUCCESS') {

@@ -1,4 +1,5 @@
 import 'package:bio_watch/models/Activity.dart';
+import 'package:bio_watch/shared/decorations.dart';
 import 'package:flutter/material.dart';
 
 class ActivityViewer extends StatelessWidget {
@@ -21,7 +22,7 @@ class ActivityViewer extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(activity.heading, style: theme.textTheme.headline4),
-              Text(activity.date, style: theme.textTheme.headline6),
+              Text(dateTimeFormatter.format(DateTime.parse(activity.datetime)), style: theme.textTheme.headline6),
               Divider(),
               Text(activity.body, style: theme.textTheme.bodyText1)
             ],

@@ -11,13 +11,13 @@ import 'package:csv/csv.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share/share.dart';
 
-class Data {
+class DataManager {
   String uid;
   PeopleEvent event;
   List<Participant> participants;
   Map<String, String> datetimes;
 
-  Data({this.uid, this.event, this.participants, this.datetimes});
+  DataManager({this.uid, this.event, this.participants, this.datetimes});
 
   int getAge(String birthdayString) {
     int age = 0;
@@ -48,8 +48,7 @@ class Data {
       'hostName': event.hostName,
       'createdAt': event.createdAt,
       'address': event.address,
-      'date': event.date,
-      'time': event.time,
+      'datetime': event.datetime,
       'description': event.description
     };
 
@@ -61,6 +60,7 @@ class Data {
         'fullName': user.fullName,
         'address': user.address,
         'contact': user.contact,
+        'sex': user.sex,
         'age': getAge(user.birthday).toString(),
         'date': datetimes[user.uid].split(' ').first,
         'time': datetimes[user.uid].split(' ').last,
@@ -75,7 +75,7 @@ class Data {
       await jsonFile.writeAsString(json);
 
       //Create csv file
-      String csv = ListToCsvConverter().convert(<List<dynamic>>[['uid', 'fullName', 'address', 'contact', 'age', 'date', 'time']] + csvData);
+      String csv = ListToCsvConverter().convert(<List<dynamic>>[['uid', 'fullName', 'address', 'contact', 'sex', 'age', 'date', 'time']] + csvData);
       await csvFile.writeAsString(csv);
 
       //archive and share

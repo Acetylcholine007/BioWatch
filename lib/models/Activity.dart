@@ -1,9 +1,11 @@
+import 'package:bio_watch/models/Enum.dart';
+
 class Activity {
   String id;
   String heading;
-  String time;
-  String date;
+  String datetime;
   String body;
+  ActivityType type;
 
-  Activity({this.id, this.heading, this.time, this.date, this.body});
+  Activity({this.id, this.heading, this.datetime, this.body, this.type});
 }

@@ -8,6 +8,7 @@ import 'package:bio_watch/screens/subpages/PhotoViewer.dart';
 import 'package:bio_watch/services/AuthService.dart';
 import 'package:bio_watch/services/StorageService.dart';
 import 'package:bio_watch/shared/ImageManager.dart';
+import 'package:bio_watch/shared/decorations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -85,7 +86,14 @@ class _AccountPageState extends State<AccountPage> {
                           child: Icon(Icons.cake_rounded),
                         ),
                         title: Text('Birthday'),
-                        subtitle: Text(accountData.birthday),
+                        subtitle: Text(dateFormatter.format(DateTime.parse(accountData.birthday))),
+                      ),
+                      ListTile(
+                        leading: CircleAvatar(
+                          child: Icon(Icons.accessibility_new_rounded),
+                        ),
+                        title: Text('Sex'),
+                        subtitle: Text(accountData.sex),
                       ),
                     ],
                   ),

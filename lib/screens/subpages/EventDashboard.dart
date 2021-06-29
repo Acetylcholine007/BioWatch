@@ -2,7 +2,8 @@ import 'package:bio_watch/components/Loading.dart';
 import 'package:bio_watch/components/QRDisplay.dart';
 import 'package:bio_watch/models/Account.dart';
 import 'package:bio_watch/models/Activity.dart';
-import 'package:bio_watch/models/Data.dart';
+import 'package:bio_watch/models/Enum.dart';
+import 'package:bio_watch/shared/Data.dart';
 import 'package:bio_watch/models/EventAsset.dart';
 import 'package:bio_watch/models/Interested.dart';
 import 'package:bio_watch/models/Participant.dart';
@@ -77,12 +78,12 @@ class _EventDashboardState extends State<EventDashboard> {
                             ),
                             TextButton(
                               onPressed: () async {
-                                String result = DateTime.parse(widget.event.date).compareTo(DateTime.now()) != -1 ?
+                                String result = DateTime.parse(widget.event.datetime).compareTo(DateTime.now()) != -1 ?
                                 await _database.cancelEvent(widget.event.eventId, Activity(
                                   heading: 'Event Cancelled',
-                                  time: TimeOfDay.now().format(context).split(' ')[0],
-                                  date: DateTime.now().toString(),
-                                  body: 'You\'ve cancelled ${widget.event.eventName}'
+                                  datetime: DateTime.now().toString(),
+                                  body: 'You\'ve cancelled ${widget.event.eventName}',
+                                  type: ActivityType.cancelEvent
                                 )) : 'Can no longer cancel an event passed to its set event date.';
                                 Navigator.of(context).pop();
                                 if(result == 'SUCCESS') {
@@ -121,7 +122,7 @@ class _EventDashboardState extends State<EventDashboard> {
                   PopupMenuItem(child: GestureDetector(
                     onTap: () async {
                       Navigator.pop(context);
-                      final data = Data(
+                      final data = DataManager(
                         uid: user.uid,
                         event: widget.event,
                         participants: participants,
@@ -167,7 +168,7 @@ class _EventDashboardState extends State<EventDashboard> {
           ),
           body: TabBarView(
             children: [
-              Statistics(createdAt: DateTime.parse(widget.event.createdAt), conductedAt: DateTime.parse(widget.event.date)),
+              Statistics(createdAt: DateTime.parse(widget.event.createdAt), conductedAt: DateTime.parse(widget.event.datetime)),
               FutureBuilder(
                 future: _database.interestedUsers(interested.map((interested) => interested.uid).toList()),
                 builder: (context, snapshot) {

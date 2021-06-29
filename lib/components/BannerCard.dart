@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:bio_watch/models/PeopleEvent.dart';
 import 'package:bio_watch/services/StorageService.dart';
+import 'package:bio_watch/shared/decorations.dart';
 import 'package:flutter/material.dart';
 
 class BannerCard extends StatelessWidget {
@@ -45,7 +46,7 @@ class BannerCard extends StatelessWidget {
                 Expanded(flex: 1, child: Icon(Icons.bookmark_rounded, color: theme.accentColor))
               ],
             )),
-            Expanded(flex: 1, child: Text(event.date + ' ' + event.time)),
+            Expanded(flex: 1, child: Text(dateTimeFormatter.format(DateTime.parse(event.datetime)))),
             Expanded(flex: 1, child: Text(event.hostName)),
             Expanded(flex: 1, child: Text(event.address))
           ]

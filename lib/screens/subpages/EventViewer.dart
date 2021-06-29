@@ -5,6 +5,7 @@ import 'package:bio_watch/models/AccountData.dart';
 import 'package:bio_watch/screens/subpages/PhotoViewer.dart';
 import 'package:bio_watch/screens/subpages/UserViewer.dart';
 import 'package:bio_watch/services/DatabaseService.dart';
+import 'package:bio_watch/shared/decorations.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -95,14 +96,14 @@ class _EventViewerState extends State<EventViewer> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(widget.event.eventName, style: theme.textTheme.headline4),
-                  Text(widget.event.date + ' ' + widget.event.time, style: theme.textTheme.subtitle2),
+                  Text(dateTimeFormatter.format(DateTime.parse(widget.event.datetime)), style: theme.textTheme.subtitle2),
                   Text(widget.event.address, style: theme.textTheme.subtitle2),
                   TextButton(
                     onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => FutureBuilder(
                       future: _database.getAccount(widget.event.hostId),
                       builder: (context, snapshot) {
                         if(snapshot.connectionState == ConnectionState.done) {
-                          return UserViewer(user: snapshot.data);
+                          return UserViewer(accountData: snapshot.data);
                         } else {
                           return Loading();
                         }

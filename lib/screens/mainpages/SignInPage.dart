@@ -27,8 +27,8 @@ class _SignInPageState extends State<SignInPage> {
   String error = '';
   String email = '';
   String password = '';
-  AccountData user;
-  _SignInPageState(this.user);
+  AccountData accountData;
+  _SignInPageState(this.accountData);
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +60,7 @@ class _SignInPageState extends State<SignInPage> {
                               await userProfile.delete();
                             setState(() {
                               userProfile = result['image'];
-                              user.idUri = userProfile.path.split('/').last;
+                              accountData.idUri = userProfile.path.split('/').last;
                             });
                           }
                         },
@@ -78,10 +78,10 @@ class _SignInPageState extends State<SignInPage> {
                   Expanded(
                     flex: 3,
                     child: TextFormField(
-                      initialValue: user.fullName,
+                      initialValue: accountData.fullName,
                       decoration: textFieldDecoration.copyWith(hintText: 'Full Name'),
                       validator: (val) => val.isEmpty ? 'Enter Full Name' : null,
-                      onChanged: (val) => setState(() => user.fullName = val)
+                      onChanged: (val) => setState(() => accountData.fullName = val)
                     ),
                   ),
                   Expanded(
@@ -99,11 +99,17 @@ class _SignInPageState extends State<SignInPage> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Expanded(
-                          child: TextFormField(
-                            initialValue: user.accountType,
-                            decoration: textFieldDecoration.copyWith(hintText: 'Account Type'),
-                            validator: (val) => val.isEmpty ? 'Enter AccountType' : null,
-                            onChanged: (val) => setState(() => user.accountType = val),
+                          child: DropdownButtonFormField(
+                            value: accountData.accountType ?? 'USER',
+                            decoration: textFieldDecoration.copyWith(
+                              contentPadding: EdgeInsets.fromLTRB(10, 18, 10, 17)
+                            ),
+                            validator: (val) => val.isEmpty ? 'Specify AccountType' : null,
+                            items: [
+                              DropdownMenuItem(value: 'USER', child: Text('USER')),
+                              DropdownMenuItem(value: 'HOST', child: Text('HOST'))
+                            ],
+                            onChanged: (val) => setState(() => accountData.accountType = val),
                           ),
                         ),
                         SizedBox(width: 10),
@@ -127,10 +133,20 @@ class _SignInPageState extends State<SignInPage> {
                   Expanded(
                     flex: 3,
                     child: TextFormField(
-                      initialValue: user.address,
+                      initialValue: accountData.address,
                       decoration: textFieldDecoration.copyWith(hintText: 'Permanent Address'),
                       validator: (val) => val.isEmpty ? 'Enter Permanent Address' : null,
-                      onChanged: (val) => setState(() => user.address = val)
+                      onChanged: (val) => setState(() => accountData.address = val)
+                    ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: TextFormField(
+                      keyboardType: TextInputType.number,
+                      initialValue: accountData.contact,
+                      decoration: textFieldDecoration.copyWith(hintText: 'Contact No.'),
+                      validator: (val) => val.isEmpty ? 'Enter Contact No.' : null,
+                      onChanged: (val) => setState(() => accountData.contact = val)
                     ),
                   ),
                   Expanded(
@@ -139,12 +155,17 @@ class _SignInPageState extends State<SignInPage> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Expanded(
-                          child: TextFormField(
-                            keyboardType: TextInputType.number,
-                            initialValue: user.contact,
-                            decoration: textFieldDecoration.copyWith(hintText: 'Contact No.'),
-                            validator: (val) => val.isEmpty ? 'Enter Contact No.' : null,
-                            onChanged: (val) => setState(() => user.contact = val)
+                          child: DropdownButtonFormField(
+                            value: accountData.sex ?? 'Male',
+                            decoration: textFieldDecoration.copyWith(
+                              contentPadding: EdgeInsets.fromLTRB(10, 18, 10, 17)
+                            ),
+                            validator: (val) => val.isEmpty ? 'Specify Sex' : null,
+                            items: [
+                              DropdownMenuItem(value: 'Male', child: Text('Male')),
+                              DropdownMenuItem(value: 'Female', child: Text('Female'))
+                            ],
+                            onChanged: (val) => setState(() => accountData.sex = val)
                           ),
                         ),
                         SizedBox(width: 10),
@@ -153,20 +174,16 @@ class _SignInPageState extends State<SignInPage> {
                             validator: (val) => val.isEmpty ? 'Enter Birthday' : null,
                             type: DateTimePickerType.date,
                             dateMask: 'MMMM d, yyyy',
-                            initialValue: user.birthday,
+                            initialValue: accountData.birthday,
                             firstDate: DateTime(1900),
                             lastDate: DateTime(DateTime.now().year),
                             dateLabelText: 'Birthday',
                             decoration: textFieldDecoration.copyWith(hintText: 'Birthday'),
-                            onChanged: (val) => setState(() => user.birthday = val)
+                            onChanged: (val) => setState(() => accountData.birthday = val)
                           ),
                         )
                       ],
                     ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Center(child: Text(error, style: TextStyle(color: Colors.red, fontSize: 14)))
                   ),
                   Expanded(
                     flex: 2,
@@ -175,7 +192,7 @@ class _SignInPageState extends State<SignInPage> {
                       onPressed: () async {
                         if(_formKey.currentState.validate() && userProfile != null) {
                           setState(() => loading = true);
-                          String result = await _auth.signIn(user, email, password, userProfile);
+                          String result = await _auth.signIn(accountData, email, password, userProfile);
                           if(result != 'SUCCESS') {
                             setState(() {
                               error = result;

@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'PhotoViewer.dart';
 
 class UserViewer extends StatelessWidget {
-  final AccountData user;
+  final AccountData accountData;
 
-  UserViewer({this.user});
+  UserViewer({this.accountData});
 
   int getAge(String birthdayString) {
     int age = 0;
@@ -37,7 +37,7 @@ class UserViewer extends StatelessWidget {
               Expanded(
                 flex: 3,
                 child: FutureBuilder(
-                  future: _storage.getUserId(user.uid, user.idUri),
+                  future: _storage.getUserId(accountData.uid, accountData.idUri),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.done) {
                       return GestureDetector(
@@ -59,7 +59,7 @@ class UserViewer extends StatelessWidget {
                       leading: CircleAvatar(
                         child: Icon(Icons.person_rounded),
                       ),
-                      title: Text(user.fullName),
+                      title: Text(accountData.fullName),
                       //subtitle: Text(user.email),
                     ),
                     ListTile(
@@ -67,21 +67,28 @@ class UserViewer extends StatelessWidget {
                         child: Icon(Icons.location_on_rounded),
                       ),
                       title: Text('Address'),
-                      subtitle: Text(user.address),
+                      subtitle: Text(accountData.address),
                     ),
                     ListTile(
                       leading: CircleAvatar(
                         child: Icon(Icons.phone_rounded),
                       ),
                       title: Text('Phone'),
-                      subtitle: Text(user.contact),
+                      subtitle: Text(accountData.contact),
                     ),
                     ListTile(
                       leading: CircleAvatar(
                         child: Icon(Icons.cake_rounded),
                       ),
                       title: Text('Age'),
-                      subtitle: Text('${getAge(user.birthday)}'),
+                      subtitle: Text('${getAge(accountData.birthday)}'),
+                    ),
+                    ListTile(
+                      leading: CircleAvatar(
+                        child: Icon(Icons.accessibility_new_rounded),
+                      ),
+                      title: Text('Sex'),
+                      subtitle: Text(accountData.sex),
                     ),
                   ],
                 ),

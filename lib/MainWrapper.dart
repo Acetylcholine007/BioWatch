@@ -2,6 +2,7 @@ import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:bio_watch/components/Loading.dart';
 import 'package:bio_watch/models/Account.dart';
 import 'package:bio_watch/models/AccountData.dart';
+import 'package:bio_watch/models/Enum.dart';
 import 'package:bio_watch/models/PeopleEvent.dart';
 import 'package:bio_watch/screens/mainpages/AccountPage.dart';
 import 'package:bio_watch/screens/mainpages/ActivityPage.dart';
@@ -103,8 +104,7 @@ class _MainWrapperState extends State<MainWrapper> {
                 eventName: '',
                 hostName: accountData.fullName,
                 address: '',
-                time: TimeOfDay.now().format(context).split(' ')[0],
-                date: DateTime.now().toString(),
+                datetime: '',
                 description: '',
                 bannerUri: 'assets/events/img1.jpg',
                 showcaseUris: [],
@@ -119,9 +119,9 @@ class _MainWrapperState extends State<MainWrapper> {
               List<String> data = (await scanCode()).split('<=>');
               String result = myEventIds.contains(data[0]) ? await _database.joinEvent(data[0], Activity(
                 heading: 'Joined an Event',
-                time: TimeOfDay.now().format(context).split(' ')[0],
-                date: DateTime.now().toString(),
-                body: 'You\'ve joined in ${data[1]}'
+                datetime: DateTime.now().toString(),
+                body: 'You\'ve joined in ${data[1]}',
+                type: ActivityType.joinEvent
               )) : 'Mark the event as interested first. Head over to Event page, open the said event and tap the bookmark button.';
               final snackBar = SnackBar(
                 duration: Duration(seconds: 2),

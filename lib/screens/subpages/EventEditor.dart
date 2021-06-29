@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:bio_watch/components/Loading.dart';
 import 'package:bio_watch/models/Account.dart';
 import 'package:bio_watch/models/Activity.dart';
+import 'package:bio_watch/models/Enum.dart';
 import 'package:bio_watch/models/EventAsset.dart';
 import 'package:bio_watch/models/PeopleEvent.dart';
 import 'package:bio_watch/services/DatabaseService.dart';
@@ -116,9 +117,9 @@ class _EventEditorState extends State<EventEditor> {
           await _database.addToMyEvents(eventId);
           await _database.createActivity(Activity(
             heading: 'Event Created',
-            time: TimeOfDay.now().format(context).split(' ')[0],
-            date: DateTime.now().toString(),
-            body: 'You\'ve created ${event.eventName}'
+            datetime: DateTime.now().toString(),
+            body: 'You\'ve created ${event.eventName}',
+            type: ActivityType.createEvent
           ));
           final snackBar = SnackBar(
             duration: Duration(seconds: 2),
@@ -130,9 +131,9 @@ class _EventEditorState extends State<EventEditor> {
         } else {
           String eventId = eventDataChanged ? await _database.editEvent(event, Activity(
             heading: 'Event Edited',
-            time: TimeOfDay.now().format(context).split(' ')[0],
-            date: DateTime.now().toString(),
-            body: 'You\'ve edited ${event.eventName}'
+            datetime: DateTime.now().toString(),
+            body: 'You\'ve edited ${event.eventName}',
+            type: ActivityType.editEvent
           )) : event.eventId;
           if(eventAssetChanged) await _storage.uploadEventAsset(eventId, eventAsset.banner, eventAsset.showcases, eventAsset.permits);
           widget.refresh();
@@ -269,43 +270,28 @@ class _EventEditorState extends State<EventEditor> {
                               event.description = val;
                               eventDataChanged = true;
                             }),
-                            maxLines: 3,
+                            maxLines: 5,
                           ),
                         ),
                         Expanded(
                           flex: 1,
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: DateTimePicker(
-                                  type: DateTimePickerType.date,
-                                  dateMask: 'MMMM d, yyyy',
-                                  initialValue: event.date,
-                                  firstDate: DateTime(DateTime.now().year - 5),
-                                  lastDate: DateTime(DateTime.now().year + 5),
-                                  dateLabelText: 'Date',
-                                  decoration: textFieldDecoration.copyWith(suffixIcon: Icon(Icons.date_range_rounded)),
-                                  onChanged: (val) => setState(() {
-                                    event.date = val;
-                                    eventDataChanged = true;
-                                  }),
-                                ),
-                              ),
-                              SizedBox(width: 10),
-                              Expanded(
-                                child: DateTimePicker(
-                                  type: DateTimePickerType.time,
-                                  initialValue: event.time,
-                                  timeLabelText: "Hour",
-                                  decoration: textFieldDecoration.copyWith(suffixIcon: Icon(Icons.access_time_rounded)),
-                                  onChanged: (val) => setState(() {
-                                    event.time = val;
-                                    eventDataChanged = true;
-                                  }),
-                                  use24HourFormat: false,
-                                ),
-                              ),
-                            ],
+                          child: DateTimePicker(
+                            type: DateTimePickerType.dateTime,
+                            dateMask: 'MMMM dd, yyyy hh:mm a',
+                            initialValue: event.datetime,
+                            firstDate: DateTime(DateTime.now().year - 5),
+                            lastDate: DateTime(DateTime.now().year + 5),
+                            icon: Icon(Icons.event),
+                            dateLabelText: 'Date',
+                            timeLabelText: 'Time',
+                            onChanged: (val) => setState(() {
+                              event.datetime = val;
+                              eventDataChanged = true;
+                              print(val);
+                            }),
+                            decoration: textFieldDecoration.copyWith(hintText: 'Date and Time'),
+                            use24HourFormat: false,
+                            validator: (val) => val.isEmpty ? 'Enter Event Date and Time' : null,
                           )
                         ),
                         Expanded(

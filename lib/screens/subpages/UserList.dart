@@ -47,11 +47,11 @@ class _UserListState extends State<UserList> {
                 itemCount: usersLocal.length,
                 itemBuilder: (BuildContext context, int index){
                   return GestureDetector(
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => UserViewer(user: usersLocal[index]))),
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => UserViewer(accountData: usersLocal[index]))),
                     child: ListTile(
                       leading: CircleAvatar(child: Text(usersLocal[index].fullName[0].toUpperCase())),
                       title: Text(usersLocal[index].fullName),
-                      subtitle: Text('Joined: ${widget.datetimes[usersLocal[index].uid]}'),
+                      subtitle: Text(dateTimeFormatter.format(DateTime.parse(widget.datetimes[usersLocal[index].uid]))),
                     )
                   );
                 }

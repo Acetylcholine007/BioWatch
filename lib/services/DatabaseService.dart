@@ -1,4 +1,5 @@
 import 'package:bio_watch/models/Activity.dart';
+import 'package:bio_watch/models/Enum.dart';
 import 'package:bio_watch/models/Interested.dart';
 import 'package:bio_watch/models/MyEvent.dart';
 import 'package:bio_watch/models/Participant.dart';
@@ -24,7 +25,8 @@ class DatabaseService {
       accountType: snapshot.get('accountType') ?? '',
       address: snapshot.get('address') ?? '',
       contact: snapshot.get('contact') ?? '',
-      birthday: snapshot.get('birthday') ?? ''
+      birthday: snapshot.get('birthday') ?? '',
+      sex: snapshot.get('sex') ?? ''
     );
   }
 
@@ -33,9 +35,9 @@ class DatabaseService {
       return Activity(
         id: doc.id,
         heading: doc.get('heading') ?? '',
-        time: doc.get('time') ?? '',
-        date: doc.get('date') ?? '',
-        body: doc.get('body') ?? ''
+        datetime: doc.get('datetime') ?? '',
+        body: doc.get('body') ?? '',
+        type: ActivityType.values[doc.get('type')] ?? null
       );
     }).toList();
   }
@@ -48,8 +50,7 @@ class DatabaseService {
         eventName: doc.get('eventName') ?? '',
         hostName: doc.get('hostName') ?? '',
         address: doc.get('address') ?? '',
-        date: doc.get('date') ?? '',
-        time: doc.get('time') ?? '',
+        datetime: doc.get('datetime') ?? '',
         bannerUri: doc.get('bannerUri') ?? '',
         showcaseUris: doc.get('showcaseUris') ?? [],
         permitUris: doc.get('permitUris') ?? [],
@@ -67,8 +68,7 @@ class DatabaseService {
         eventName: doc.get('eventName') ?? '',
         hostName: doc.get('hostName') ?? '',
         address: doc.get('address') ?? '',
-        date: doc.get('date') ?? '',
-        time: doc.get('time') ?? '',
+        datetime: doc.get('datetime') ?? '',
         bannerUri: doc.get('bannerUri') ?? '',
         showcaseUris: doc.get('showcaseUris') ?? [],
         permitUris: doc.get('permitUris') ?? [],
@@ -87,7 +87,8 @@ class DatabaseService {
         accountType: doc.get('accountType') ?? '',
         address: doc.get('address') ?? '',
         contact: doc.get('contact') ?? '',
-        birthday: doc.get('birthday') ?? ''
+        birthday: doc.get('birthday') ?? '',
+        sex: doc.get('sex') ?? ''
       );
     }).toList();
   }
@@ -172,8 +173,7 @@ class DatabaseService {
         'eventName': event.eventName,
         'hostName': event.hostName,
         'address': event.address,
-        'date': event.date,
-        'time': event.time,
+        'datetime': event.datetime,
         'bannerUri': event.bannerUri,
         'showcaseUris': event.showcaseUris,
         'permitUris': event.permitUris,
@@ -194,8 +194,7 @@ class DatabaseService {
         'eventName': event.eventName,
         'hostName': event.hostName,
         'address': event.address,
-        'date': event.date,
-        'time': event.time,
+        'datetime': event.datetime,
         'bannerUri': event.bannerUri,
         'showcaseUris': event.showcaseUris,
         'permitUris': event.permitUris,
@@ -230,9 +229,9 @@ class DatabaseService {
     return activityCollection.doc(uid).collection('activities')
       .add({
         'heading': activity.heading,
-        'date': activity.date,
-        'time': activity.time,
+        'datetime': activity.datetime,
         'body': activity.body,
+        'type': activity.type.index
       })
       .then((value) => print('Activity ${value.id} added'))
       .catchError((error) => print('Failed to record activity'));
@@ -269,7 +268,8 @@ class DatabaseService {
       'address': person.address,
       'birthday': person.birthday,
       'accountType': person.accountType,
-      'contact': person.contact
+      'contact': person.contact,
+      'sex': person.sex
     })
     .then((value) => print('User data created'))
     .catchError((error) => print('Failed to create user data'));

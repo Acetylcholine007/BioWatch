@@ -4,8 +4,7 @@ class PeopleEvent {
   String eventName;
   String hostName;
   String address;
-  String date;
-  String time;
+  String datetime;
   String bannerUri;
   List showcaseUris;
   List permitUris;
@@ -18,8 +17,7 @@ class PeopleEvent {
     this.eventName,
     this.hostName,
     this.address,
-    this.date,
-    this.time,
+    this.datetime,
     this.bannerUri,
     this.showcaseUris,
     this.permitUris,
@@ -34,8 +32,7 @@ class PeopleEvent {
       eventName: this.eventName,
       hostName: this.hostName,
       address: this.address,
-      date: this.date,
-      time: this.time,
+      datetime: this.datetime,
       bannerUri: this.bannerUri,
       showcaseUris: [...this.showcaseUris],
       permitUris: [...this.permitUris],
