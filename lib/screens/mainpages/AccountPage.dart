@@ -45,7 +45,7 @@ class _AccountPageState extends State<AccountPage> {
             child: Column(
               children: [
                 Expanded(
-                  flex: 3,
+                  flex: 4,
                   child: GestureDetector(
                     onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => PhotoViewer(title: 'User Profile', image: snapshot.data))),
                     child: ClipRRect(

@@ -14,7 +14,7 @@ class EventAsset {
   }
 
   EventImage toEventImage() {
-    Image bannerImage = Image(image: FileImage(banner), fit: BoxFit.fitWidth);
+    Image bannerImage = banner != null ? Image(image: FileImage(banner), fit: BoxFit.fitWidth) : Image.asset('assets/placeholder.jpg', fit: BoxFit.fitWidth);
     List<Image> showcaseImages = showcases.map((showcase) => Image(image: FileImage(showcase), fit: BoxFit.fitWidth)).toList();
     List<Image> permitImages = permits.map((permit) => Image(image: FileImage(permit), fit: BoxFit.fitWidth)).toList();
 

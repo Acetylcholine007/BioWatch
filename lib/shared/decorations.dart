@@ -8,8 +8,6 @@ InputDecoration textFieldDecoration = InputDecoration(
 
 DateFormat dateTimeFormatter = DateFormat('MMMM dd, yyyy hh:mm a');
 
-DateFormat editorDateTimeFormatter = DateFormat('yyyy-MM-dd,HH:mm');
-
 DateFormat dateFormatter = DateFormat('MMMM dd, yyyy');
 
-DateFormat timeFormatter = DateFormat('hh:mm');
+DateFormat dateFormatter2 = DateFormat('MMM/dd/yyyy');

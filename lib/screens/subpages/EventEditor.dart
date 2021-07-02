@@ -187,143 +187,180 @@ class _EventEditorState extends State<EventEditor> {
             IconButton(icon: Icon(Icons.save_rounded), onPressed: saveChanges),
           ],
         ),
-        body: Container(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: Stack(
-                    alignment: Alignment.topRight,
-                    children: <Widget>[
-                      Positioned.fill(
-                        child: GestureDetector(
-                        onTap: () async {
-                          dynamic result = await imagePicker.showPicker(context);
-                          if(result['image'] != null) {
-                            if(eventAsset.banner != null)
-                              await eventAsset.banner.delete();
-                            setState(() {
-                              eventAsset.banner = result['image'];
-                              eventAssetChanged = true;
-                            });
-                          }
-                        },
-                        child: eventAsset.banner != null ? Image(image: FileImage(eventAsset.banner), fit: BoxFit.cover) :
-                          Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.cover)
-                        ),
-                      )
-                    ] + (eventAsset.banner != null ? [
-                    IconButton(icon: Icon(Icons.remove_circle_rounded, color: theme.accentColor), onPressed: () async {
-                      if(eventAsset.banner != null)
-                        await eventAsset.banner.delete();
-                      setState(() {
-                        eventAsset.banner = null;
-                        event.bannerUri = '';
-                        eventDataChanged = true;
-                      });
-                    })
-                    ] : []),
-                  ),
-                ),
-                Expanded(
-                  flex: 9,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+        body: Builder(
+          builder: (context) {
+            return SingleChildScrollView(
+              physics: ClampingScrollPhysics(),
+              child: Container(
+                child: Form(
+                  key: _formKey,
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height - Scaffold.of(context).appBarMaxHeight,
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Expanded(
-                          flex: 1,
-                          child: TextFormField(
-                            initialValue: event.eventName,
-                            decoration: textFieldDecoration.copyWith(hintText: 'Event Name'),
-                            validator: (val) => val.isEmpty ? 'Enter Event Name' : null,
-                            onChanged: (val) => setState(() {
-                              event.eventName = val;
-                              eventDataChanged = true;
-                            })
-                          ),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: TextFormField(
-                            initialValue: event.address,
-                            decoration: textFieldDecoration.copyWith(hintText: 'Event Address'),
-                            validator: (val) => val.isEmpty ? 'Enter Event Address' : null,
-                            onChanged: (val) => setState(() {
-                              event.address = val;
-                              eventDataChanged = true;
-                            })
-                          ),
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: TextFormField(
-                            keyboardType: TextInputType.multiline,
-                            initialValue: event.description,
-                            decoration: textFieldDecoration.copyWith(hintText: 'Event Description'),
-                            validator: (val) => val.isEmpty ? 'Enter Event Description' : null,
-                            onChanged: (val) => setState(() {
-                              event.description = val;
-                              eventDataChanged = true;
-                            }),
-                            maxLines: 5,
-                          ),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: DateTimePicker(
-                            type: DateTimePickerType.dateTime,
-                            dateMask: 'MMMM dd, yyyy hh:mm a',
-                            initialValue: event.datetime,
-                            firstDate: DateTime(DateTime.now().year - 5),
-                            lastDate: DateTime(DateTime.now().year + 5),
-                            icon: Icon(Icons.event),
-                            dateLabelText: 'Date',
-                            timeLabelText: 'Time',
-                            onChanged: (val) => setState(() {
-                              event.datetime = val;
-                              eventDataChanged = true;
-                              print(val);
-                            }),
-                            decoration: textFieldDecoration.copyWith(hintText: 'Date and Time'),
-                            use24HourFormat: false,
-                            validator: (val) => val.isEmpty ? 'Enter Event Date and Time' : null,
-                          )
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Expanded(
+                          flex: 3,
+                          child: Stack(
+                            alignment: Alignment.topRight,
+                            children: <Widget>[
+                              Positioned.fill(
                                 child: GestureDetector(
-                                  onTap: () => showAssetPicker(context, 'Showcase Collection', eventAsset.showcases),
-                                  child: eventAsset.showcases.isNotEmpty ? Image(image: FileImage(eventAsset.showcases[0]), fit: BoxFit.cover) :
-                                    Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.cover)
+                                  onTap: () async {
+                                    dynamic result = await imagePicker.showPicker(context);
+                                    if(result['image'] != null) {
+                                      if(eventAsset.banner != null)
+                                        await eventAsset.banner.delete();
+                                      setState(() {
+                                        eventAsset.banner = result['image'];
+                                        eventAssetChanged = true;
+                                      });
+                                    }
+                                  },
+                                  child: eventAsset.banner != null ? Image(image: FileImage(eventAsset.banner), fit: BoxFit.cover) :
+                                  Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.cover)
                                 ),
                               ),
-                              SizedBox(width: 10),
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () => showAssetPicker(context, 'Permit Collection', eventAsset.permits),
-                                  child: eventAsset.permits.isNotEmpty ? Image(image: FileImage(eventAsset.permits[0]), fit: BoxFit.cover) :
-                                    Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.cover)
-                                )
-                              ),
-                            ],
+                              Positioned(left: 0, bottom: 0, child: Container(color: Colors.grey[200], padding: EdgeInsets.all(10), child: Text('Event Banner')))
+                            ] + (eventAsset.banner != null ? [
+                            IconButton(icon: Icon(Icons.remove_circle_rounded, color: theme.accentColor), onPressed: () async {
+                              if(eventAsset.banner != null)
+                                await eventAsset.banner.delete();
+                              setState(() {
+                                eventAsset.banner = null;
+                                event.bannerUri = '';
+                                eventDataChanged = true;
+                              });
+                            })
+                            ] : []),
                           ),
                         ),
+                        Expanded(
+                          flex: 9,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  flex: 1,
+                                  child: TextFormField(
+                                    initialValue: event.eventName,
+                                    decoration: textFieldDecoration.copyWith(hintText: 'Event Name'),
+                                    validator: (val) => val.isEmpty ? 'Enter Event Name' : null,
+                                    onChanged: (val) => setState(() {
+                                      event.eventName = val;
+                                      eventDataChanged = true;
+                                    })
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 1,
+                                  child: TextFormField(
+                                    initialValue: event.address,
+                                    decoration: textFieldDecoration.copyWith(hintText: 'Event Address'),
+                                    validator: (val) => val.isEmpty ? 'Enter Event Address' : null,
+                                    onChanged: (val) => setState(() {
+                                      event.address = val;
+                                      eventDataChanged = true;
+                                    })
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: TextFormField(
+                                    keyboardType: TextInputType.multiline,
+                                    initialValue: event.description,
+                                    decoration: textFieldDecoration.copyWith(hintText: 'Event Description'),
+                                    validator: (val) => val.isEmpty ? 'Enter Event Description' : null,
+                                    onChanged: (val) => setState(() {
+                                      event.description = val;
+                                      eventDataChanged = true;
+                                    }),
+                                    maxLines: 5,
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 1,
+                                  child: DateTimePicker(
+                                    type: DateTimePickerType.dateTime,
+                                    dateMask: 'MMMM dd, yyyy hh:mm a',
+                                    initialValue: event.datetime,
+                                    firstDate: DateTime(DateTime.now().year - 5),
+                                    lastDate: DateTime(DateTime.now().year + 5),
+                                    icon: Icon(Icons.event),
+                                    dateLabelText: 'Date',
+                                    timeLabelText: 'Time',
+                                    onChanged: (val) => setState(() {
+                                      event.datetime = val;
+                                      eventDataChanged = true;
+                                      print(val);
+                                    }),
+                                    decoration: textFieldDecoration.copyWith(hintText: 'Date and Time'),
+                                    use24HourFormat: false,
+                                    validator: (val) => val.isEmpty ? 'Enter Event Date and Time' : null,
+                                  )
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      Expanded(
+                                        child: Card(
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(5),
+                                            child: Stack(
+                                              alignment: AlignmentDirectional.bottomStart,
+                                              children: [
+                                                Positioned.fill(
+                                                  child: GestureDetector(
+                                                    onTap: () => showAssetPicker(context, 'Showcase Collection', eventAsset.showcases),
+                                                    child: eventAsset.showcases.isNotEmpty ? Image(image: FileImage(eventAsset.showcases[0]), fit: BoxFit.cover) :
+                                                    Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.cover)
+                                                  ),
+                                                ),
+                                                Container(color: Colors.grey[200], padding: EdgeInsets.all(10), child: Text('Showcses'))
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(width: 10),
+                                      Expanded(
+                                        child: Card(
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(5),
+                                            child: Stack(
+                                              alignment: AlignmentDirectional.bottomStart,
+                                              children: [
+                                                Positioned.fill(
+                                                  child: GestureDetector(
+                                                    onTap: () => showAssetPicker(context, 'Permit Collection', eventAsset.permits),
+                                                    child: eventAsset.permits.isNotEmpty ? Image(image: FileImage(eventAsset.permits[0]), fit: BoxFit.cover) :
+                                                    Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.cover)
+                                                  ),
+                                                ),
+                                                Container(color: Colors.grey[200], padding: EdgeInsets.all(10), child: Text('Permits'))
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
                       ],
                     ),
                   ),
-                )
-              ],
-            ),
-          ),
+                ),
+              ),
+            );
+          }
         ),
       ),
     );

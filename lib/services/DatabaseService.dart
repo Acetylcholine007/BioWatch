@@ -300,7 +300,13 @@ class DatabaseService {
   }
 
   Future<List<MyEvent>> myEvents(List<String> eventId) {
-    return eventCollection.where('__name__', whereIn: eventId).get().then(_myEventListFromSnapshot).catchError((error){print(error);});
+    return eventCollection.where('__name__', whereIn: eventId).get().then((snapshot) {
+      List<String> missingIds = eventId.toSet().difference(snapshot.docs.map((doc) => doc.id).toList().toSet()).toList();
+      if(missingIds != null && missingIds.isNotEmpty) missingIds.forEach((eventId) => removeToMyEvents(eventId));
+      return _myEventListFromSnapshot(snapshot);
+    }).catchError((error){
+      print(error);
+    });
   }
 
   Future<List<AccountData>> interestedUsers(List<String> userIds) {

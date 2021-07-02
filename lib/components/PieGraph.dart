@@ -24,21 +24,34 @@ class PieGraph extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PieChart(
-      generateSeries(),
-      animate: true,
-      defaultRenderer: ArcRendererConfig(
-        arcRendererDecorators: [
-          ArcLabelDecorator()
-        ]
-      ),
-      behaviors: [
-        DatumLegend(
-          position: BehaviorPosition.end,
-          desiredMaxRows: 2,
-          cellPadding: EdgeInsets.only(right: 4.0, bottom: 4.0)
-        )
-      ],
+    final theme = Theme.of(context);
+    return Column(
+      children: [
+        Expanded(flex: 1, child: Center(child: Text('Popularity Chart', style: theme.textTheme.headline4.copyWith(fontSize: 30)))),
+        ] + (attendees == 0 && absentees == 0 ? [
+          Expanded(flex: 2, child: Center(child: Icon(Icons.group_rounded, size: 100, color: theme.primaryColor))),
+          Expanded(flex: 2, child: Center(child: Text('Nobody is taking up interest yet', style: theme.textTheme.headline4.copyWith(fontSize: 20)))),
+      ] : [
+        Expanded(
+          flex: 4,
+          child: PieChart(
+            generateSeries(),
+            animate: true,
+            defaultRenderer: ArcRendererConfig(
+              arcRendererDecorators: [
+                ArcLabelDecorator()
+              ]
+            ),
+            behaviors: [
+              DatumLegend(
+                position: BehaviorPosition.end,
+                desiredMaxRows: 2,
+                cellPadding: EdgeInsets.only(right: 4.0, bottom: 4.0)
+              )
+            ],
+          ),
+        ),
+      ]),
     );
   }
 }

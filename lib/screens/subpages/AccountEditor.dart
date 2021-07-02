@@ -129,100 +129,122 @@ class _AccountEditorState extends State<AccountEditor> {
             } : () => Navigator.of(context).pop(),
           ),
         ),
-        body: Container(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: GestureDetector(
-                      onTap: () async {
-                        dynamic result = await imagePicker.showPicker(context);
-                        if(result['image'] != null) {
-                          if(userId != null)
-                            await userId.delete();
-                          setState(() {
-                            userId = result['image'];
-                            userData.idUri = userId.path.split('/').last;
-                            profile = Image(image: FileImage(userId), fit: BoxFit.fitWidth);
-                            profileChanged = true;
-                          });
-                        }
-                      },
-                      child: SizedBox(
-                        height: 200,
-                        width: 300,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(5),
-                          child: profile == null ? Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.fitWidth) : profile
-                        ),
+        body: Builder(
+          builder: (context) {
+            return SingleChildScrollView(
+              physics: ClampingScrollPhysics(),
+              child: Container(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Form(
+                    key: _formKey,
+                    child: SizedBox(
+                      height: MediaQuery.of(context).size.height - Scaffold.of(context).appBarMaxHeight,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
+                            child: GestureDetector(
+                              onTap: () async {
+                                dynamic result = await imagePicker.showPicker(context);
+                                if(result['image'] != null) {
+                                  if(userId != null)
+                                    await userId.delete();
+                                  setState(() {
+                                    userId = result['image'];
+                                    userData.idUri = userId.path.split('/').last;
+                                    profile = Image(image: FileImage(userId), fit: BoxFit.cover);
+                                    profileChanged = true;
+                                  });
+                                }
+                              },
+                              child: SizedBox(
+                                height: 220,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(5),
+                                  child: Stack(
+                                    alignment: AlignmentDirectional.bottomStart,
+                                    children: [
+                                      Positioned.fill(
+                                        child: profile == null ? Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.fitWidth) : profile,
+                                      ),
+                                      Container(color: Colors.grey[200], padding: EdgeInsets.all(10), child: Text('Valid ID'))
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 30),
+                          DateTimePicker(
+                            validator: (val) => val.isEmpty ? 'Enter Birthday' : null,
+                            type: DateTimePickerType.date,
+                            dateMask: 'MMMM d, yyyy',
+                            initialValue: userData.birthday,
+                            firstDate: DateTime(1900),
+                            lastDate: DateTime(DateTime.now().year),
+                            dateLabelText: 'Birthday',
+                            decoration: textFieldDecoration.copyWith(hintText: 'Birthday'),
+                            onChanged: (val) => setState(() {
+                              userData.birthday = val;
+                              userDataChanged = true;
+                            })
+                          ),
+                          SizedBox(height: 16),
+                          TextFormField(
+                            initialValue: email,
+                            decoration: textFieldDecoration.copyWith(hintText: 'New Email'),
+                            validator: (val) => val.isEmpty ? 'Enter Email' : null,
+                            onChanged: (val) => setState(() {
+                              email = val;
+                              emailChanged = true;
+                            })
+                          ),
+                          SizedBox(height: 16),
+                          TextFormField(
+                            initialValue: password,
+                            decoration: textFieldDecoration.copyWith(suffixIcon: IconButton(
+                              onPressed: () => setState(() => hidePassword = !hidePassword),
+                              icon: Icon(Icons.visibility)
+                            ),
+                                hintText: 'New Password'
+                            ),
+                            validator: (val) => val.length < 7 && passwordChanged ? 'Length should be at least 7 characters' : null,
+                            onChanged: (val) => setState(() {
+                              password = val;
+                              passwordChanged = true;
+                            }),
+                            obscureText: hidePassword,
+                          ),
+                          SizedBox(height: 16),
+                          TextFormField(
+                            keyboardType: TextInputType.number,
+                            initialValue: userData.contact,
+                            decoration: textFieldDecoration.copyWith(hintText: 'Contact No.'),
+                            validator: (val) => val.isEmpty ? 'Enter Contact No.' : null,
+                            onChanged: (val) => setState(() {
+                              userData.contact = val;
+                              userDataChanged = true;
+                            })
+                          ),
+                          SizedBox(height: 30),
+                          SizedBox(
+                            height: 56,
+                            child: ElevatedButton(
+                              child: Text('SAVE CHANGES'),
+                              onPressed: saveChanges,
+                              style: ElevatedButton.styleFrom(primary: theme.accentColor),
+                            ),
+                          )
+                        ],
                       ),
                     ),
                   ),
-                  SizedBox(height: 30),
-                  DateTimePicker(
-                    validator: (val) => val.isEmpty ? 'Enter Birthday' : null,
-                    type: DateTimePickerType.date,
-                    dateMask: 'MMMM d, yyyy',
-                    initialValue: userData.birthday,
-                    firstDate: DateTime(1900),
-                    lastDate: DateTime(DateTime.now().year),
-                    dateLabelText: 'Birthday',
-                    decoration: textFieldDecoration.copyWith(hintText: 'Birthday'),
-                    onChanged: (val) => setState(() {
-                      userData.birthday = val;
-                      userDataChanged = true;
-                    })
-                  ),
-                  TextFormField(
-                    initialValue: email,
-                    decoration: textFieldDecoration.copyWith(hintText: 'New Email'),
-                    validator: (val) => val.isEmpty ? 'Enter Email' : null,
-                    onChanged: (val) => setState(() {
-                      email = val;
-                      emailChanged = true;
-                    })
-                  ),
-                  TextFormField(
-                    initialValue: password,
-                    decoration: textFieldDecoration.copyWith(suffixIcon: IconButton(
-                      onPressed: () => setState(() => hidePassword = !hidePassword),
-                      icon: Icon(Icons.visibility)
-                    ),
-                      hintText: 'New Password'
-                    ),
-                    validator: (val) => val.length < 7 && passwordChanged ? 'Length should be at least 7 characters' : null,
-                    onChanged: (val) => setState(() {
-                      password = val;
-                      passwordChanged = true;
-                    }),
-                    obscureText: hidePassword,
-                  ),
-                  TextFormField(
-                    keyboardType: TextInputType.number,
-                    initialValue: userData.contact,
-                    decoration: textFieldDecoration.copyWith(hintText: 'Contact No.'),
-                    validator: (val) => val.isEmpty ? 'Enter Contact No.' : null,
-                    onChanged: (val) => setState(() {
-                      userData.contact = val;
-                      userDataChanged = true;
-                    })
-                  ),
-                  Text(error, style: TextStyle(color: Colors.red, fontSize: 14)),
-                  SizedBox(height: 30),
-                  ElevatedButton(
-                    child: Text('SAVE CHANGES'),
-                    onPressed: saveChanges,
-                    style: ElevatedButton.styleFrom(primary: theme.accentColor),
-                  )
-                ],
+                )
               ),
-            ),
-          )
+            );
+          }
         ),
       ),
     );

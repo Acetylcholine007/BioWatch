@@ -13,14 +13,19 @@ class UserList extends StatefulWidget {
   UserList({this.users, this.type, this.datetimes});
 
   @override
-  _UserListState createState() => _UserListState(users);
+  _UserListState createState() {
+    List<AccountData> usersCopy = users;
+    usersCopy.sort((a, b) => DateTime.parse(datetimes[b.uid]).compareTo(DateTime.parse(datetimes[a.uid])));
+    return _UserListState(usersCopy);
+  }
 }
 
 class _UserListState extends State<UserList> {
   String queryName = '';
+  List<AccountData> users;
   List<AccountData> usersLocal;
 
-  _UserListState(this.usersLocal);
+  _UserListState(this.users);
 
   @override
   Widget build(BuildContext context) {

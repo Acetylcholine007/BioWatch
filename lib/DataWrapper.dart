@@ -32,9 +32,10 @@ class _DataWrapperState extends State<DataWrapper> {
       List<MyEvent> myEvents = myEventIds != null && myEventIds.isNotEmpty ? await _database.myEvents(myEventIds) : <MyEvent>[];
       Map<String, EventAsset> myEventAssets = <String, EventAsset>{};
       if(myEventIds != null) {
-        for(int i = 0; i < myEventIds.length; i++) {
-          myEventAssets[myEventIds[i]] = _imageManager.getEventAssetFromCache(
-            account.uid, myEventIds[i],
+        for(int i = 0; i < myEvents.length; i++) {
+          myEventAssets[myEvents[i].event.eventId] = _imageManager.getEventAssetFromCache(
+            account.uid,
+            myEvents[i].event.eventId,
             myEvents[i].event.bannerUri,
             myEvents[i].event.showcaseUris,
             myEvents[i].event.permitUris,

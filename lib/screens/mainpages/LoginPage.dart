@@ -69,59 +69,62 @@ class _LoginPageState extends State<LoginPage> {
                         obscureText: showPassword,
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Center(child: Text(error, style: TextStyle(color: Colors.red, fontSize: 14)))
-                    ),
-                    ElevatedButton(
-                      child: Text('LOG IN'),
-                        onPressed: () async {
-                          if(_formKey.currentState.validate()) {
-                            setState(() => loading = true);
-                            String result = await _auth.logIn(email, password);
-                            if(result != 'SUCCESS') {
-                              setState(() {
-                                error = result;
-                                loading = false;
-                              });
-                              showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: Text('Log In'),
-                                  content: Text(error),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: Text('OK')
-                                    )
-                                  ],
-                                )
+                    SizedBox(height: 30),
+                    SizedBox(
+                      height: 50,
+                      child: ElevatedButton(
+                        child: Text('LOG IN'),
+                          onPressed: () async {
+                            if(_formKey.currentState.validate()) {
+                              setState(() => loading = true);
+                              String result = await _auth.logIn(email, password);
+                              if(result != 'SUCCESS') {
+                                setState(() {
+                                  error = result;
+                                  loading = false;
+                                });
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: Text('Log In'),
+                                    content: Text(error),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: Text('OK')
+                                      )
+                                    ],
+                                  )
+                                );
+                              }
+                            } else {
+                              final snackBar = SnackBar(
+                                duration: Duration(seconds: 2),
+                                behavior: SnackBarBehavior.floating,
+                                content: Text('Fill up all the fields'),
+                                action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
                               );
+                              ScaffoldMessenger.of(context).showSnackBar(snackBar);
                             }
-                          } else {
-                            final snackBar = SnackBar(
-                              duration: Duration(seconds: 2),
-                              behavior: SnackBarBehavior.floating,
-                              content: Text('Fill up all the fields'),
-                              action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
-                            );
-                            ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                          }
-                        },
-                      style: ElevatedButton.styleFrom(primary: theme.accentColor)
+                          },
+                        style: ElevatedButton.styleFrom(primary: theme.accentColor)
+                      ),
                     ),
                     Divider(),
-                    ElevatedButton(
-                      child: Text('CREATE ACCOUNT'),
-                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => SignInPage(user: AccountData(
-                        fullName: '',
-                        accountType: 'USER',
-                        address: '',
-                        contact: '',
-                        birthday: '',
-                        sex: 'Male'
-                      )))),
-                      style: ElevatedButton.styleFrom(primary: theme.accentColor),
+                    SizedBox(
+                      height: 50,
+                      child: ElevatedButton(
+                        child: Text('CREATE ACCOUNT'),
+                        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => SignInPage(user: AccountData(
+                          fullName: '',
+                          accountType: 'USER',
+                          address: '',
+                          contact: '',
+                          birthday: '',
+                          sex: 'Male'
+                        )))),
+                        style: ElevatedButton.styleFrom(primary: theme.accentColor),
+                      ),
                     )
                   ],
                 ),

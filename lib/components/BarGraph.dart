@@ -33,15 +33,19 @@ class _BarGraphState extends State<BarGraph> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
+        Expanded(flex: 1, child: Center(child: Text('Attendance summary', style: theme.textTheme.headline4.copyWith(fontSize: 30)))),
         Expanded(
           flex: 4,
           child: BarChart(
             generateSeries(),
             animate: true,
             barRendererDecorator: BarLabelDecorator<String>(),
-            domainAxis: OrdinalAxisSpec(),
+            domainAxis: OrdinalAxisSpec(
+              renderSpec: SmallTickRendererSpec(labelRotation: 60),
+            ),
           ),
         ),
         Expanded(flex: 1, child: Row(
