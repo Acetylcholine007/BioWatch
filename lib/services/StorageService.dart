@@ -1,15 +1,22 @@
 import 'dart:io';
 
 import 'package:bio_watch/models/EventAsset.dart';
-import 'package:bio_watch/models/EventImage.dart';
-import 'package:bio_watch/models/MyEvent.dart';
-import 'package:bio_watch/models/PeopleEvent.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 class StorageService {
   FirebaseStorage storage = FirebaseStorage.instance;
+
+  Widget loadingBuilder (BuildContext context, Widget child, ImageChunkEvent loadingProgress) {
+    if (loadingProgress == null) return child;
+    return Center(
+      child: CircularProgressIndicator(
+      value: loadingProgress.expectedTotalBytes != null ?
+      loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes : null,
+      ),
+    );
+  }
 
   Future<String> uploadId(String uid, File file, Directory cachePath) async {
     String result = '';
@@ -33,10 +40,9 @@ class StorageService {
       await path.create(recursive: true);
     }
     File myId = File('${cachePath.path}/$uid/id/$filename');
-
     try {
       await storage.ref('users/$uid/$filename').writeToFile(myId);
-      return Image(image: FileImage(myId), fit: BoxFit.fitHeight);
+      return Image(image: FileImage(myId), fit: BoxFit.fitHeight, loadingBuilder: loadingBuilder);
     } on FirebaseException catch(e) {
       print(e);
       return Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.fitWidth);
@@ -46,22 +52,21 @@ class StorageService {
   Future<Image> getUserId(String uid, String filename) async {
     try {
       String url = await storage.ref('users/$uid/$filename').getDownloadURL();
-      return Image(image: NetworkImage(url), fit: BoxFit.fitHeight);
+      return Image(image: NetworkImage(url), fit: BoxFit.fitHeight, loadingBuilder: loadingBuilder);
     } on FirebaseException catch(e) {
       print(e);
       return Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.fitWidth);
     }
   }
 
-  Future<Image> getEventBanner(String uid, String eventId, String filename, Directory cachePath) async {
+  Future<File> getEventBanner(String uid, String eventId, String filename, Directory cachePath) async {
     File eventBanner = await File('${cachePath.path}/$uid/$eventId/$filename').create(recursive: true);
-
     try {
       await storage.ref('events/$eventId/$filename').writeToFile(eventBanner);
-      return Image(image: FileImage(eventBanner), fit: BoxFit.fitHeight);
+      return eventBanner;
     } on FirebaseException catch(e) {
       print(e);
-      return Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.cover);
+      return null;
     }
   }
 
@@ -89,22 +94,38 @@ class StorageService {
     return result;
   }
 
-  Future<EventImage> getEventImage(String eventId, String bannerUri, List showcaseUris, List permitUris) async {
-    Image banner;
-    List<Image> showcases = [];
-    List<Image> permits = [];
-    try{
-      banner = Image.network(await storage.ref('events/$eventId/$bannerUri').getDownloadURL(), fit: BoxFit.cover);
-      for(int i = 0; i < showcaseUris.length; i++) {
-        showcases.add(Image.network(await storage.ref('events/$eventId/showcases/${showcaseUris[i]}').getDownloadURL(), fit: BoxFit.cover));
-      }
-      for(int i = 0; i < permitUris.length; i++) {
-        permits.add(Image.network(await storage.ref('events/$eventId/permits/${permitUris[i]}').getDownloadURL(), fit: BoxFit.cover));
-      }
-      return EventImage(banner: banner, showcases: showcases, permits: permits);
+  Future<Image> getBannerImage(String eventId, bannerUri) async {
+    try {
+      return Image.network(await storage.ref('events/$eventId/$bannerUri').getDownloadURL(), fit: BoxFit.cover, loadingBuilder: loadingBuilder);
     } catch(e) {
       print(e);
-      return null;
+      return Future(() => Image.asset('assets/noImage.jpg', fit: BoxFit.fitWidth));
+    }
+  }
+
+  Future<List<Image>> getShowcaseImages(String eventId, List showcaseUris) async {
+    List<Image> showcases = [];
+    try {
+      for(int i = 0; i < showcaseUris.length; i++) {
+        showcases.add(Image.network(await storage.ref('events/$eventId/showcases/${showcaseUris[i]}').getDownloadURL(), fit: BoxFit.cover, loadingBuilder: loadingBuilder));
+      }
+      return showcases.isNotEmpty ? showcases : <Image>[Image.asset('assets/noImage.jpg', fit: BoxFit.cover)];
+    } catch(e) {
+      print(e);
+      return Future(() => <Image>[Image.asset('assets/noImage.jpg', fit: BoxFit.cover)]);
+    }
+  }
+
+  Future<List<Image>> getPermitImages(String eventId, List permitUris) async {
+    List<Image> permits = [];
+    try {
+      for(int i = 0; i < permitUris.length; i++) {
+        permits.add(Image.network(await storage.ref('events/$eventId/permits/${permitUris[i]}').getDownloadURL(), fit: BoxFit.cover, loadingBuilder: loadingBuilder));
+      }
+      return permits.isNotEmpty ? permits : <Image>[Image.asset('assets/noImage.jpg', fit: BoxFit.cover)];
+    } catch(e) {
+      print(e);
+      return Future(() => <Image>[Image.asset('assets/noImage.jpg', fit: BoxFit.cover)]);
     }
   }
 
@@ -112,9 +133,13 @@ class StorageService {
     try{
       EventAsset eventAsset = EventAsset();
 
-      File banner = await File('${cachePath.path}/$uid/$eventId/$bannerUri').create(recursive: true);
-      await storage.ref('events/$eventId/$bannerUri').writeToFile(banner);
-      eventAsset.banner = banner;
+      if(bannerUri != '') {
+        File banner = await File('${cachePath.path}/$uid/$eventId/$bannerUri').create(recursive: true);
+        await storage.ref('events/$eventId/$bannerUri').writeToFile(banner);
+        eventAsset.banner = banner;
+      } else {
+        eventAsset.banner = null;
+      }
 
       for(int showcaseIndex = 0; showcaseIndex < showcaseUris.length; showcaseIndex++) {
         File showcase = await File('${cachePath.path}/$uid/$eventId/showcases/${showcaseUris[showcaseIndex]}').create(recursive: true);
@@ -131,40 +156,6 @@ class StorageService {
     } catch(e) {
       print(e);
       return EventAsset();
-    }
-  }
-
-  Future<Map<String, EventAsset>> getMyEventAssets(String uid, List<MyEvent> myEvents, Directory cachePath) async {
-    Map<String, EventAsset> myEventAssets = <String, EventAsset>{};
-    try {
-      for(int eventIndex = 0; eventIndex < myEvents.length; eventIndex++) {
-        PeopleEvent event = myEvents[eventIndex].event;
-        myEventAssets[event.eventId] = EventAsset();
-
-        if(event.bannerUri != '') {
-          File banner = await File('${cachePath.path}/$uid/${event.eventId}/${event.bannerUri}').create(recursive: true);
-          await storage.ref('events/${event.eventId}/${event.bannerUri}').writeToFile(banner);
-          myEventAssets[event.eventId].banner = banner;
-        } else {
-          myEventAssets[event.eventId].banner = null;
-        }
-
-        for(int showcaseIndex = 0; showcaseIndex < event.showcaseUris.length; showcaseIndex++) {
-          File showcase = await File('${cachePath.path}/$uid/${event.eventId}/showcases/${event.showcaseUris[showcaseIndex]}').create(recursive: true);
-          await storage.ref('events/${event.eventId}/showcases/${event.showcaseUris[showcaseIndex]}').writeToFile(showcase);
-          myEventAssets[event.eventId].showcases.add(showcase);
-        }
-
-        for(int permitIndex = 0; permitIndex < event.permitUris.length; permitIndex++) {
-          File permit = await File('${cachePath.path}/$uid/${event.eventId}/permits/${event.permitUris[permitIndex]}').create(recursive: true);
-          await storage.ref('events/${event.eventId}/permits/${event.permitUris[permitIndex]}').writeToFile(permit);
-          myEventAssets[event.eventId].permits.add(permit);
-        }
-      }
-      return myEventAssets;
-    } catch(e) {
-      print(e);
-      return <String, EventAsset>{};
     }
   }
 }

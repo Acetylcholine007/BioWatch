@@ -15,11 +15,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class EventEditor extends StatefulWidget {
-  EventEditor({this.event, this.isNew, this.eventAsset, this.refresh});
+  EventEditor({this.event, this.isNew, this.eventAsset, this.refresh, this.uid});
   final EventAsset eventAsset;
   final PeopleEvent event;
   final bool isNew;
   final Function refresh;
+  final String uid;
 
   @override
   _EventEditorState createState() => _EventEditorState(event, eventAsset);
@@ -27,7 +28,7 @@ class EventEditor extends StatefulWidget {
 
 class _EventEditorState extends State<EventEditor> {
   final _formKey = GlobalKey<FormState>();
-  final imagePicker = ImageManager();
+  final imageManager = ImageManager();
   EventAsset eventAsset = EventAsset();
   PeopleEvent event;
   bool loading = false;
@@ -58,7 +59,7 @@ class _EventEditorState extends State<EventEditor> {
                     crossAxisCount: 3,
                     children: (collection.length < 6 ? <Card>[Card(child: GestureDetector(
                       onTap: () async {
-                        dynamic result = await imagePicker.showPicker(context);
+                        dynamic result = await imageManager.showPicker(context);
                         if(result['image'] != null) {
                           setState(() {
                             collection.add(result['image']);
@@ -113,7 +114,10 @@ class _EventEditorState extends State<EventEditor> {
         event.showcaseUris = eventAsset.showcases.isNotEmpty ? eventAsset.showcases.map((showcase) => showcase.path.split('/').last).toList() : [];
         if(widget.isNew) {
           String eventId = await _database.createEvent(event);
-          if(eventAssetChanged) await _storage.uploadEventAsset(eventId, eventAsset.banner, eventAsset.showcases, eventAsset.permits);
+          if(eventAssetChanged) {
+            await _storage.uploadEventAsset(eventId, eventAsset.banner, eventAsset.showcases, eventAsset.permits);
+            await imageManager.saveEventAssetToCache(widget.uid, eventId, eventAsset);
+          }
           await _database.addToMyEvents(eventId);
           await _database.createActivity(Activity(
             heading: 'Event Created',
@@ -135,7 +139,10 @@ class _EventEditorState extends State<EventEditor> {
             body: 'You\'ve edited ${event.eventName}',
             type: ActivityType.editEvent
           )) : event.eventId;
-          if(eventAssetChanged) await _storage.uploadEventAsset(eventId, eventAsset.banner, eventAsset.showcases, eventAsset.permits);
+          if(eventAssetChanged) {
+            await _storage.uploadEventAsset(eventId, eventAsset.banner, eventAsset.showcases, eventAsset.permits);
+            await imageManager.saveEventAssetToCache(widget.uid, eventId, eventAsset);
+          }
           widget.refresh();
           final snackBar = SnackBar(
             duration: Duration(seconds: 2),
@@ -143,6 +150,7 @@ class _EventEditorState extends State<EventEditor> {
             content: Text('Event Edited'),
             action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
           );
+          Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
         }
         Navigator.of(context).pop();
@@ -174,7 +182,7 @@ class _EventEditorState extends State<EventEditor> {
                       Navigator.of(context).pop();
                       saveChanges();
                     }, child: Text('Yes')),
-                    TextButton(onPressed: () async {
+                    TextButton(onPressed: () {
                       Navigator.of(context).pop();
                       Navigator.of(context).pop();
                     }, child: Text('No'))
@@ -207,13 +215,14 @@ class _EventEditorState extends State<EventEditor> {
                               Positioned.fill(
                                 child: GestureDetector(
                                   onTap: () async {
-                                    dynamic result = await imagePicker.showPicker(context);
+                                    dynamic result = await imageManager.showPicker(context);
                                     if(result['image'] != null) {
                                       if(eventAsset.banner != null)
                                         await eventAsset.banner.delete();
                                       setState(() {
                                         eventAsset.banner = result['image'];
                                         eventAssetChanged = true;
+                                        eventDataChanged = true;
                                       });
                                     }
                                   },
@@ -285,14 +294,14 @@ class _EventEditorState extends State<EventEditor> {
                                   child: DateTimePicker(
                                     type: DateTimePickerType.dateTime,
                                     dateMask: 'MMMM dd, yyyy hh:mm a',
-                                    initialValue: event.datetime,
+                                    initialValue: event.datetime.toString(),
                                     firstDate: DateTime(DateTime.now().year - 5),
                                     lastDate: DateTime(DateTime.now().year + 5),
                                     icon: Icon(Icons.event),
                                     dateLabelText: 'Date',
                                     timeLabelText: 'Time',
                                     onChanged: (val) => setState(() {
-                                      event.datetime = val;
+                                      event.datetime = DateTime.parse(val);
                                       eventDataChanged = true;
                                       print(val);
                                     }),
@@ -320,7 +329,7 @@ class _EventEditorState extends State<EventEditor> {
                                                     Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.cover)
                                                   ),
                                                 ),
-                                                Container(color: Colors.grey[200], padding: EdgeInsets.all(10), child: Text('Showcses'))
+                                                ClipRRect(borderRadius: BorderRadius.only(topRight: Radius.circular(5)), child: Container(color: Colors.grey[200], padding: EdgeInsets.all(10), child: Text('Showcses')))
                                               ],
                                             ),
                                           ),
@@ -341,7 +350,7 @@ class _EventEditorState extends State<EventEditor> {
                                                     Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.cover)
                                                   ),
                                                 ),
-                                                Container(color: Colors.grey[200], padding: EdgeInsets.all(10), child: Text('Permits'))
+                                                ClipRRect(borderRadius: BorderRadius.only(topRight: Radius.circular(5)), child: Container(color: Colors.grey[200], padding: EdgeInsets.all(10), child: Text('Permits')))
                                               ],
                                             ),
                                           ),

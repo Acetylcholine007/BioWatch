@@ -35,7 +35,7 @@ class _SignInPageState extends State<SignInPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return loading ? Loading() : GestureDetector(
+    return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
       child: Scaffold(
         appBar: AppBar(
@@ -43,8 +43,7 @@ class _SignInPageState extends State<SignInPage> {
         ),
         body: Builder(
           builder: (context) {
-            print(Scaffold.of(context).appBarMaxHeight);
-            return SingleChildScrollView(
+            return loading ? Loading() : SingleChildScrollView(
               physics: ClampingScrollPhysics(),
               child: Container(
                 child: Padding(
@@ -63,7 +62,7 @@ class _SignInPageState extends State<SignInPage> {
                               child: GestureDetector(
                                 onTap: () async {
                                   dynamic result = await imagePicker.showPicker(context);
-                                  if(result['image'] != null) {
+                                  if(result != null && result['image'] != null) {
                                     if(userProfile != null)
                                       await userProfile.delete();
                                     setState(() {
@@ -76,14 +75,19 @@ class _SignInPageState extends State<SignInPage> {
                                   height: 300,
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(5),
-                                    child: Stack(
-                                      alignment: AlignmentDirectional.bottomStart,
-                                      children: [
-                                        Positioned.fill(
-                                          child: userProfile != null ? Image(image: FileImage(userProfile), fit: BoxFit.cover) : Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.fitWidth),
-                                        ),
-                                        Container(color: Colors.grey[200], padding: EdgeInsets.all(10), child: Text('Valid ID'))
-                                      ],
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        border: Border.all(width: userProfile == null ? 1 : 0, color: Colors.red),
+                                      ),
+                                      child: Stack(
+                                        alignment: AlignmentDirectional.bottomStart,
+                                        children: [
+                                          Positioned.fill(
+                                            child: userProfile != null ? Image(image: FileImage(userProfile), fit: BoxFit.fitWidth) : Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.fitWidth),
+                                          ),
+                                          Container(color: Colors.grey[200], padding: EdgeInsets.all(10), child: Text('Valid ID'))
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -160,7 +164,7 @@ class _SignInPageState extends State<SignInPage> {
                               keyboardType: TextInputType.number,
                               initialValue: accountData.contact,
                               decoration: textFieldDecoration.copyWith(hintText: 'Contact No.'),
-                              validator: (val) => val.isEmpty ? 'Enter Contact No.' : null,
+                              validator: (val) => val.isNotEmpty ? val.length == 11 ? null : 'Length is not equal to 11 digits' : 'Enter Contact No.',
                               onChanged: (val) => setState(() => accountData.contact = val)
                             ),
                           ),
@@ -191,10 +195,13 @@ class _SignInPageState extends State<SignInPage> {
                                     dateMask: 'MMMM d, yyyy',
                                     initialValue: accountData.birthday,
                                     firstDate: DateTime(1900),
-                                    lastDate: DateTime(DateTime.now().year + 1),
+                                    lastDate: DateTime(DateTime.now().year - 2),
                                     dateLabelText: 'Birthday',
                                     decoration: textFieldDecoration.copyWith(hintText: 'Birthday'),
-                                    onChanged: (val) => setState(() => accountData.birthday = val)
+                                    onChanged: (val) {
+                                      print(val);
+                                      setState(() => accountData.birthday = val);
+                                    }
                                   ),
                                 )
                               ],
@@ -208,7 +215,9 @@ class _SignInPageState extends State<SignInPage> {
                                 if(_formKey.currentState.validate() && userProfile != null) {
                                   setState(() => loading = true);
                                   String result = await _auth.signIn(accountData, email, password, userProfile);
-                                  if(result != 'SUCCESS') {
+                                  if(result == 'SUCCESS') {
+                                    Navigator.of(context).pop();
+                                  } else {
                                     setState(() {
                                       error = result;
                                       loading = false;
@@ -226,8 +235,6 @@ class _SignInPageState extends State<SignInPage> {
                                         ],
                                       )
                                     );
-                                  } else {
-                                    Navigator.of(context).pop();
                                   }
                                 } else {
                                   final snackBar = SnackBar(

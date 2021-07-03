@@ -3,7 +3,7 @@ import 'package:bio_watch/components/QRDisplay.dart';
 import 'package:bio_watch/models/Account.dart';
 import 'package:bio_watch/models/Activity.dart';
 import 'package:bio_watch/models/Enum.dart';
-import 'package:bio_watch/shared/Data.dart';
+import 'package:bio_watch/shared/DataManager.dart';
 import 'package:bio_watch/models/EventAsset.dart';
 import 'package:bio_watch/models/Interested.dart';
 import 'package:bio_watch/models/Participant.dart';
@@ -33,15 +33,9 @@ class _EventDashboardState extends State<EventDashboard> {
     final interested = Provider.of<List<Interested>>(context);
     final participants = Provider.of<List<Participant>>(context);
     final DatabaseService _database = DatabaseService(uid: user.uid);
+    final isEnded = DateTime.now().compareTo(widget.event.datetime) == 1;
 
     if(interested != null && participants != null) {
-      // print('>>>>>');
-      // print(interested.map((x) => x.datetime).toList());
-      // interested.sort((a, b) => DateTime.parse(b.datetime).compareTo(DateTime.parse(a.datetime)));
-      // participants.sort((a, b) => DateTime.parse(b.datetime).compareTo(DateTime.parse(a.datetime)));
-      // print('??????');
-      // print(interested.map((x) => x.datetime).toList());
-
       return DefaultTabController(
         length: 3,
         child: GestureDetector(
@@ -56,113 +50,179 @@ class _EventDashboardState extends State<EventDashboard> {
                 PopupMenuButton(
                   icon: Icon(Icons.more_vert_rounded),
                   itemBuilder: (BuildContext context) => <PopupMenuEntry>[
-                    PopupMenuItem(child: GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                        Navigator.push(context, MaterialPageRoute(
-                          builder: (context) =>
-                            EventEditor(
-                              event: widget.event.copy(),
-                              isNew: false,
-                              eventAsset: widget.eventAsset,
-                              refresh: widget.refresh
-                            )
-                        ));
-                      },
-                        child: Text('Edit Event')
-                    )),
-                    PopupMenuItem(child: GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text('Cancel Event'),
-                            content: Text('Do you really want to cancel this event?'),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: Text('NO')
-                              ),
-                              TextButton(
-                                onPressed: () async {
-                                  String result = DateTime.parse(widget.event.datetime).compareTo(DateTime.now()) != -1 ?
-                                  await _database.cancelEvent(widget.event.eventId, Activity(
-                                    heading: 'Event Cancelled',
-                                    datetime: DateTime.now().toString(),
-                                    body: 'You\'ve cancelled ${widget.event.eventName}',
-                                    type: ActivityType.cancelEvent
-                                  )) : 'Can no longer cancel an event passed to its set event date.';
-                                  Navigator.of(context).pop();
-                                  if(result == 'SUCCESS') {
-                                    final snackBar = SnackBar(
-                                      duration: Duration(seconds: 3),
-                                      behavior: SnackBarBehavior.floating,
-                                      content: Text('Event Cancelled'),
-                                      action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
-                                    );
-                                    Navigator.of(context).pop();
-                                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                                  } else {
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                        title: Text('Cancel Event'),
-                                        content: Text(result),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () => Navigator.pop(context),
-                                            child: Text('OK')
-                                          )
-                                        ],
-                                      )
-                                    );
-                                  }
-                                },
-                                child: Text('YES')
-                              )
-                            ],
-                          )
-                        );
-                      },
-                      child: Text('Cancel Event')
-                    )),
-                    PopupMenuItem(child: GestureDetector(
-                      onTap: () async {
-                        Navigator.pop(context);
-                        final data = DataManager(
-                          uid: user.uid,
-                          event: widget.event,
-                          participants: participants,
-                          datetimes: {for (var user in participants) user.uid: user.datetime}
-                        );
-                        String result = await data.exportData(widget.event.eventId);
-                        if(result == 'SUCCESS') {
-                          final snackBar = SnackBar(
-                            duration: Duration(seconds: 2),
-                            behavior: SnackBarBehavior.floating,
-                            content: Text('Data Exported'),
-                            action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                        } else {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text('Export Data'),
-                              content: Text(result),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: Text('OK')
+                    PopupMenuItem(
+                      enabled: !isEnded,
+                      child: GestureDetector(
+                        onTap: () {
+                          if(!isEnded) {
+                            Navigator.pop(context);
+                            Navigator.push(context, MaterialPageRoute(
+                              builder: (context) =>
+                                EventEditor(
+                                  uid: user.uid,
+                                  event: widget.event.copy(),
+                                  isNew: false,
+                                  eventAsset: widget.eventAsset,
+                                  refresh: widget.refresh
                                 )
-                              ],
-                            )
+                            ));
+                          }
+                        },
+                        child: Text('Edit Event')
+                      )
+                    ),
+                    PopupMenuItem(
+                      enabled: !isEnded,
+                      child: GestureDetector(
+                        onTap: () {
+                          if(!isEnded) {
+                            Navigator.pop(context);
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: Text('Cancel Event'),
+                                content: Text('Do you really want to cancel this event?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: Text('NO')
+                                  ),
+                                  TextButton(
+                                    onPressed: () async {
+                                      String result = await _database.cancelEvent(widget.event.eventId, Activity(
+                                        heading: 'Event Cancelled',
+                                        datetime: DateTime.now().toString(),
+                                        body: 'You\'ve cancelled ${widget.event.eventName}',
+                                        type: ActivityType.cancelEvent
+                                      ));
+                                      Navigator.of(context).pop();
+                                      if(result == 'SUCCESS') {
+                                        final snackBar = SnackBar(
+                                          duration: Duration(seconds: 3),
+                                          behavior: SnackBarBehavior.floating,
+                                          content: Text('Event Cancelled'),
+                                          action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
+                                        );
+                                        Navigator.of(context).pop();
+                                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                                      } else {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            title: Text('Cancel Event'),
+                                            content: Text(result),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(context),
+                                                child: Text('OK')
+                                              )
+                                            ],
+                                          )
+                                        );
+                                      }
+                                    },
+                                    child: Text('YES')
+                                  )
+                                ],
+                              )
+                            );
+                          }
+                        },
+                        child: Text('Cancel Event')
+                      )
+                    ),
+                    PopupMenuItem(
+                      child: GestureDetector(
+                        onTap: () async {
+                          Navigator.pop(context);
+                          final data = DataManager(
+                            uid: user.uid,
+                            event: widget.event,
+                            participants: participants,
+                            datetimes: {for (var user in participants) user.uid: user.datetime}
                           );
-                        }
-                      },
-                      child: Text('Export Data')
-                    )),
+                          String result = await data.exportData(widget.event.eventId);
+                          if(result == 'SUCCESS') {
+                            final snackBar = SnackBar(
+                              duration: Duration(seconds: 2),
+                              behavior: SnackBarBehavior.floating,
+                              content: Text('Data Exported'),
+                              action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
+                            );
+                            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                          } else {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: Text('Export Data'),
+                                content: Text(result),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: Text('OK')
+                                  )
+                                ],
+                              )
+                            );
+                          }
+                        },
+                        child: Text('Export Data')
+                      ),
+                    ),
+                    PopupMenuItem(
+                      enabled: isEnded,
+                      child: GestureDetector(
+                        onTap: () {
+                          if(isEnded) {
+                            Navigator.pop(context);
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: Text('Archive Event'),
+                                content: Text('Archiving event will remove it from your Event list but data will be kept at the database for possible future usage. Do you really want to archive this event?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: Text('NO')
+                                  ),
+                                  TextButton(
+                                    onPressed: () async {
+                                      String result = await _database.archiveEvent(widget.event.eventId, Activity(
+                                        heading: 'Event Archived',
+                                        datetime: DateTime.now().toString(),
+                                        body: 'You\'ve archived ${widget.event.eventName}',
+                                        type: ActivityType.archiveEvent
+                                      ));
+                                      if(result == 'SUCCESS') {
+                                        widget.refresh();
+                                        Navigator.of(context).pop();
+                                        Navigator.of(context).pop();
+                                      } else {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            title: Text('Archive Event'),
+                                            content: Text(result),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(context),
+                                                child: Text('OK')
+                                              )
+                                            ],
+                                          )
+                                        );
+                                      }
+                                    },
+                                    child: Text('YES')
+                                  ),
+                                ]
+                              )
+                            );
+                          }
+                        },
+                        child: Text('Archive Event')
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -176,7 +236,7 @@ class _EventDashboardState extends State<EventDashboard> {
             ),
             body: TabBarView(
               children: [
-                Statistics(createdAt: DateTime.parse(widget.event.createdAt), conductedAt: DateTime.parse(widget.event.datetime)),
+                Statistics(createdAt: DateTime.parse(widget.event.createdAt), conductedAt: widget.event.datetime),
                 FutureBuilder(
                   future: _database.interestedUsers(interested.map((interested) => interested.uid).toList()),
                   builder: (context, snapshot) {

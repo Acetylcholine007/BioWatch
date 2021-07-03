@@ -1,7 +1,7 @@
-import 'package:bio_watch/components/Loading.dart';
 import 'package:bio_watch/models/AccountData.dart';
 import 'package:bio_watch/services/StorageService.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import 'PhotoViewer.dart';
 
@@ -24,6 +24,7 @@ class UserViewer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final StorageService _storage = StorageService();
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -42,15 +43,28 @@ class UserViewer extends StatelessWidget {
                     if (snapshot.connectionState == ConnectionState.done) {
                       return GestureDetector(
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => PhotoViewer(title: 'User Profile', image: snapshot.data))),
-                        child: snapshot.data,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(5),
+                          child: snapshot.data,
+                        ),
                       );
                     } else {
-                      return Loading();
+                      return ClipRRect(
+                        child: Container(
+                          color: Colors.white,
+                          child: Center(
+                            child: SpinKitRotatingPlain(
+                              color: theme.accentColor,
+                              size: 40
+                            ),
+                          ),
+                        ),
+                      );
                     }
                   },
                 )
               ),
-              Divider(),
+              Divider(height: 20),
               Expanded(
                 flex: 8,
                 child: ListView(

@@ -64,7 +64,7 @@ class Statistics extends StatelessWidget {
                           child: Row(
                             children: [
                               Icon(Icons.directions_walk_rounded, size: 30, color: Colors.grey[700]),
-                              Text('${interested.length}', style: theme.textTheme.headline4.copyWith(fontSize: 29)),
+                              Text('${participants.length}', style: theme.textTheme.headline4.copyWith(fontSize: 29)),
                             ],
                           ),
                         )

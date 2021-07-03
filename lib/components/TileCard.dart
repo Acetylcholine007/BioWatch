@@ -5,7 +5,7 @@ class TileCard extends StatelessWidget {
   final String eventName;
   final String hostName;
   final String address;
-  final String datetime;
+  final DateTime datetime;
   final Image banner;
 
   TileCard({this.eventName, this.hostName, this.address, this.datetime, this.banner});
@@ -39,7 +39,7 @@ class TileCard extends StatelessWidget {
                       ),
                       Expanded(
                         flex: 1,
-                        child: Text(dateTimeFormatter.format(DateTime.parse(datetime)), style: theme.textTheme.bodyText1, overflow: TextOverflow.ellipsis),
+                        child: Text(DateTime.now().compareTo(datetime) == 1 ? 'EVENT ENDED' : dateTimeFormatter.format(datetime), style: theme.textTheme.bodyText1, overflow: TextOverflow.ellipsis),
                       ),
                       Expanded(
                         flex: 1,

@@ -1,12 +1,14 @@
 import 'dart:io';
 
 import 'package:bio_watch/models/EventAsset.dart';
+import 'package:bio_watch/services/StorageService.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
 class ImageManager {
   final picker = ImagePicker();
+  final StorageService _storage = StorageService();
   File _image;
 
   _imgFromCamera() async {
@@ -27,6 +29,10 @@ class ImageManager {
 
   Future<dynamic> showPicker(context) {
     return showModalBottomSheet(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+      ),
       context: context,
       builder: (BuildContext bc) {
         return SafeArea(
@@ -56,42 +62,12 @@ class ImageManager {
     );
   }
 
-  // Future<String> saveIdToCache(String uid, File file) async {
-  //   String result = '';
-  //   try {
-  //     Directory cachePath = await getTemporaryDirectory();
-  //     Directory idPath = Directory('${cachePath.path}/$uid/id');
-  //     if(idPath.existsSync()) {
-  //       idPath.deleteSync(recursive: true);
-  //     }
-  //     file.copySync('${idPath.path}/${file.path.split('/').last}');
-  //     result = 'SUCCESS';
-  //   } catch(e) {
-  //     result = e.toString();
-  //   }
-  //   return result;
-  // }
-
-  // Future<File> getIdFromCache(String uid, String fileName) async {
-  //   try {
-  //     Directory cachePath = await getTemporaryDirectory();
-  //     Directory idPath = Directory('${cachePath.path}/$uid/id');
-  //     return File('${idPath.path}/$fileName');
-  //   } catch(e) {
-  //     print(e);
-  //     return null;
-  //   }
-  // }
-
   Future<String> saveEventAssetToCache(String uid, String eventId, EventAsset eventAsset) async {
     String result = '';
     try {
       Directory cachePath = await getTemporaryDirectory();
       Directory eventPath = Directory('${cachePath.path}/$uid/$eventId');
-      if(eventPath.existsSync()) {
-        eventPath.deleteSync(recursive: true);
-      }
-      eventAsset.banner.copySync('${eventPath.path}/${eventAsset.banner.path.split('/').last}');
+      if(eventAsset.banner != null) eventAsset.banner.copySync('${eventPath.path}/${eventAsset.banner.path.split('/').last}');
       eventAsset.showcases.forEach((showcase) => showcase.copySync('${eventPath.path}/showcases/${showcase.path.split('/').last}'));
       eventAsset.permits.forEach((permit) => permit.copySync('${eventPath.path}/permits/${permit.path.split('/').last}'));
       result = 'SUCCESS';
@@ -101,7 +77,7 @@ class ImageManager {
     return result;
   }
 
-  EventAsset getEventAssetFromCache(String uid, String eventId, String banner, List showcases, List permits, Directory cachePath) {
+  Future<EventAsset> getEventAssetFromCache(String uid, String eventId, String banner, List showcases, List permits, Directory cachePath) async {
     try {
       EventAsset eventAsset = EventAsset();
       Directory eventPath = Directory('${cachePath.path}/$uid/$eventId');
@@ -109,7 +85,8 @@ class ImageManager {
       eventAsset.banner = banner != '' ? File('${eventPath.path}/$banner') : null;
       showcases.forEach((showcase) => eventAsset.showcases.add(File('${eventPath.path}/showcases/$showcase')));
       permits.forEach((permit) => eventAsset.permits.add(File('${eventPath.path}/permits/$permit')));
-      return eventAsset;
+
+      return eventAsset.hasMissing() ? await _storage.getEventAsset(uid, eventId, banner, showcases, permits, cachePath) : Future(() => eventAsset);
     } catch(e) {
       print(e);
       return null;

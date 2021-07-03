@@ -5,7 +5,6 @@ import 'package:bio_watch/models/PeopleEvent.dart';
 import 'package:bio_watch/models/AccountData.dart';
 import 'package:bio_watch/screens/subpages/EventViewer.dart';
 import 'package:bio_watch/services/DatabaseService.dart';
-import 'package:bio_watch/services/StorageService.dart';
 import 'package:bio_watch/shared/decorations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -18,7 +17,6 @@ class EventPage extends StatefulWidget {
 }
 
 class _EventPageState extends State<EventPage> {
-  final StorageService _storage = StorageService();
   String queryName = '';
 
   @override
@@ -51,29 +49,19 @@ class _EventPageState extends State<EventPage> {
               padding: const EdgeInsets.all(8.0),
               child: ListView.builder(
                 itemCount: events.length,
-                itemBuilder: (BuildContext context, int index){
-                  return FutureBuilder(
-                    initialData: '',
-                    future: _database.getInterestedCount(events[index].eventId),
-                    builder: (context, countSnapshot) {
+                itemBuilder: (BuildContext context, int index) {
+                  return Builder(
+                    builder: (context) {
+                      Future<String> count = _database.getInterestedCount(events[index].eventId);
                       return GestureDetector(
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => StreamProvider<List<String>>.value(
                           initialData: null,
                           value: DatabaseService(uid: accountData.uid).myEventIds,
-                          child: FutureBuilder(
-                            future: _storage.getEventImage(events[index].eventId, events[index].bannerUri, events[index].showcaseUris, events[index].permitUris),
-                            builder: (context, snapshot) {
-                              if(snapshot.connectionState == ConnectionState.done) {
-                                return EventViewer(event: events[index], user: accountData, eventImage: snapshot.data, interestedCount: countSnapshot.data);
-                              } else {
-                                return Loading();
-                              }
-                            }
-                          )
+                          child: EventViewer(event: events[index], user: accountData, interestedCount: count),
                         ))),
-                        child: BannerCard(event: events[index], cachePath: data.cachePath, uid: accountData.uid, interestedCount: countSnapshot.data)
+                        child: BannerCard(event: events[index], cachePath: data.cachePath, uid: accountData.uid, interestedCount: count)
                       );
-                    }
+                    },
                   );
                 }
               ),

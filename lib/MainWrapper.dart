@@ -104,12 +104,13 @@ class _MainWrapperState extends State<MainWrapper> {
                 eventName: '',
                 hostName: accountData.fullName,
                 address: '',
-                datetime: '',
+                datetime: DateTime.now(),
                 description: '',
                 bannerUri: 'assets/events/img1.jpg',
                 showcaseUris: [],
                 permitUris: [],
-                createdAt: DateTime.now().toString()
+                createdAt: DateTime.now().toString(),
+                isArchive: false
               ),
               isNew: true,
               eventAsset: EventAsset(),

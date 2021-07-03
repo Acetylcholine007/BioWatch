@@ -10,6 +10,7 @@ import 'package:bio_watch/services/StorageService.dart';
 import 'package:bio_watch/shared/ImageManager.dart';
 import 'package:bio_watch/shared/decorations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 
 class AccountPage extends StatefulWidget {
@@ -35,9 +36,37 @@ class _AccountPageState extends State<AccountPage> {
 
     File profile = File('${data.cachePath.path}/${accountData.uid}/id/${accountData.idUri}');
 
-    return FutureBuilder(
-      initialData: profile.existsSync() ? Image(image: FileImage(profile), fit: BoxFit.fitHeight) : Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.fitWidth),
-      future: StorageService().getMyId(accountData.uid, accountData.idUri, data.cachePath),
+    Widget initialId() {
+      if(accountData.idUri != '') {
+        if(profile.existsSync()) {
+          return Image(image: FileImage(profile), fit: BoxFit.fitHeight);
+        } else {
+          return Container(
+            color: Colors.white,
+            child: Center(
+              child: SpinKitRotatingPlain(
+                color: theme.accentColor,
+                size: 40
+              ),
+            ),
+          );
+        }
+      } else {
+        return Image.asset('assets/noImage.jpg', fit: BoxFit.fitWidth);
+      }
+    }
+
+    Future<Image> getId() {
+      if(accountData.idUri != '') {
+        return StorageService().getMyId(accountData.uid, accountData.idUri, data.cachePath);
+      } else {
+        return Future(() => Image.asset('assets/noImage.jpg', fit: BoxFit.fitWidth));
+      }
+    }
+
+    return FutureBuilder<Widget>(
+      initialData: initialId(),
+      future: getId(),
       builder: (context, snapshot) {
         return Container(
           child: Padding(

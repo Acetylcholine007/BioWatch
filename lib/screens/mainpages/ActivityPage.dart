@@ -3,7 +3,6 @@ import 'package:bio_watch/components/NoActivity.dart';
 import 'package:bio_watch/models/Account.dart';
 import 'package:bio_watch/models/Activity.dart';
 import 'package:bio_watch/models/Enum.dart';
-import 'package:bio_watch/screens/subpages/ActivityViewer.dart';
 import 'package:bio_watch/services/DatabaseService.dart';
 import 'package:bio_watch/shared/decorations.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +28,10 @@ class _ActivityPageState extends State<ActivityPage> {
       ActivityType.editEvent: Icons.event_available_rounded,
       ActivityType.cancelEvent: Icons.event_busy_rounded,
       ActivityType.joinEvent: Icons.directions_walk_rounded,
-      ActivityType.exportData: Icons.send_rounded
+      ActivityType.exportData: Icons.send_rounded,
+      ActivityType.markEvent: Icons.bookmark_rounded,
+      ActivityType.unmarkEvent: Icons.bookmark_border_rounded,
+      ActivityType.archiveEvent: Icons.archive_rounded,
     };
 
     if(activities != null) {
@@ -40,7 +42,27 @@ class _ActivityPageState extends State<ActivityPage> {
           itemCount: activities.length,
           itemBuilder: (BuildContext context, int index){
             return GestureDetector(
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ActivityViewer(activity: activities[index]))),
+              onTap: () => showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text(activities[index].heading),
+                  content: RichText(
+                    //textAlign: TextAlign.center,
+                    text: TextSpan(
+                      children: [
+                        TextSpan(text: activities[index].body + ' in ', style: theme.textTheme.bodyText1.copyWith(fontSize: 16, fontWeight: FontWeight.normal)),
+                        TextSpan(text: dateTimeFormatter.format(DateTime.parse(activities[index].datetime)), style: theme.textTheme.bodyText1.copyWith(fontSize: 16))
+                      ]
+                    )
+                  ),
+                  actions: [
+                    TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text('OK')
+                    )
+                  ],
+                )
+              ),
               child: Dismissible(
                 direction: DismissDirection.endToStart,
                 key: Key(activities[index].id),

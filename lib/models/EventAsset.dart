@@ -20,4 +20,20 @@ class EventAsset {
 
     return EventImage(banner: bannerImage, showcases: showcaseImages, permits: permitImages);
   }
+
+  bool hasMissing() {
+    bool isIncomplete = false;
+
+    if(banner != null && !banner.existsSync()) return true;
+
+    for(int i = 0; i < showcases.length; i++) {
+      if(!showcases[i].existsSync()) return true;
+    }
+
+    for(int i = 0; i < permits.length; i++) {
+      if(!permits[i].existsSync()) return true;
+    }
+
+    return isIncomplete;
+  }
 }

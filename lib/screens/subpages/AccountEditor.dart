@@ -148,7 +148,7 @@ class _AccountEditorState extends State<AccountEditor> {
                             child: GestureDetector(
                               onTap: () async {
                                 dynamic result = await imagePicker.showPicker(context);
-                                if(result['image'] != null) {
+                                if(result != null && result['image'] != null) {
                                   if(userId != null)
                                     await userId.delete();
                                   setState(() {
@@ -169,7 +169,7 @@ class _AccountEditorState extends State<AccountEditor> {
                                       Positioned.fill(
                                         child: profile == null ? Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.fitWidth) : profile,
                                       ),
-                                      Container(color: Colors.grey[200], padding: EdgeInsets.all(10), child: Text('Valid ID'))
+                                      ClipRRect(borderRadius: BorderRadius.only(topRight: Radius.circular(5)), child: Container(color: Colors.grey[200], padding: EdgeInsets.all(10), child: Text('Valid ID')))
                                     ],
                                   ),
                                 ),
@@ -183,7 +183,7 @@ class _AccountEditorState extends State<AccountEditor> {
                             dateMask: 'MMMM d, yyyy',
                             initialValue: userData.birthday,
                             firstDate: DateTime(1900),
-                            lastDate: DateTime(DateTime.now().year),
+                            lastDate: DateTime(DateTime.now().year - 2),
                             dateLabelText: 'Birthday',
                             decoration: textFieldDecoration.copyWith(hintText: 'Birthday'),
                             onChanged: (val) => setState(() {
@@ -222,7 +222,7 @@ class _AccountEditorState extends State<AccountEditor> {
                             keyboardType: TextInputType.number,
                             initialValue: userData.contact,
                             decoration: textFieldDecoration.copyWith(hintText: 'Contact No.'),
-                            validator: (val) => val.isEmpty ? 'Enter Contact No.' : null,
+                            validator: (val) => val.isNotEmpty ? val.length == 11 ? null : 'Length is not equal to 11 digits' : 'Enter Contact No.',
                             onChanged: (val) => setState(() {
                               userData.contact = val;
                               userDataChanged = true;

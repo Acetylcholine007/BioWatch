@@ -4,5 +4,8 @@ enum ActivityType {
   editEvent,
   cancelEvent,
   joinEvent,
-  exportData
+  exportData,
+  markEvent,
+  unmarkEvent,
+  archiveEvent
 }

@@ -4,12 +4,13 @@ class PeopleEvent {
   String eventName;
   String hostName;
   String address;
-  String datetime;
+  DateTime datetime;
   String bannerUri;
   List showcaseUris;
   List permitUris;
   String description;
   String createdAt;
+  bool isArchive;
 
   PeopleEvent({
     this.eventId,
@@ -22,7 +23,8 @@ class PeopleEvent {
     this.showcaseUris,
     this.permitUris,
     this.description,
-    this.createdAt
+    this.createdAt,
+    this.isArchive
   });
 
   PeopleEvent copy() {
@@ -32,12 +34,13 @@ class PeopleEvent {
       eventName: this.eventName,
       hostName: this.hostName,
       address: this.address,
-      datetime: this.datetime,
+      datetime: DateTime.parse(this.datetime.toString()),
       bannerUri: this.bannerUri,
       showcaseUris: [...this.showcaseUris],
       permitUris: [...this.permitUris],
       description: this.description,
-      createdAt: this.createdAt
+      createdAt: this.createdAt,
+      isArchive: this.isArchive
     );
   }
 }

@@ -50,12 +50,13 @@ class DatabaseService {
         eventName: doc.get('eventName') ?? '',
         hostName: doc.get('hostName') ?? '',
         address: doc.get('address') ?? '',
-        datetime: doc.get('datetime') ?? '',
+        datetime: doc.get('datetime').toDate() ?? null,
         bannerUri: doc.get('bannerUri') ?? '',
         showcaseUris: doc.get('showcaseUris') ?? [],
         permitUris: doc.get('permitUris') ?? [],
         description: doc.get('description') ?? '',
-        createdAt: doc.get('createdAt') ?? ''
+        createdAt: doc.get('createdAt') ?? '',
+        isArchive: doc.get('isArchive') ?? ''
       );
     }).toList();
   }
@@ -68,12 +69,13 @@ class DatabaseService {
         eventName: doc.get('eventName') ?? '',
         hostName: doc.get('hostName') ?? '',
         address: doc.get('address') ?? '',
-        datetime: doc.get('datetime') ?? '',
+        datetime: doc.get('datetime').toDate() ?? null,
         bannerUri: doc.get('bannerUri') ?? '',
         showcaseUris: doc.get('showcaseUris') ?? [],
         permitUris: doc.get('permitUris') ?? [],
         description: doc.get('description') ?? '',
-        createdAt: doc.get('createdAt') ?? ''
+        createdAt: doc.get('createdAt') ?? '',
+        isArchive: doc.get('isArchive') ?? ''
       ));
     }).toList();
   }
@@ -123,7 +125,7 @@ class DatabaseService {
       .catchError((error) => print('Failed to remove from myEvents'));
   }
 
-  Future markEvent(String eventId) async {
+  Future markEvent(String eventId, Activity activity) async {
     return eventCollection
       .doc(eventId).collection('interested').doc(uid).set({
         'uid': uid,
@@ -131,16 +133,18 @@ class DatabaseService {
       })
       .then((value) {
         addToMyEvents(eventId);
+        createActivity(activity);
         print('Event $eventId marked as interested');
       })
       .catchError((error) => print('Failed to mark event $eventId'));
   }
 
-  Future unmarkEvent(String eventId) async {
+  Future unmarkEvent(String eventId, Activity activity) async {
     return eventCollection
       .doc(eventId).collection('interested').doc(uid).delete()
       .then((value) {
         removeToMyEvents(eventId);
+        createActivity(activity);
         print('Event $eventId removed from interests');
       })
       .catchError((error) => print('Failed to remove event $eventId'));
@@ -173,12 +177,13 @@ class DatabaseService {
         'eventName': event.eventName,
         'hostName': event.hostName,
         'address': event.address,
-        'datetime': event.datetime,
+        'datetime': Timestamp.fromDate(event.datetime),
         'bannerUri': event.bannerUri,
         'showcaseUris': event.showcaseUris,
         'permitUris': event.permitUris,
         'description': event.description,
-        'createdAt': event.createdAt
+        'createdAt': event.createdAt,
+        'isArchive': event.isArchive
       })
       .then((value) {
         eventId = value.id;
@@ -189,16 +194,16 @@ class DatabaseService {
   }
 
   Future<String> editEvent(PeopleEvent event, Activity activity) async {
-    await eventCollection.doc(event.eventId)
-      .update({
+    await eventCollection.doc(event.eventId).update({
         'eventName': event.eventName,
         'hostName': event.hostName,
         'address': event.address,
-        'datetime': event.datetime,
+        'datetime': Timestamp.fromDate(event.datetime),
         'bannerUri': event.bannerUri,
         'showcaseUris': event.showcaseUris,
         'permitUris': event.permitUris,
-        'description': event.description
+        'description': event.description,
+        'isArchive': event.isArchive
       })
       .then((value) {
         createActivity(activity);
@@ -206,6 +211,21 @@ class DatabaseService {
       })
       .catchError((error) => print('Failed to edit event'));
     return event.eventId;
+  }
+
+  Future<String> archiveEvent(String eventId, Activity activity) async {
+    String result = '';
+    await eventCollection.doc(eventId).update({
+      'isArchive': true
+    }).then((value) {
+      createActivity(activity);
+      print('Event archived');
+      result = 'SUCCESS';
+    }).catchError((error) {
+      print('Failed to archive event');
+      result = error.toString();
+    });
+    return result;
   }
 
   Future<String> cancelEvent(String eventId, Activity activity) async {
@@ -300,7 +320,7 @@ class DatabaseService {
   }
 
   Future<List<MyEvent>> myEvents(List<String> eventId) {
-    return eventCollection.where('__name__', whereIn: eventId).get().then((snapshot) {
+    return eventCollection.where('__name__', whereIn: eventId).where('isArchive', isEqualTo: false).get().then((snapshot) {
       List<String> missingIds = eventId.toSet().difference(snapshot.docs.map((doc) => doc.id).toList().toSet()).toList();
       if(missingIds != null && missingIds.isNotEmpty) missingIds.forEach((eventId) => removeToMyEvents(eventId));
       return _myEventListFromSnapshot(snapshot);
@@ -336,7 +356,7 @@ class DatabaseService {
   }
 
   Stream<List<PeopleEvent>> get events {
-    return eventCollection.snapshots().map(_eventListFromSnapshot);
+    return eventCollection.where('isArchive', isEqualTo: false).where('datetime', isGreaterThanOrEqualTo: Timestamp.fromDate(DateTime.now())).snapshots().map(_eventListFromSnapshot);
   }
 
   Stream<List<String>> get myEventIds {
