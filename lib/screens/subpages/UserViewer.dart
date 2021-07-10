@@ -15,10 +15,13 @@ class UserViewer extends StatelessWidget {
     DateTime birthday = DateTime.parse(birthdayString);
     DateTime today = DateTime.now();
 
-    print(birthday.year);
     age = today.year - birthday.year;
 
-    return today.month >= birthday.month && today.day >= birthday.day ? age : age - 1;
+    if(DateTime(today.year, today.month, today.day).compareTo(DateTime(birthday.year, birthday.month, birthday.day)) < 0) {
+      return age - 1;
+    } else {
+      return age;
+    }
   }
 
   @override
@@ -31,6 +34,12 @@ class UserViewer extends StatelessWidget {
         title: Text('Person Viewer'),
       ),
       body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/subBackground.png'),
+            fit: BoxFit.cover
+          )
+        ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -71,35 +80,41 @@ class UserViewer extends StatelessWidget {
                   children: [
                     ListTile(
                       leading: CircleAvatar(
-                        child: Icon(Icons.person_rounded),
+                        child: Icon(Icons.person_rounded, color: Colors.white),
+                        backgroundColor: theme.accentColor,
                       ),
                       title: Text(accountData.fullName),
+                      subtitle: Text(accountData.email),
                       //subtitle: Text(user.email),
                     ),
                     ListTile(
                       leading: CircleAvatar(
-                        child: Icon(Icons.location_on_rounded),
+                        child: Icon(Icons.location_on_rounded, color: Colors.white),
+                        backgroundColor: theme.accentColor,
                       ),
                       title: Text('Address'),
                       subtitle: Text(accountData.address),
                     ),
                     ListTile(
                       leading: CircleAvatar(
-                        child: Icon(Icons.phone_rounded),
+                        child: Icon(Icons.phone_rounded, color: Colors.white),
+                        backgroundColor: theme.accentColor,
                       ),
                       title: Text('Phone'),
                       subtitle: Text(accountData.contact),
                     ),
                     ListTile(
                       leading: CircleAvatar(
-                        child: Icon(Icons.cake_rounded),
+                        child: Icon(Icons.cake_rounded, color: Colors.white),
+                        backgroundColor: theme.accentColor,
                       ),
                       title: Text('Age'),
                       subtitle: Text('${getAge(accountData.birthday)}'),
                     ),
                     ListTile(
                       leading: CircleAvatar(
-                        child: Icon(Icons.accessibility_new_rounded),
+                        child: Icon(Icons.accessibility_new_rounded, color: Colors.white),
+                        backgroundColor: theme.accentColor,
                       ),
                       title: Text('Sex'),
                       subtitle: Text(accountData.sex),

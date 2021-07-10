@@ -102,7 +102,7 @@ class _AccountEditorState extends State<AccountEditor> {
       }
     }
 
-    return loading ? Loading() : GestureDetector(
+    return loading ? Loading('Loading Account Data') : GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
       child: Scaffold(
         appBar: AppBar(
@@ -134,6 +134,12 @@ class _AccountEditorState extends State<AccountEditor> {
             return SingleChildScrollView(
               physics: ClampingScrollPhysics(),
               child: Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/subBackground.png'),
+                    fit: BoxFit.cover
+                  )
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Form(

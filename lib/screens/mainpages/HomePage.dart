@@ -29,6 +29,12 @@ class _HomePageState extends State<HomePage> {
     final DatabaseService _database = DatabaseService(uid: accountData.uid);
 
     return myEventIds != null ? myEventIds.isNotEmpty ? Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/mainBackground.png'),
+          fit: BoxFit.cover
+        )
+      ),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: data.myEvents.length != 0 ? ListView.builder(
@@ -67,6 +73,6 @@ class _HomePageState extends State<HomePage> {
           }
         ) : accountData.accountType == 'USER' ? NoInterest() : NoEvent(),
       )
-    ) : accountData.accountType == 'USER' ? NoInterest() : NoEvent() : Loading();
+    ) : accountData.accountType == 'USER' ? NoInterest() : NoEvent() : Loading('Loading My Events');
   }
 }

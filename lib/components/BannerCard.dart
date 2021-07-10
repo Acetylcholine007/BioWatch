@@ -39,7 +39,9 @@ class BannerCard extends StatelessWidget {
     }
 
     Future<Image> getBanner() async {
+      imageCache.clear();
       if(event.bannerUri != '') {
+        //TODO: problem in this code causing blank banner in events page
         if(bannerExists) {
           return Future(() => Image(image: FileImage(bannerFile), fit: BoxFit.cover));
         } else {
@@ -54,6 +56,7 @@ class BannerCard extends StatelessWidget {
     return SizedBox(
       height: 250,
       child: Card(
+        color: theme.primaryColorLight,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(5),
           child: Column(

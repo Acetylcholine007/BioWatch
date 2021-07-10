@@ -26,7 +26,8 @@ class DatabaseService {
       address: snapshot.get('address') ?? '',
       contact: snapshot.get('contact') ?? '',
       birthday: snapshot.get('birthday') ?? '',
-      sex: snapshot.get('sex') ?? ''
+      sex: snapshot.get('sex') ?? '',
+      email: snapshot.get('email') ?? ''
     );
   }
 
@@ -90,7 +91,8 @@ class DatabaseService {
         address: doc.get('address') ?? '',
         contact: doc.get('contact') ?? '',
         birthday: doc.get('birthday') ?? '',
-        sex: doc.get('sex') ?? ''
+        sex: doc.get('sex') ?? '',
+        email: doc.get('email') ?? ''
       );
     }).toList();
   }
@@ -281,7 +283,7 @@ class DatabaseService {
     return result;
   }
 
-  Future createAccount(AccountData person) async {
+  Future createAccount(AccountData person, String email) async {
     return await userCollection.doc(uid).set({
       'idUri': person.idUri,
       'fullName': person.fullName,
@@ -289,7 +291,8 @@ class DatabaseService {
       'birthday': person.birthday,
       'accountType': person.accountType,
       'contact': person.contact,
-      'sex': person.sex
+      'sex': person.sex,
+      'email': email
     })
     .then((value) => print('User data created'))
     .catchError((error) => print('Failed to create user data'));

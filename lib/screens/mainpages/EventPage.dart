@@ -33,6 +33,12 @@ class _EventPageState extends State<EventPage> {
     }
 
     return events != null && myEvents != null ? Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/mainBackground.png'),
+          fit: BoxFit.cover
+        )
+      ),
       child: Column(
         children: [
           Expanded(
@@ -69,6 +75,6 @@ class _EventPageState extends State<EventPage> {
           ),
         ],
       )
-    ) : Loading();
+    ) : Loading('Loading Events');
   }
 }

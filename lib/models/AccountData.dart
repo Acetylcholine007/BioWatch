@@ -7,6 +7,7 @@ class AccountData {
   String contact;
   String birthday;
   String sex;
+  String email;
 
   AccountData({
     this.uid,
@@ -16,7 +17,8 @@ class AccountData {
     this.address,
     this.contact,
     this.birthday,
-    this.sex
+    this.sex,
+    this.email
   });
 
   AccountData copy() => AccountData(
@@ -27,6 +29,7 @@ class AccountData {
     address: this.address,
     contact: this.contact,
     birthday: this.birthday,
-    sex: this.sex
+    sex: this.sex,
+    email: this.email
   );
 }

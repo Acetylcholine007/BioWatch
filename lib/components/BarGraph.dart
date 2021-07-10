@@ -36,7 +36,7 @@ class _BarGraphState extends State<BarGraph> {
     final theme = Theme.of(context);
     return Column(
       children: [
-        Expanded(flex: 1, child: Center(child: Text('Attendance summary', style: theme.textTheme.headline4.copyWith(fontSize: 30)))),
+        Expanded(flex: 1, child: Center(child: Text('Popularity Growth', style: theme.textTheme.headline4.copyWith(fontSize: 30)))),
         Expanded(
           flex: 4,
           child: BarChart(

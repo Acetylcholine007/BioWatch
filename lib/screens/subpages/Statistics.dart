@@ -22,7 +22,18 @@ class Statistics extends StatelessWidget {
       int count = 0;
       int index = 0;
       List<DateTime> dates = interested.map((date) => DateTime.parse(date.datetime)).toList();
+      DateTime currentDate = DateTime.parse(createdAt.toString());
       List<List> chartData = [];
+
+      print(dates.toString());
+      //TODO: Fix date range, next month is not accomodated
+      for (int i = 0; i <= conductedAt.difference(createdAt).inDays; i++) {
+        print('>>>>>${currentDate.toString()}');
+        count += dates.where((date) => date.month == currentDate.month && date.day == currentDate.day && date.year == currentDate.year).length;
+        chartData.add([dateFormatter2.format(createdAt.add(Duration(days: index))), count]);
+        index++;
+        currentDate = currentDate.add(Duration(days: 1));
+      }
       for(int day = createdAt.day; day <= conductedAt.day; day++) {
         count += dates.where((date) => date.day == day).length;
         chartData.add([dateFormatter2.format(createdAt.add(Duration(days: index))), count]);
@@ -32,6 +43,12 @@ class Statistics extends StatelessWidget {
     }
 
     return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/subBackground.png'),
+          fit: BoxFit.cover
+        )
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

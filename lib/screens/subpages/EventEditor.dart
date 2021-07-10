@@ -1,8 +1,9 @@
 import 'dart:io';
 
-import 'package:bio_watch/components/Loading.dart';
+import 'package:bio_watch/components/LoadingDeterminate.dart';
 import 'package:bio_watch/models/Account.dart';
 import 'package:bio_watch/models/Activity.dart';
+import 'package:bio_watch/models/AppTask.dart';
 import 'package:bio_watch/models/Enum.dart';
 import 'package:bio_watch/models/EventAsset.dart';
 import 'package:bio_watch/models/PeopleEvent.dart';
@@ -34,8 +35,38 @@ class _EventEditorState extends State<EventEditor> {
   bool loading = false;
   bool eventAssetChanged = false;
   bool eventDataChanged = false;
+  List<AppTask> tasks = [];
+  int taskLength = 0;
+  int taskIndex = 0;
 
   _EventEditorState(this.event, this.eventAsset);
+
+  void incrementIndex() {
+    setState(() => taskIndex++);
+  }
+
+  void createTaskList(bool isNew, EventAsset asset) {
+    if(isNew) {
+      if(eventDataChanged) {
+        tasks.add(AppTask(heading: 'Database Writing', content: 'Adding to events'));
+        if(eventAssetChanged) {
+          tasks.add(AppTask(heading: 'Processing Image', content: 'Uploading images'));
+          tasks.add(AppTask(heading: 'Processing Image', content: 'Caching images'));
+        }
+        tasks.add(AppTask(heading: 'Database Writing', content: 'Adding to myEvents'));
+        tasks.add(AppTask(heading: 'Database Writing', content: 'Adding to activities'));
+      }
+    } else {
+      if(eventDataChanged) {
+        tasks.add(AppTask(heading: 'Database Writing', content: 'Editing events record'));
+        if(eventAssetChanged) {
+          tasks.add(AppTask(heading: 'Processing Image', content: 'Uploading images'));
+          tasks.add(AppTask(heading: 'Processing Image', content: 'Caching images'));
+        }
+      }
+    }
+    taskLength = tasks.length;
+  }
 
   void showAssetPicker(BuildContext context, String title, List<File> collection) {
     showModalBottomSheet(
@@ -70,24 +101,27 @@ class _EventEditorState extends State<EventEditor> {
                         }
                       },
                       child: Icon(Icons.add, size: 36))
-                    )] : <Card>[]) + collection.map((showcase) => Card(child: Stack(
-                      alignment: Alignment.topRight,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Expanded(child: Image(image: FileImage(showcase), fit: BoxFit.cover)),
-                          ],
-                        ),
-                        IconButton(icon: Icon(Icons.remove_circle_rounded, color: theme.accentColor), onPressed: (){
-                          setState(() {
-                            collection.remove(showcase);
-                            eventAssetChanged = true;
-                            eventDataChanged = true;
-                          });
-                          setModalState((){});
-                        })
-                      ]
+                    )] : <Card>[]) + collection.map((showcase) => Card(child: ClipRRect(
+                      borderRadius: BorderRadius.circular(5),
+                      child: Stack(
+                        alignment: Alignment.topRight,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(child: Image(image: FileImage(showcase), fit: BoxFit.cover)),
+                            ],
+                          ),
+                          IconButton(icon: Icon(Icons.remove_circle_rounded, color: theme.accentColor), onPressed: (){
+                            setState(() {
+                              collection.remove(showcase);
+                              eventAssetChanged = true;
+                              eventDataChanged = true;
+                            });
+                            setModalState((){});
+                          })
+                        ]
+                      ),
                     ))).toList(),
                   ),
                 )
@@ -112,13 +146,18 @@ class _EventEditorState extends State<EventEditor> {
         event.bannerUri = eventAsset.banner != null ? eventAsset.banner.path.split('/').last : '';
         event.permitUris = eventAsset.permits.isNotEmpty ? eventAsset.permits.map((permit) => permit.path.split('/').last).toList() : [];
         event.showcaseUris = eventAsset.showcases.isNotEmpty ? eventAsset.showcases.map((showcase) => showcase.path.split('/').last).toList() : [];
+        createTaskList(widget.isNew, eventAsset);
         if(widget.isNew) {
           String eventId = await _database.createEvent(event);
+          incrementIndex();
           if(eventAssetChanged) {
             await _storage.uploadEventAsset(eventId, eventAsset.banner, eventAsset.showcases, eventAsset.permits);
+            incrementIndex();
             await imageManager.saveEventAssetToCache(widget.uid, eventId, eventAsset);
+            incrementIndex();
           }
           await _database.addToMyEvents(eventId);
+          incrementIndex();
           await _database.createActivity(Activity(
             heading: 'Event Created',
             datetime: DateTime.now().toString(),
@@ -140,7 +179,9 @@ class _EventEditorState extends State<EventEditor> {
             type: ActivityType.editEvent
           )) : event.eventId;
           if(eventAssetChanged) {
+            incrementIndex();
             await _storage.uploadEventAsset(eventId, eventAsset.banner, eventAsset.showcases, eventAsset.permits);
+            incrementIndex();
             await imageManager.saveEventAssetToCache(widget.uid, eventId, eventAsset);
           }
           widget.refresh();
@@ -165,7 +206,7 @@ class _EventEditorState extends State<EventEditor> {
       }
     }
 
-    return loading ? Loading() : GestureDetector(
+    return loading ? LoadingDeterminate(tasks[taskIndex < taskLength ? taskIndex : taskLength - 1], taskIndex, taskLength) : GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
       child: Scaffold(
         appBar: AppBar(
@@ -200,6 +241,12 @@ class _EventEditorState extends State<EventEditor> {
             return SingleChildScrollView(
               physics: ClampingScrollPhysics(),
               child: Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/subBackground.png'),
+                    fit: BoxFit.cover
+                  )
+                ),
                 child: Form(
                   key: _formKey,
                   child: SizedBox(
@@ -230,7 +277,10 @@ class _EventEditorState extends State<EventEditor> {
                                   Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.cover)
                                 ),
                               ),
-                              Positioned(left: 0, bottom: 0, child: Container(color: Colors.grey[200], padding: EdgeInsets.all(10), child: Text('Event Banner')))
+                              Positioned(left: 0, bottom: 0, child: ClipRRect(
+                                borderRadius: BorderRadius.only(topRight: Radius.circular(5)),
+                                child: Container(color: Colors.grey[200], padding: EdgeInsets.all(10), child: Text('Event Banner'))
+                              ))
                             ] + (eventAsset.banner != null ? [
                             IconButton(icon: Icon(Icons.remove_circle_rounded, color: theme.accentColor), onPressed: () async {
                               if(eventAsset.banner != null)

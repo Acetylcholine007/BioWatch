@@ -14,7 +14,7 @@ class AuthService {
   //MAPPING FUNCTION SECTION
 
   Account _userFromFirebaseUser(User user) {
-    return user != null ? Account(uid: user.uid, email: user.email) : null;
+    return user != null && user.emailVerified ? Account(uid: user.uid, email: user.email) : null;
   }
 
   //STREAM SECTION
@@ -28,7 +28,7 @@ class AuthService {
   Future<String> logIn(String email, String password) async {
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
-      return 'SUCCESS';
+      return _auth.currentUser.emailVerified ? 'SUCCESS' : 'Account is not verified';
     } on FirebaseAuthException catch (error) {
       return error.message;
     }
@@ -38,12 +38,11 @@ class AuthService {
     try {
       UserCredential result = await _auth.createUserWithEmailAndPassword(email: email, password: password);
       User user = result.user;
-      //TODO: add email verification
-      // if (user!= null && !user.emailVerified) {
-      //   await user.sendEmailVerification();
-      // }
-      await DatabaseService(uid: user.uid).createAccount(accountData);
+
+      await DatabaseService(uid: user.uid).createAccount(accountData, email = user.email);
       await StorageService().uploadId(user.uid, file, await getTemporaryDirectory());
+      user.sendEmailVerification();
+
       return 'SUCCESS';
     } on FirebaseAuthException catch (error) {
       return error.message;
@@ -73,4 +72,6 @@ class AuthService {
       .catchError((error) => result = error.toString());
     return result;
   }
+
+  FirebaseAuth get auth => _auth;
 }

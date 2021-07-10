@@ -10,11 +10,13 @@ import 'package:bio_watch/screens/mainpages/EventPage.dart';
 import 'package:bio_watch/screens/mainpages/HomePage.dart';
 import 'package:bio_watch/screens/subpages/EventEditor.dart';
 import 'package:bio_watch/services/DatabaseService.dart';
+import 'package:bio_watch/shared/ImageManager.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'models/Activity.dart';
 import 'models/EventAsset.dart';
+import 'models/Resource.dart';
 
 class MainWrapper extends StatefulWidget {
   @override
@@ -36,8 +38,11 @@ class _MainWrapperState extends State<MainWrapper> {
     final account = Provider.of<Account>(context);
     final accountData = Provider.of<AccountData>(context);
     final myEventIds = Provider.of<List<String>>(context);
+    final data = Provider.of<Resource>(context);
     final DatabaseService _database = DatabaseService(uid: account.uid);
+    final ImageManager imageManager = ImageManager();
     final theme = Theme.of(context);
+    final appBarTitles = {0: 'Home', 1: 'Activity', 2: 'Events', 3: 'Account'};
     final pages = [
       HomePage(),
       ActivityPage(),
@@ -48,10 +53,13 @@ class _MainWrapperState extends State<MainWrapper> {
     return accountData != null ? GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
       child: Scaffold(
+        resizeToAvoidBottomInset : false,
         appBar: AppBar(
-          title: Text('Bio Watch'),
+          title: Text(appBarTitles[_currentIndex]),
           actions: (_currentIndex == 1 ? <Widget>[
-            IconButton(
+            FlatButton.icon(
+              textColor: Colors.white,
+              label: Text('Clear'),
               icon: Icon(Icons.delete_rounded),
               onPressed: () {
                 showDialog(
@@ -98,8 +106,16 @@ class _MainWrapperState extends State<MainWrapper> {
                   )
                 );
               }
-            )] : <Widget>[]) + (accountData.accountType == 'HOST' ? <Widget>[
-            IconButton(icon: Icon(Icons.add), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => EventEditor(
+            )] : (_currentIndex == 0 || _currentIndex == 2) ? <Widget>[
+            FlatButton.icon(
+              textColor: Colors.white,
+              label: Text('Refresh'),
+              icon: Icon(Icons.refresh_outlined), onPressed: () => imageManager.clearCache(data.cachePath, data.refresh))
+          ] : <Widget>[]) + (accountData.accountType == 'HOST' ? (_currentIndex == 0 ? <Widget>[
+            FlatButton.icon(
+              textColor: Colors.white,
+              label: Text('Create'),
+              icon: Icon(Icons.add), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => EventEditor(
               event: PeopleEvent(
                 eventName: '',
                 hostName: accountData.fullName,
@@ -115,8 +131,11 @@ class _MainWrapperState extends State<MainWrapper> {
               isNew: true,
               eventAsset: EventAsset(),
               refresh: refresh))))
-          ] : <Widget>[
-            IconButton(icon: Icon(Icons.qr_code_scanner_rounded), onPressed: () async {
+          ] : <Widget>[]) : <Widget>[
+            FlatButton.icon(
+              textColor: Colors.white,
+              label: Text('Scan'),
+              icon: Icon(Icons.qr_code_scanner_rounded), onPressed: () async {
               List<String> data = (await scanCode()).split('<=>');
               String result = myEventIds.contains(data[0]) ? await _database.joinEvent(data[0], Activity(
                 heading: 'Joined an Event',
@@ -173,7 +192,7 @@ class _MainWrapperState extends State<MainWrapper> {
               icon: Icon(Icons.flag_rounded),
             ),
             BottomNavigationBarItem(
-              label: 'Me',
+              label: 'Account',
               icon: Icon(Icons.person_rounded),
             ),
           ],
@@ -182,6 +201,6 @@ class _MainWrapperState extends State<MainWrapper> {
           child: pages[_currentIndex]
         )
       ),
-    ) : Loading();
+    ) : Loading('Loading App Data');
   }
 }

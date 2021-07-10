@@ -67,9 +67,15 @@ class ImageManager {
     try {
       Directory cachePath = await getTemporaryDirectory();
       Directory eventPath = Directory('${cachePath.path}/$uid/$eventId');
-      if(eventAsset.banner != null) eventAsset.banner.copySync('${eventPath.path}/${eventAsset.banner.path.split('/').last}');
-      eventAsset.showcases.forEach((showcase) => showcase.copySync('${eventPath.path}/showcases/${showcase.path.split('/').last}'));
-      eventAsset.permits.forEach((permit) => permit.copySync('${eventPath.path}/permits/${permit.path.split('/').last}'));
+      if(eventAsset.banner != null) {
+        eventAsset.banner.copySync('${eventPath.path}/${eventAsset.banner.path.split('/').last}');
+      }
+      eventAsset.showcases.forEach((showcase) {
+        showcase.copySync('${eventPath.path}/showcases/${showcase.path.split('/').last}');
+      });
+      eventAsset.permits.forEach((permit) {
+        permit.copySync('${eventPath.path}/permits/${permit.path.split('/').last}');
+      });
       result = 'SUCCESS';
     } catch(e) {
       result = e.toString();
@@ -82,6 +88,8 @@ class ImageManager {
       EventAsset eventAsset = EventAsset();
       Directory eventPath = Directory('${cachePath.path}/$uid/$eventId');
 
+      imageCache.clear();
+
       eventAsset.banner = banner != '' ? File('${eventPath.path}/$banner') : null;
       showcases.forEach((showcase) => eventAsset.showcases.add(File('${eventPath.path}/showcases/$showcase')));
       permits.forEach((permit) => eventAsset.permits.add(File('${eventPath.path}/permits/$permit')));
@@ -91,5 +99,10 @@ class ImageManager {
       print(e);
       return null;
     }
+  }
+
+  Future clearCache(Directory cachePath, Function refresh) async {
+    await new Directory(cachePath.path).delete(recursive: true);
+    refresh();
   }
 }

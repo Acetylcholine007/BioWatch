@@ -41,8 +41,9 @@ class _EventDashboardState extends State<EventDashboard> {
         child: GestureDetector(
           onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
           child: Scaffold(
+            resizeToAvoidBottomInset : false,
             appBar: AppBar(
-              title: Text('Event Dashboard'),
+              title: Text(widget.event.eventName),
               actions: [
                 IconButton(icon: Icon(Icons.qr_code_rounded), onPressed: () =>
                   Navigator.push(context, MaterialPageRoute(builder: (context) => QRDisplay(data: widget.event.eventId + '<=>' + widget.event.eventName)))
@@ -243,7 +244,7 @@ class _EventDashboardState extends State<EventDashboard> {
                     if(snapshot.connectionState == ConnectionState.done) {
                       return UserList(users: snapshot.data, type: 'INTERESTED', datetimes: {for (var user in interested) user.uid: user.datetime});
                     } else {
-                      return Loading();
+                      return Loading('Loading Interested Data');
                     }
                   }
                 ),
@@ -253,7 +254,7 @@ class _EventDashboardState extends State<EventDashboard> {
                     if(snapshot.connectionState == ConnectionState.done) {
                       return UserList(users: snapshot.data, type: 'PARTICIPANT', datetimes: {for (var user in participants) user.uid: user.datetime});
                     } else {
-                      return Loading();
+                      return Loading('Loading Participants Data');
                     }
                   }
                 )
@@ -263,7 +264,7 @@ class _EventDashboardState extends State<EventDashboard> {
         ),
       );
     } else {
-      return Loading();
+      return Loading('Loading Event Data');
     }
   }
 }

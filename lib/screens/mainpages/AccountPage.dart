@@ -69,6 +69,12 @@ class _AccountPageState extends State<AccountPage> {
       future: getId(),
       builder: (context, snapshot) {
         return Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/mainBackground.png'),
+              fit: BoxFit.cover
+            )
+          ),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -90,7 +96,8 @@ class _AccountPageState extends State<AccountPage> {
                     children: [
                       ListTile(
                         leading: CircleAvatar(
-                          child: Icon(Icons.person_rounded),
+                          backgroundColor: theme.accentColor,
+                          child: Icon(Icons.person_rounded, color: Colors.white),
                         ),
                         title: Text(accountData.fullName),
                         subtitle: Text(account.email),
@@ -98,28 +105,32 @@ class _AccountPageState extends State<AccountPage> {
                       ),
                       ListTile(
                         leading: CircleAvatar(
-                          child: Icon(Icons.location_on_rounded),
+                          backgroundColor: theme.accentColor,
+                          child: Icon(Icons.location_on_rounded, color: Colors.white),
                         ),
                         title: Text('Address'),
                         subtitle: Text(accountData.address),
                       ),
                       ListTile(
                         leading: CircleAvatar(
-                          child: Icon(Icons.phone_rounded),
+                          backgroundColor: theme.accentColor,
+                          child: Icon(Icons.phone_rounded, color: Colors.white),
                         ),
                         title: Text('Phone'),
                         subtitle: Text(accountData.contact),
                       ),
                       ListTile(
                         leading: CircleAvatar(
-                          child: Icon(Icons.cake_rounded),
+                          backgroundColor: theme.accentColor,
+                          child: Icon(Icons.cake_rounded, color: Colors.white),
                         ),
                         title: Text('Birthday'),
                         subtitle: Text(dateFormatter.format(DateTime.parse(accountData.birthday))),
                       ),
                       ListTile(
                         leading: CircleAvatar(
-                          child: Icon(Icons.accessibility_new_rounded),
+                          backgroundColor: theme.accentColor,
+                          child: Icon(Icons.accessibility_new_rounded, color: Colors.white),
                         ),
                         title: Text('Sex'),
                         subtitle: Text(accountData.sex),

@@ -29,11 +29,18 @@ class _UserListState extends State<UserList> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     usersLocal = widget.users;
     if(queryName != '') {
       usersLocal = widget.users.where((user) => user.fullName.contains(new RegExp(queryName, caseSensitive: false))).toList();
     }
     return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/subBackground.png'),
+          fit: BoxFit.cover
+        )
+      ),
       child: Column(
         children: [
           Expanded(
@@ -54,7 +61,7 @@ class _UserListState extends State<UserList> {
                   return GestureDetector(
                     onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => UserViewer(accountData: usersLocal[index]))),
                     child: ListTile(
-                      leading: CircleAvatar(child: Text(usersLocal[index].fullName[0].toUpperCase())),
+                      leading: CircleAvatar(child: Text(usersLocal[index].fullName[0].toUpperCase(), style: TextStyle(color: Colors.white)), backgroundColor: theme.accentColor),
                       title: Text(usersLocal[index].fullName),
                       subtitle: Text(dateTimeFormatter.format(DateTime.parse(widget.datetimes[usersLocal[index].uid]))),
                     )

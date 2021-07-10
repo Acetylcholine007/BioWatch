@@ -56,7 +56,7 @@ class _DataWrapperState extends State<DataWrapper> {
             child: MainWrapper()
           );
         } else {
-          return Loading();
+          return Loading('Loading App Resources');
         }
       }
     );

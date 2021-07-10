@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:bio_watch/components/Loading.dart';
 import 'package:bio_watch/models/AccountData.dart';
+import 'package:bio_watch/screens/subpages/VerificationPage.dart';
 import 'package:bio_watch/services/AuthService.dart';
 import 'package:bio_watch/shared/ImageManager.dart';
 import 'package:bio_watch/shared/decorations.dart';
@@ -23,7 +24,9 @@ class _SignInPageState extends State<SignInPage> {
   final AuthService _auth = AuthService();
   final _formKey = GlobalKey<FormState>();
   File userProfile;
+  bool isProfileMissing = false;
   bool loading = false;
+  bool verifying = false;
   bool hidePassword = true;
   String error = '';
   String email = '';
@@ -43,9 +46,26 @@ class _SignInPageState extends State<SignInPage> {
         ),
         body: Builder(
           builder: (context) {
-            return loading ? Loading() : SingleChildScrollView(
+            return loading ? Loading('Signing Up') : verifying ?
+            VerificationPage(callback: () {
+              final snackBar = SnackBar(
+                duration: Duration(seconds: 2),
+                behavior: SnackBarBehavior.floating,
+                content: Text('Account Verified'),
+                action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
+              );
+              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              Navigator.of(context).pop();
+            }, auth: _auth) :
+            SingleChildScrollView(
               physics: ClampingScrollPhysics(),
               child: Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/preBackground.png'),
+                    fit: BoxFit.cover
+                  )
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Form(
@@ -77,7 +97,7 @@ class _SignInPageState extends State<SignInPage> {
                                     borderRadius: BorderRadius.circular(5),
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        border: Border.all(width: userProfile == null ? 1 : 0, color: Colors.red),
+                                        border: isProfileMissing ? Border.all(width: 1, color: Colors.red) : null,
                                       ),
                                       child: Stack(
                                         alignment: AlignmentDirectional.bottomStart,
@@ -85,7 +105,7 @@ class _SignInPageState extends State<SignInPage> {
                                           Positioned.fill(
                                             child: userProfile != null ? Image(image: FileImage(userProfile), fit: BoxFit.fitWidth) : Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.fitWidth),
                                           ),
-                                          Container(color: Colors.grey[200], padding: EdgeInsets.all(10), child: Text('Valid ID'))
+                                          ClipRRect(borderRadius: BorderRadius.only(topRight: Radius.circular(5)), child: Container(color: Colors.grey[200], padding: EdgeInsets.all(10), child: Text('Valid ID')))
                                         ],
                                       ),
                                     ),
@@ -216,7 +236,10 @@ class _SignInPageState extends State<SignInPage> {
                                   setState(() => loading = true);
                                   String result = await _auth.signIn(accountData, email, password, userProfile);
                                   if(result == 'SUCCESS') {
-                                    Navigator.of(context).pop();
+                                    setState(() {
+                                      loading = false;
+                                      verifying = true;
+                                    });
                                   } else {
                                     setState(() {
                                       error = result;
@@ -237,6 +260,7 @@ class _SignInPageState extends State<SignInPage> {
                                     );
                                   }
                                 } else {
+                                  setState(() => isProfileMissing = userProfile == null);
                                   final snackBar = SnackBar(
                                     duration: Duration(seconds: 2),
                                     behavior: SnackBarBehavior.floating,

@@ -17,6 +17,7 @@ class TileCard extends StatelessWidget {
     return SizedBox(
       height: 150,
       child: Card(
+        color: theme.primaryColorLight,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(5),
           child: Row(

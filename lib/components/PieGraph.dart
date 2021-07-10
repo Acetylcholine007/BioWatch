@@ -27,7 +27,7 @@ class PieGraph extends StatelessWidget {
     final theme = Theme.of(context);
     return Column(
       children: [
-        Expanded(flex: 1, child: Center(child: Text('Popularity Chart', style: theme.textTheme.headline4.copyWith(fontSize: 30)))),
+        Expanded(flex: 1, child: Center(child: Text('Attendance Summary', style: theme.textTheme.headline4.copyWith(fontSize: 30)))),
         ] + (attendees == 0 && absentees == 0 ? [
           Expanded(flex: 2, child: Center(child: Icon(Icons.group_rounded, size: 100, color: theme.primaryColor))),
           Expanded(flex: 2, child: Center(child: Text('Nobody is taking up interest yet', style: theme.textTheme.headline4.copyWith(fontSize: 20)))),

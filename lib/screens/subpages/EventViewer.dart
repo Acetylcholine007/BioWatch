@@ -175,7 +175,7 @@ class _EventViewerState extends State<EventViewer> {
                                   if(snapshot.connectionState == ConnectionState.done) {
                                     return UserViewer(accountData: snapshot.data);
                                   } else {
-                                    return Loading();
+                                    return Loading('Loading User Data');
                                   }
                                 },
                               ))),
@@ -244,7 +244,7 @@ class _EventViewerState extends State<EventViewer> {
           ],
         ),
       ),
-    ) : Loading();
+    ) : Loading('Loading Event Data');
   }
 }
 

@@ -37,6 +37,12 @@ class _ActivityPageState extends State<ActivityPage> {
     if(activities != null) {
       activities.sort((a, b) => DateTime.parse(b.datetime).compareTo(DateTime.parse(a.datetime)));
       return Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/mainBackground.png'),
+            fit: BoxFit.cover
+          )
+        ),
         child: activities.length != 0 ? ListView.separated(
           separatorBuilder: (context, index) => Divider(),
           itemCount: activities.length,
@@ -72,7 +78,8 @@ class _ActivityPageState extends State<ActivityPage> {
                 onDismissed: (direction) => _database.removeActivity(activities[index].id),
                 child: ListTile(
                   leading: CircleAvatar(
-                    child: Icon(avatars[activities[index].type]),
+                    child: Icon(avatars[activities[index].type], color: Colors.white),
+                    backgroundColor: theme.accentColor,
                   ),
                   title: Text(activities[index].heading),
                   subtitle: Text(dateTimeFormatter.format(DateTime.parse(activities[index].datetime))),
@@ -83,7 +90,7 @@ class _ActivityPageState extends State<ActivityPage> {
         ) : NoActivity()
       );
     } else {
-      return Loading();
+      return Loading('Loading Activities');
     }
   }
 }
