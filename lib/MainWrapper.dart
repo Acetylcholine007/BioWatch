@@ -120,7 +120,7 @@ class _MainWrapperState extends State<MainWrapper> {
                 eventName: '',
                 hostName: accountData.fullName,
                 address: '',
-                datetime: DateTime.now(),
+                datetime: DateTime.now().add(Duration(days: 7)),
                 description: '',
                 bannerUri: 'assets/events/img1.jpg',
                 showcaseUris: [],

@@ -12,7 +12,7 @@ class LoadingDeterminate extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      color: Colors.white,
+      color: theme.primaryColorLight,
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

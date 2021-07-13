@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 InputDecoration textFieldDecoration = InputDecoration(
-  border: OutlineInputBorder(),
+  border: OutlineInputBorder(
+    borderSide: BorderSide(color: Colors.white)),
+  filled: true,
+  fillColor: Colors.white
 );
 
 

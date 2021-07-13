@@ -55,7 +55,8 @@ class _UserListState extends State<UserList> {
             flex: 11,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: usersLocal.length != 0 ? ListView.builder(
+              child: usersLocal.length != 0 ? ListView.separated(
+                separatorBuilder: (context, index) => Divider(),
                 itemCount: usersLocal.length,
                 itemBuilder: (BuildContext context, int index){
                   return GestureDetector(

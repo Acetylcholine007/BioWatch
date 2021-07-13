@@ -10,7 +10,7 @@ class Loading extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      color: Colors.white,
+      color: theme.primaryColorLight,
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

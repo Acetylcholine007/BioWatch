@@ -78,46 +78,56 @@ class UserViewer extends StatelessWidget {
                 flex: 8,
                 child: ListView(
                   children: [
-                    ListTile(
-                      leading: CircleAvatar(
-                        child: Icon(Icons.person_rounded, color: Colors.white),
-                        backgroundColor: theme.accentColor,
+                    Card(
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          child: Icon(Icons.person_rounded, color: Colors.white),
+                          backgroundColor: theme.accentColor,
+                        ),
+                        title: Text(accountData.fullName),
+                        subtitle: Text(accountData.email),
+                        //subtitle: Text(user.email),
                       ),
-                      title: Text(accountData.fullName),
-                      subtitle: Text(accountData.email),
-                      //subtitle: Text(user.email),
                     ),
-                    ListTile(
-                      leading: CircleAvatar(
-                        child: Icon(Icons.location_on_rounded, color: Colors.white),
-                        backgroundColor: theme.accentColor,
+                    Card(
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          child: Icon(Icons.location_on_rounded, color: Colors.white),
+                          backgroundColor: theme.accentColor,
+                        ),
+                        title: Text('Address'),
+                        subtitle: Text(accountData.address),
                       ),
-                      title: Text('Address'),
-                      subtitle: Text(accountData.address),
                     ),
-                    ListTile(
-                      leading: CircleAvatar(
-                        child: Icon(Icons.phone_rounded, color: Colors.white),
-                        backgroundColor: theme.accentColor,
+                    Card(
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          child: Icon(Icons.phone_rounded, color: Colors.white),
+                          backgroundColor: theme.accentColor,
+                        ),
+                        title: Text('Phone'),
+                        subtitle: Text(accountData.contact),
                       ),
-                      title: Text('Phone'),
-                      subtitle: Text(accountData.contact),
                     ),
-                    ListTile(
-                      leading: CircleAvatar(
-                        child: Icon(Icons.cake_rounded, color: Colors.white),
-                        backgroundColor: theme.accentColor,
+                    Card(
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          child: Icon(Icons.cake_rounded, color: Colors.white),
+                          backgroundColor: theme.accentColor,
+                        ),
+                        title: Text('Age'),
+                        subtitle: Text('${getAge(accountData.birthday)}'),
                       ),
-                      title: Text('Age'),
-                      subtitle: Text('${getAge(accountData.birthday)}'),
                     ),
-                    ListTile(
-                      leading: CircleAvatar(
-                        child: Icon(Icons.accessibility_new_rounded, color: Colors.white),
-                        backgroundColor: theme.accentColor,
+                    Card(
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          child: Icon(Icons.accessibility_new_rounded, color: Colors.white),
+                          backgroundColor: theme.accentColor,
+                        ),
+                        title: Text('Sex'),
+                        subtitle: Text(accountData.sex),
                       ),
-                      title: Text('Sex'),
-                      subtitle: Text(accountData.sex),
                     ),
                   ],
                 ),

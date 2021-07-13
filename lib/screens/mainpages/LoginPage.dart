@@ -48,10 +48,11 @@ class _LoginPageState extends State<LoginPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        SizedBox(height: 100),
+                        SizedBox(height: 26),
                         Center(child: Text('Biowatch', style: theme.textTheme.headline2)),
-                        Center(child: Text('Keep events tracked and safe with Biowatch', style: theme.textTheme.bodyText2)),
-                        SizedBox(height: 60),
+                        //SizedBox(height: 30),
+                        Center(child: Text('Keep events tracked and safe with Biowatch', style: theme.textTheme.bodyText1)),
+                        SizedBox(height: 100),
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: TextFormField(
@@ -117,7 +118,7 @@ class _LoginPageState extends State<LoginPage> {
                             style: ElevatedButton.styleFrom(primary: theme.accentColor)
                           ),
                         ),
-                        Divider(),
+                        Divider(color: Colors.white, thickness: 2, height: 25),
                         SizedBox(
                           height: 50,
                           child: ElevatedButton(

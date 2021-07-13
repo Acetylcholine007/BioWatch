@@ -94,73 +94,86 @@ class _AccountPageState extends State<AccountPage> {
                   flex: 8,
                   child: ListView(
                     children: [
-                      ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: theme.accentColor,
-                          child: Icon(Icons.person_rounded, color: Colors.white),
+                      Card(
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: theme.accentColor,
+                            child: Icon(Icons.person_rounded, color: Colors.white),
+                          ),
+                          title: Text(accountData.fullName),
+                          subtitle: Text(account.email),
+                          //subtitle: Text(user.email),
                         ),
-                        title: Text(accountData.fullName),
-                        subtitle: Text(account.email),
-                        //subtitle: Text(user.email),
                       ),
-                      ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: theme.accentColor,
-                          child: Icon(Icons.location_on_rounded, color: Colors.white),
+                      Card(
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: theme.accentColor,
+                            child: Icon(Icons.location_on_rounded, color: Colors.white),
+                          ),
+                          title: Text('Address'),
+                          subtitle: Text(accountData.address),
                         ),
-                        title: Text('Address'),
-                        subtitle: Text(accountData.address),
                       ),
-                      ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: theme.accentColor,
-                          child: Icon(Icons.phone_rounded, color: Colors.white),
+                      Card(
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: theme.accentColor,
+                            child: Icon(Icons.phone_rounded, color: Colors.white),
+                          ),
+                          title: Text('Phone'),
+                          subtitle: Text(accountData.contact),
                         ),
-                        title: Text('Phone'),
-                        subtitle: Text(accountData.contact),
                       ),
-                      ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: theme.accentColor,
-                          child: Icon(Icons.cake_rounded, color: Colors.white),
+                      Card(
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: theme.accentColor,
+                            child: Icon(Icons.cake_rounded, color: Colors.white),
+                          ),
+                          title: Text('Birthday'),
+                          subtitle: Text(dateFormatter.format(DateTime.parse(accountData.birthday))),
                         ),
-                        title: Text('Birthday'),
-                        subtitle: Text(dateFormatter.format(DateTime.parse(accountData.birthday))),
                       ),
-                      ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: theme.accentColor,
-                          child: Icon(Icons.accessibility_new_rounded, color: Colors.white),
+                      Card(
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: theme.accentColor,
+                            child: Icon(Icons.accessibility_new_rounded, color: Colors.white),
+                          ),
+                          title: Text('Sex'),
+                          subtitle: Text(accountData.sex),
                         ),
-                        title: Text('Sex'),
-                        subtitle: Text(accountData.sex),
                       ),
                     ],
                   ),
                 ),
                 Expanded(
                   flex: 1,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          child: Text('EDIT ACCOUNT'),
-                          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => AccountEditor(
-                              user: accountData.copy(), image: snapshot.data, refresh: refresh, cachePath: data.cachePath, email: account.email
-                          ))),
-                          style: ElevatedButton.styleFrom(primary: theme.accentColor),
+                  child: Padding(
+                    padding: const EdgeInsets.all(3),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            child: Text('EDIT ACCOUNT'),
+                            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => AccountEditor(
+                                user: accountData.copy(), image: snapshot.data, refresh: refresh, cachePath: data.cachePath, email: account.email
+                            ))),
+                            style: ElevatedButton.styleFrom(primary: theme.accentColor),
+                          ),
                         ),
-                      ),
-                      SizedBox(width: 10),
-                      Expanded(
-                        child: ElevatedButton(
-                          child: Text('LOG OUT'),
-                          onPressed: () => _auth.logOut(),
-                          style: ElevatedButton.styleFrom(primary: theme.accentColor),
-                        ),
-                      )
-                    ],
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: ElevatedButton(
+                            child: Text('LOG OUT'),
+                            onPressed: () => _auth.logOut(),
+                            style: ElevatedButton.styleFrom(primary: theme.accentColor),
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 )
               ],

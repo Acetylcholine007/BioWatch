@@ -345,7 +345,7 @@ class _EventEditorState extends State<EventEditor> {
                                     type: DateTimePickerType.dateTime,
                                     dateMask: 'MMMM dd, yyyy hh:mm a',
                                     initialValue: event.datetime.toString(),
-                                    firstDate: DateTime(DateTime.now().year - 5),
+                                    firstDate: DateTime.now(),
                                     lastDate: DateTime(DateTime.now().year + 5),
                                     icon: Icon(Icons.event),
                                     dateLabelText: 'Date',
