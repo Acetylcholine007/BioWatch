@@ -379,7 +379,7 @@ class _EventEditorState extends State<EventEditor> {
                                                     Image(image: AssetImage('assets/placeholder.jpg'), fit: BoxFit.cover)
                                                   ),
                                                 ),
-                                                ClipRRect(borderRadius: BorderRadius.only(topRight: Radius.circular(5)), child: Container(color: Colors.grey[200], padding: EdgeInsets.all(10), child: Text('Showcses')))
+                                                ClipRRect(borderRadius: BorderRadius.only(topRight: Radius.circular(5)), child: Container(color: Colors.grey[200], padding: EdgeInsets.all(10), child: Text('Showcases')))
                                               ],
                                             ),
                                           ),

@@ -46,7 +46,7 @@ class _EventDashboardState extends State<EventDashboard> {
               title: Text(widget.event.eventName),
               actions: [
                 IconButton(icon: Icon(Icons.qr_code_rounded), onPressed: () =>
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => QRDisplay(data: widget.event.eventId + '<=>' + widget.event.eventName)))
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => QRDisplay(title: widget.event.eventName, data: widget.event.eventId + '<=Biowatch=>' + widget.event.eventName)))
                 ),
                 PopupMenuButton(
                   icon: Icon(Icons.more_vert_rounded),

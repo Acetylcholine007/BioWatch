@@ -136,37 +136,38 @@ class _MainWrapperState extends State<MainWrapper> {
               textColor: Colors.white,
               label: Text('Scan'),
               icon: Icon(Icons.qr_code_scanner_rounded), onPressed: () async {
-              List<String> data = (await scanCode()).split('<=>');
-              String result = myEventIds.contains(data[0]) ? await _database.joinEvent(data[0], Activity(
-                heading: 'Joined an Event',
-                datetime: DateTime.now().toString(),
-                body: 'You\'ve joined in ${data[1]}',
-                type: ActivityType.joinEvent
-              )) : 'Mark the event as interested first. Head over to Event page, open the said event and tap the bookmark button.';
-              final snackBar = SnackBar(
-                duration: Duration(seconds: 2),
-                behavior: SnackBarBehavior.floating,
-                content: Text('You\'ve joined the Event'),
-                action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
-              );
-              if(result == 'SUCCESS') {
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-              } else {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: Text('Join Event'),
-                    content: Text(result),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: Text('OK')
-                      )
-                    ],
-                  )
+                String rawData = await scanCode();
+                List<String> data = rawData.contains('<=Biowatch=>') ? rawData.split('<=Biowatch=>') : null;
+                String result = data != null ? (myEventIds.contains(data[0]) ? await _database.joinEvent(data[0], Activity(
+                  heading: 'Joined an Event',
+                  datetime: DateTime.now().toString(),
+                  body: 'You\'ve joined in ${data[1]}',
+                  type: ActivityType.joinEvent
+                )) : 'Mark the event as interested first. Head over to Event page, open the said event and tap the bookmark button.') : 'Invalid Biowatch Event QR code';
+                final snackBar = SnackBar(
+                  duration: Duration(seconds: 2),
+                  behavior: SnackBarBehavior.floating,
+                  content: Text('You\'ve joined the Event'),
+                  action: SnackBarAction(label: 'OK', onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()),
                 );
-              }
-            })
+                if(result == 'SUCCESS') {
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                } else {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text('Join Event'),
+                      content: Text(result),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text('OK')
+                        )
+                      ],
+                    )
+                  );
+                }
+              })
           ]),
         ),
         bottomNavigationBar: BottomNavigationBar(

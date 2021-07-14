@@ -95,7 +95,7 @@ class _EventViewerState extends State<EventViewer> {
               showDialog(context: context, builder: (BuildContext context) {
                 return AlertDialog(
                   title: Text('Mark Event'),
-                  content: Text('Marking this event will make your credentials visible to the host of the event. Make sure you trust the event before marking it.'),
+                  content: Text('Marking this event will make your account information visible to the host of the event. Make sure you trust the event before marking it.\n\nAfter you\'ve marked the event, you can now join the event by scanning the QR code provided by the host at the venue once you attend.'),
                   actions: [
                     TextButton(onPressed: () {
                       Navigator.of(context).pop();
