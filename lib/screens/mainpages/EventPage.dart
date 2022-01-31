@@ -26,7 +26,7 @@ class _EventPageState extends State<EventPage> {
     final myEvents = Provider.of<List<String>>(context);
     final data = Provider.of<Resource>(context);
 
-    List<PeopleEvent> events = Provider.of<List<PeopleEvent>>(context);
+      List<PeopleEvent> events = Provider.of<List<PeopleEvent>>(context);
 
     if(queryName != '') {
       events = events.where((event) => event.eventName.contains(new RegExp(queryName, caseSensitive: false))).toList();
